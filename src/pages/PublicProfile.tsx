@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { ExternalLink, Loader2, AlertCircle, Globe } from "lucide-react";
+import { ExternalLink, Loader2, AlertCircle, Globe, BadgeCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import SocialIcon, { getPlatformColor, getPlatformLabel, PLATFORM_COLORS } from "@/components/SocialIcon";
 import avylinkLogo from "@/assets/avylink-logo.jpg";
 import type { Tables } from "@/integrations/supabase/types";
 
 type ProfileLink = Tables<"profile_links">;
-type Profile = Tables<"profiles"> & { cover_url?: string | null };
+type Profile = Tables<"profiles"> & { cover_url?: string | null; is_verified?: boolean | null };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -408,9 +408,16 @@ const PublicProfile = () => {
               )}
             </div>
 
-            <h1 className="font-dm font-bold text-2xl text-foreground leading-tight">
-              {profile.display_name || `@${profile.username}`}
-            </h1>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="font-dm font-bold text-2xl text-foreground leading-tight">
+                {profile.display_name || `@${profile.username}`}
+              </h1>
+              {profile.is_verified && (
+                <span title="Profil vérifié" className="flex-shrink-0">
+                  <BadgeCheck className="w-6 h-6 text-primary drop-shadow-sm" strokeWidth={2.5} />
+                </span>
+              )}
+            </div>
             {profile.username && (
               <p className="text-sm text-muted-foreground">@{profile.username}</p>
             )}

@@ -226,6 +226,7 @@ export type Database = {
           font_style: string
           google_analytics_id: string | null
           id: string
+          is_verified: boolean
           plan: string
           seo_description: string | null
           seo_title: string | null
@@ -250,6 +251,7 @@ export type Database = {
           font_style?: string
           google_analytics_id?: string | null
           id?: string
+          is_verified?: boolean
           plan?: string
           seo_description?: string | null
           seo_title?: string | null
@@ -274,6 +276,7 @@ export type Database = {
           font_style?: string
           google_analytics_id?: string | null
           id?: string
+          is_verified?: boolean
           plan?: string
           seo_description?: string | null
           seo_title?: string | null
