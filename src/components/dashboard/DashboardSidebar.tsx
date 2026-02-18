@@ -12,6 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
+  LayoutTemplate,
+  Plug,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -27,7 +29,9 @@ const navItems = [
   { to: "/dashboard", label: "Vue d'ensemble", icon: LayoutDashboard, end: true },
   { to: "/dashboard/page", label: "Ma Page", icon: User },
   { to: "/dashboard/liens", label: "Liens", icon: Link2 },
+  { to: "/dashboard/modeles", label: "Modèles", icon: LayoutTemplate },
   { to: "/dashboard/apparence", label: "Apparence", icon: Palette },
+  { to: "/dashboard/integrations", label: "Intégrations", icon: Plug },
   { to: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/dashboard/parametres", label: "Paramètres", icon: Settings },
 ];
