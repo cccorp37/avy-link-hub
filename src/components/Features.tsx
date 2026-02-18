@@ -75,7 +75,7 @@ const Features = () => {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-16 space-y-4">
-          <div className="inline-flex items-center gap-2 glass-pink px-4 py-2 rounded-full text-sm font-medium text-primary">
+          <div className="inline-flex items-center gap-2 glass-blue px-4 py-2 rounded-full text-sm font-medium text-primary">
             <Zap className="w-4 h-4" />
             Fonctionnalités puissantes
           </div>
@@ -85,7 +85,7 @@ const Features = () => {
             <span className="text-gradient">sans complexité</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            AVYLINK combine puissance et simplicité pour que chaque créateur 
+            AVYLINK combine puissance et simplicité pour que chaque créateur
             puisse briller en ligne, dès le premier jour.
           </p>
         </div>
@@ -99,11 +99,11 @@ const Features = () => {
             >
               {/* Hover gradient */}
               <div className="absolute inset-0 gradient-soft opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
-              
+
               <div className="relative z-10">
                 {/* Badge */}
                 {feat.badge && (
-                  <span className="absolute top-0 right-0 glass-pink text-primary text-xs font-semibold px-2.5 py-1 rounded-bl-xl rounded-tr-xl">
+                  <span className="absolute top-0 right-0 glass-blue text-primary text-xs font-semibold px-2.5 py-1 rounded-bl-xl rounded-tr-xl">
                     {feat.badge}
                   </span>
                 )}
@@ -121,7 +121,7 @@ const Features = () => {
         </div>
 
         {/* Mobile showcase */}
-        <div className="mt-20 glass-pink rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
+        <div className="mt-20 glass-blue rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
           <div className="flex-1 space-y-4">
             <div className="inline-flex items-center gap-2 text-primary font-semibold text-sm">
               <Smartphone className="w-4 h-4" />
@@ -131,7 +131,7 @@ const Features = () => {
               Conçu pour l'Afrique 🌍
             </h3>
             <p className="text-muted-foreground leading-relaxed">
-              Pages ultra-légères optimisées pour les connexions 3G/4G. 
+              Pages ultra-légères optimisées pour les connexions 3G/4G.
               Interface traduite en Français, Anglais, Wolof, Swahili et plus encore.
               Prix accessibles à tous les créateurs africains.
             </p>
@@ -152,7 +152,7 @@ const Features = () => {
                 { icon: Globe, label: "Langues", value: "Multi-langues" },
               ].map((item) => (
                 <div key={item.label} className="bg-card rounded-2xl p-4 shadow-card text-center">
-                  <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center mx-auto mb-2">
+                  <div className="w-10 h-10 gradient-cta rounded-xl flex items-center justify-center mx-auto mb-2">
                     <item.icon className="w-5 h-5 text-primary-foreground" />
                   </div>
                   <div className="font-dm font-bold text-sm text-foreground">{item.value}</div>

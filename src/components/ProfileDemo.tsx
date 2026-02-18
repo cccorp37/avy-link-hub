@@ -46,7 +46,7 @@ const ProfileDemo = () => {
                   {/* Avatar */}
                   <div className="text-center space-y-2">
                     <div className="relative inline-block">
-                      <div className="w-20 h-20 rounded-full gradient-primary flex items-center justify-center text-3xl mx-auto shadow-rose">
+                      <div className="w-20 h-20 rounded-full gradient-cta flex items-center justify-center text-3xl mx-auto shadow-blue">
                         👨🏿‍💻
                       </div>
                       <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success rounded-full border-2 border-white flex items-center justify-center">
@@ -63,7 +63,7 @@ const ProfileDemo = () => {
                       </p>
                     </div>
                     <div className="flex justify-center gap-3 text-xs">
-                      <span className="glass-pink text-primary px-2 py-0.5 rounded-full font-semibold">✓ Certified</span>
+                      <span className="glass-blue text-primary px-2 py-0.5 rounded-full font-semibold">✓ Certified</span>
                       <span className="text-muted-foreground flex items-center gap-1">
                         <Heart className="w-3 h-3 text-primary" /> 24.5K fans
                       </span>
@@ -147,7 +147,7 @@ const ProfileDemo = () => {
                 { step: "4", title: "Suis tes performances", desc: "Analytics en temps réel, sources de trafic, clics" },
               ].map((item) => (
                 <div key={item.step} className="flex items-start gap-4">
-                  <div className="w-10 h-10 gradient-cta text-primary-foreground rounded-xl flex items-center justify-center font-dm font-bold text-sm flex-shrink-0 shadow-rose">
+                  <div className="w-10 h-10 gradient-cta text-primary-foreground rounded-xl flex items-center justify-center font-dm font-bold text-sm flex-shrink-0 shadow-blue">
                     {item.step}
                   </div>
                   <div>
@@ -158,7 +158,7 @@ const ProfileDemo = () => {
               ))}
             </div>
 
-            <div className="glass-pink rounded-2xl p-5">
+            <div className="glass-blue rounded-2xl p-5">
               <p className="text-primary font-semibold text-sm mb-1">💡 Le saviez-vous ?</p>
               <p className="text-foreground/80 text-sm">
                 Les créateurs AvyLink génèrent en moyenne <strong>3x plus de clics</strong> qu'avec Linktree, 

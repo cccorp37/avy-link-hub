@@ -53,7 +53,7 @@ const CTA = () => {
                     <div className="text-sm text-muted-foreground">{t.role}</div>
                     <div className="text-xs text-muted-foreground">{t.country}</div>
                   </div>
-                  <span className="ml-auto glass-pink text-primary text-xs font-semibold px-2 py-1 rounded-full flex-shrink-0">
+                  <span className="ml-auto glass-blue text-primary text-xs font-semibold px-2 py-1 rounded-full flex-shrink-0">
                     {t.plan}
                   </span>
                 </div>
@@ -71,10 +71,12 @@ const CTA = () => {
 
       {/* Final CTA */}
       <section className="py-24 relative overflow-hidden">
-        {/* Background */}
+        {/* Background — blue gradient */}
         <div className="absolute inset-0 gradient-cta opacity-95" />
         <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
+        {/* Subtle rose blob */}
+        <div className="absolute top-1/2 right-1/4 w-48 h-48 bg-rose-400/10 rounded-full blur-3xl" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
 
         <div className="container mx-auto px-4 text-center relative z-10">
@@ -85,10 +87,10 @@ const CTA = () => {
           <h2 className="font-dm font-bold text-4xl md:text-6xl text-white mb-6 tracking-tight">
             Ton univers mérite
             <br />
-            une belle vitrine 🌸
+            une belle vitrine ✨
           </h2>
           <p className="text-white/80 text-lg mb-10 max-w-lg mx-auto">
-            Crée ta page AVYLINK gratuitement en 5 minutes. 
+            Crée ta page AVYLINK gratuitement en 5 minutes.
             Aucune carte bancaire requise.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
