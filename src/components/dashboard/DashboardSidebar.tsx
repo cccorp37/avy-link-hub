@@ -14,6 +14,7 @@ import {
   Shield,
   LayoutTemplate,
   Plug,
+  BadgeCheck,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -23,7 +24,7 @@ import avylinkLogo from "@/assets/avylink-logo.jpg";
 import { useState } from "react";
 import type { Tables } from "@/integrations/supabase/types";
 
-type Profile = Tables<"profiles">;
+type Profile = Tables<"profiles"> & { is_verified?: boolean | null };
 
 const navItems = [
   { to: "/dashboard", label: "Vue d'ensemble", icon: LayoutDashboard, end: true },
@@ -172,9 +173,14 @@ export function DashboardSidebar({ profile }: Props) {
         {!collapsed && (
           <>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-foreground truncate">
-                {profile?.display_name || user?.email?.split("@")[0]}
-              </p>
+              <div className="flex items-center gap-1">
+                <p className="text-xs font-semibold text-foreground truncate">
+                  {profile?.display_name || user?.email?.split("@")[0]}
+                </p>
+                {profile?.is_verified && (
+                  <BadgeCheck className="w-3.5 h-3.5 text-primary flex-shrink-0" strokeWidth={2.5} />
+                )}
+              </div>
               <p className="text-xs text-muted-foreground truncate">
                 {isAdmin ? "Administrateur" : profile?.plan || "free"}
               </p>

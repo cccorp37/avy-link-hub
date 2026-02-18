@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Star, Shield, Trash2, Loader2 } from "lucide-react";
+import { Search, Star, Shield, Trash2, Loader2, BadgeCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
@@ -13,6 +13,7 @@ interface UserProfile {
   plan: string;
   created_at: string;
   website: string | null;
+  is_verified: boolean;
 }
 
 export default function AdminUsers() {
@@ -26,11 +27,11 @@ export default function AdminUsers() {
   useEffect(() => {
     supabase
       .from("profiles")
-      .select("id, user_id, display_name, username, bio, plan, created_at, website")
+      .select("id, user_id, display_name, username, bio, plan, created_at, website, is_verified")
       .order("created_at", { ascending: false })
       .then(({ data }) => {
-        setProfiles(data || []);
-        setFiltered(data || []);
+        setProfiles((data as UserProfile[]) || []);
+        setFiltered((data as UserProfile[]) || []);
         setLoading(false);
       });
   }, []);
@@ -56,6 +57,19 @@ export default function AdminUsers() {
     if (!error) {
       setProfiles((prev) => prev.map((p) => (p.id === profile.id ? { ...p, plan: newPlan } : p)));
       toast({ title: newPlan === "premium" ? "✅ Compte passé en Premium" : "Plan remis en Free" });
+    }
+    setUpdatingId(null);
+  };
+
+  const toggleVerified = async (profile: UserProfile) => {
+    setUpdatingId(profile.id + "-verified");
+    const newVal = !profile.is_verified;
+    const { error } = await supabase.from("profiles").update({ is_verified: newVal } as never).eq("id", profile.id);
+    if (!error) {
+      setProfiles((prev) => prev.map((p) => (p.id === profile.id ? { ...p, is_verified: newVal } : p)));
+      toast({ title: newVal ? "✅ Badge Vérifié accordé" : "Badge Vérifié retiré" });
+    } else {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
     }
     setUpdatingId(null);
   };
@@ -109,19 +123,44 @@ export default function AdminUsers() {
                   </p>
                 </div>
 
-                {/* Plan badge */}
-                <span
-                  className={`px-2.5 py-1 text-xs font-bold rounded-full flex-shrink-0 ${
-                    profile.plan !== "free"
-                      ? "gradient-cta text-primary-foreground"
-                      : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {profile.plan}
-                </span>
+                {/* Badges */}
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  {profile.is_verified && (
+                    <span className="flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary text-xs font-bold rounded-full">
+                      <BadgeCheck className="w-3 h-3" /> Vérifié
+                    </span>
+                  )}
+                  <span
+                    className={`px-2.5 py-1 text-xs font-bold rounded-full ${
+                      profile.plan !== "free"
+                        ? "gradient-cta text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {profile.plan}
+                  </span>
+                </div>
 
                 {/* Actions */}
                 <div className="flex items-center gap-1 flex-shrink-0">
+                  {/* Toggle verified */}
+                  <button
+                    onClick={() => toggleVerified(profile)}
+                    disabled={updatingId === profile.id + "-verified"}
+                    title={profile.is_verified ? "Retirer le badge Vérifié" : "Accorder le badge Vérifié"}
+                    className={`p-2 rounded-xl transition-colors ${
+                      profile.is_verified
+                        ? "text-primary bg-primary/10 hover:bg-destructive/10 hover:text-destructive"
+                        : "text-muted-foreground hover:text-primary hover:bg-primary/10"
+                    }`}
+                  >
+                    {updatingId === profile.id + "-verified" ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <BadgeCheck className="w-4 h-4" />
+                    )}
+                  </button>
+                  {/* Toggle premium */}
                   <button
                     onClick={() => upgradeToPremium(profile)}
                     disabled={updatingId === profile.id}
@@ -129,7 +168,7 @@ export default function AdminUsers() {
                     className={`p-2 rounded-xl transition-colors ${
                       profile.plan === "premium"
                         ? "text-warning hover:bg-warning/10"
-                        : "text-primary hover:bg-primary/10"
+                        : "text-muted-foreground hover:text-primary hover:bg-primary/10"
                     }`}
                   >
                     {updatingId === profile.id ? (
