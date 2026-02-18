@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Link2 } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signIn, signUp, resetPassword } from "@/lib/supabase-auth";
 import { useToast } from "@/hooks/use-toast";
+import avylinkLogo from "@/assets/avylink-logo.jpg";
 
 type Mode = "login" | "signup" | "forgot";
 
@@ -73,9 +74,11 @@ const AuthModal = ({ defaultMode = "login", onClose, onSuccess }: AuthModalProps
       >
         {/* Logo */}
         <div className="flex items-center gap-2 mb-8">
-          <div className="w-9 h-9 rounded-xl gradient-cta flex items-center justify-center shadow-blue">
-            <Link2 className="w-4 h-4 text-primary-foreground" />
-          </div>
+          <img
+            src={avylinkLogo}
+            alt="AvyLink Logo"
+            className="w-9 h-9 rounded-xl object-cover shadow-blue"
+          />
           <span className="font-dm font-bold text-xl text-foreground">
             Avy<span className="text-gradient">Link</span>
           </span>
