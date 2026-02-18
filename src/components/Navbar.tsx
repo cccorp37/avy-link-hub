@@ -1,10 +1,11 @@
-import { Link2, Menu, X, LogOut, User } from "lucide-react";
+import { Menu, X, LogOut, User } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import AuthModal from "@/components/AuthModal";
 import { useAuth } from "@/hooks/useAuth";
 import { signOut } from "@/lib/supabase-auth";
 import { useToast } from "@/hooks/use-toast";
+import avylinkLogo from "@/assets/avylink-logo.jpg";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -23,9 +24,11 @@ const Navbar = () => {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl gradient-cta flex items-center justify-center shadow-blue">
-              <Link2 className="w-4 h-4 text-primary-foreground" />
-            </div>
+            <img
+              src={avylinkLogo}
+              alt="AvyLink Logo"
+              className="w-9 h-9 rounded-xl object-cover shadow-blue"
+            />
             <span className="font-dm font-bold text-xl text-foreground tracking-tight">
               Avy<span className="text-gradient">Link</span>
             </span>
@@ -76,7 +79,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile menu */}
-          <button className="md:hidden" onClick={() => setOpen(!open)}>
+          <button className="md:hidden p-2" onClick={() => setOpen(!open)}>
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
@@ -85,7 +88,12 @@ const Navbar = () => {
         {open && (
           <div className="md:hidden glass border-t border-white/30 px-4 py-4 space-y-3 animate-fade-up">
             {["Fonctionnalités", "Tarifs", "Démo"].map((item) => (
-              <a key={item} href="#" className="block text-sm font-medium text-muted-foreground hover:text-primary">
+              <a
+                key={item}
+                href={`#${item.toLowerCase().replace("é", "e").replace("î", "i")}`}
+                className="block text-sm font-medium text-muted-foreground hover:text-primary py-1"
+                onClick={() => setOpen(false)}
+              >
                 {item}
               </a>
             ))}

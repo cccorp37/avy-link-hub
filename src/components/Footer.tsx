@@ -1,4 +1,5 @@
-import { Link2, Instagram, Twitter, Youtube, Facebook, Mail } from "lucide-react";
+import { Instagram, Twitter, Youtube, Facebook, Mail } from "lucide-react";
+import avylinkLogo from "@/assets/avylink-logo.jpg";
 
 const Footer = () => {
   return (
@@ -8,15 +9,17 @@ const Footer = () => {
           {/* Brand */}
           <div className="md:col-span-1 space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl gradient-cta flex items-center justify-center">
-                <Link2 className="w-4 h-4 text-white" />
-              </div>
+              <img
+                src={avylinkLogo}
+                alt="AvyLink Logo"
+                className="w-9 h-9 rounded-xl object-cover"
+              />
               <span className="font-dm font-bold text-xl text-white">
                 Avy<span className="text-primary-light">Link</span>
               </span>
             </div>
             <p className="text-background/60 text-sm leading-relaxed">
-              La plateforme de portfolio personnalisable 
+              La plateforme de portfolio personnalisable
               conçue pour les créateurs africains et du monde entier.
             </p>
             <div className="flex gap-3">
