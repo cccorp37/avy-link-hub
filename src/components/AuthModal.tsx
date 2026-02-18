@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { lovable } from "@/integrations/lovable";
+
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -187,6 +189,19 @@ const AuthModal = ({ defaultMode = "login", onClose, onSuccess }: AuthModalProps
           </Button>
         </form>
 
+        {/* Social sign-in — only on login/signup */}
+        {mode !== "forgot" && (
+          <>
+            <div className="flex items-center gap-3 my-5">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs text-muted-foreground">ou</span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+
+            <AppleSignInButton onSuccess={onSuccess} onClose={onClose} />
+          </>
+        )}
+
         {/* Switch mode */}
         <div className="mt-6 text-center text-sm text-muted-foreground">
           {mode === "login" && (
@@ -214,4 +229,51 @@ const AuthModal = ({ defaultMode = "login", onClose, onSuccess }: AuthModalProps
   );
 };
 
+// ─── Apple Sign-In Button ─────────────────────────────────────────────────────
+function AppleSignInButton({ onSuccess, onClose }: { onSuccess?: () => void; onClose: () => void }) {
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleAppleSignIn = async () => {
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("apple");
+      if (result.error) {
+        toast({
+          title: "Erreur Apple Sign In",
+          description: (result.error as Error).message || "Une erreur est survenue",
+          variant: "destructive",
+        });
+      } else if (!result.redirected) {
+        toast({ title: "Bienvenue ! 👋", description: "Connecté avec Apple." });
+        onSuccess?.();
+        onClose();
+      }
+    } catch (err) {
+      toast({ title: "Erreur", description: "Impossible de se connecter avec Apple.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleAppleSignIn}
+      disabled={loading}
+      className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-border bg-foreground text-background hover:bg-foreground/90 transition-colors font-semibold text-sm disabled:opacity-60"
+    >
+      {loading ? (
+        <span className="w-4 h-4 border-2 border-background/40 border-t-background rounded-full animate-spin" />
+      ) : (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.38.07 2.33.74 3.13.77 1.2-.25 2.35-.96 3.62-.82 1.54.2 2.7.89 3.47 2.16-3.2 1.9-2.44 5.81.38 6.97-.57 1.52-1.33 3.01-2.6 3.8zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+        </svg>
+      )}
+      Continuer avec Apple
+    </button>
+  );
+}
+
 export default AuthModal;
+
