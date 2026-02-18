@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      form_submissions: {
+        Row: {
+          block_id: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          message: string | null
+          profile_id: string
+          submitted_at: string
+        }
+        Insert: {
+          block_id?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          message?: string | null
+          profile_id: string
+          submitted_at?: string
+        }
+        Update: {
+          block_id?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          message?: string | null
+          profile_id?: string
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "form_submissions_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "page_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_submissions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       link_clicks: {
         Row: {
           clicked_at: string
@@ -39,6 +84,50 @@ export type Database = {
             columns: ["link_id"]
             isOneToOne: false
             referencedRelation: "profile_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_blocks: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          position: number
+          profile_id: string
+          title: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          position?: number
+          profile_id: string
+          title?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          position?: number
+          profile_id?: string
+          title?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_blocks_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -129,10 +218,16 @@ export type Database = {
           bio: string | null
           button_style: string
           created_at: string
+          custom_domain: string | null
           display_name: string | null
+          facebook_pixel_id: string | null
+          favicon_url: string | null
           font_style: string
+          google_analytics_id: string | null
           id: string
           plan: string
+          seo_description: string | null
+          seo_title: string | null
           social_links: Json | null
           theme: string
           updated_at: string
@@ -146,10 +241,16 @@ export type Database = {
           bio?: string | null
           button_style?: string
           created_at?: string
+          custom_domain?: string | null
           display_name?: string | null
+          facebook_pixel_id?: string | null
+          favicon_url?: string | null
           font_style?: string
+          google_analytics_id?: string | null
           id?: string
           plan?: string
+          seo_description?: string | null
+          seo_title?: string | null
           social_links?: Json | null
           theme?: string
           updated_at?: string
@@ -163,10 +264,16 @@ export type Database = {
           bio?: string | null
           button_style?: string
           created_at?: string
+          custom_domain?: string | null
           display_name?: string | null
+          facebook_pixel_id?: string | null
+          favicon_url?: string | null
           font_style?: string
+          google_analytics_id?: string | null
           id?: string
           plan?: string
+          seo_description?: string | null
+          seo_title?: string | null
           social_links?: Json | null
           theme?: string
           updated_at?: string

@@ -1,11 +1,11 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Link2, Palette, BarChart3, Settings } from "lucide-react";
+import { LayoutDashboard, User, LayoutTemplate, Plug, Settings } from "lucide-react";
 
 const mobileNav = [
   { to: "/dashboard", label: "Accueil", icon: LayoutDashboard, end: true },
-  { to: "/dashboard/liens", label: "Liens", icon: Link2 },
-  { to: "/dashboard/apparence", label: "Style", icon: Palette },
-  { to: "/dashboard/analytics", label: "Stats", icon: BarChart3 },
+  { to: "/dashboard/page", label: "Ma Page", icon: User },
+  { to: "/dashboard/modeles", label: "Modèles", icon: LayoutTemplate },
+  { to: "/dashboard/integrations", label: "Intégré", icon: Plug },
   { to: "/dashboard/parametres", label: "Réglages", icon: Settings },
 ];
 
@@ -37,3 +37,4 @@ export function MobileBottomNav() {
     </nav>
   );
 }
+

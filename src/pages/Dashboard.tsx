@@ -8,13 +8,16 @@ import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
 import { Loader2 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
-// Sub-pages (lazy loaded inline)
+// Sub-pages
 import DashboardOverview from "./dashboard/DashboardOverview";
 import DashboardPage from "./dashboard/DashboardPage";
 import DashboardLinks from "./dashboard/DashboardLinks";
 import DashboardAppearance from "./dashboard/DashboardAppearance";
 import DashboardAnalytics from "./dashboard/DashboardAnalytics";
 import DashboardSettings from "./dashboard/DashboardSettings";
+import DashboardTemplates from "./dashboard/DashboardTemplates";
+import DashboardIntegrations from "./dashboard/DashboardIntegrations";
+
 
 type Profile = Tables<"profiles">;
 
@@ -138,6 +141,28 @@ const Dashboard = () => {
                 <DashboardTopbar profile={profile} title="Paramètres" />
                 <main className="flex-1 overflow-y-auto pb-20 md:pb-6">
                   <DashboardSettings profile={profile} onUpdate={updateProfile} />
+                </main>
+              </>
+            }
+          />
+          <Route
+            path="/modeles"
+            element={
+              <>
+                <DashboardTopbar profile={profile} title="Modèles" />
+                <main className="flex-1 overflow-y-auto pb-20 md:pb-6">
+                  <DashboardTemplates profile={profile} />
+                </main>
+              </>
+            }
+          />
+          <Route
+            path="/integrations"
+            element={
+              <>
+                <DashboardTopbar profile={profile} title="Intégrations" />
+                <main className="flex-1 overflow-y-auto pb-20 md:pb-6">
+                  <DashboardIntegrations profile={profile} />
                 </main>
               </>
             }
