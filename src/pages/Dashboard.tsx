@@ -151,7 +151,7 @@ const Dashboard = () => {
               <>
                 <DashboardTopbar profile={profile} title="Modèles" />
                 <main className="flex-1 overflow-y-auto pb-20 md:pb-6">
-                  <DashboardTemplates profile={profile} />
+                  <DashboardTemplates profile={profile} onUpdate={updateProfile} />
                 </main>
               </>
             }

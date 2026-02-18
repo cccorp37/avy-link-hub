@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { ExternalLink, Loader2, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { getPlatformIcon, getPlatformColor, getPlatformLabel } from "@/lib/metadata";
+import SocialIcon, { getPlatformColor, getPlatformLabel, PLATFORM_COLORS } from "@/components/SocialIcon";
 import avylinkLogo from "@/assets/avylink-logo.jpg";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -118,7 +118,7 @@ function SpotifyBlock({ link }: { link: ProfileLink }) {
       />
       <div className="px-3 pb-3 pt-1 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg">🎵</span>
+          <SocialIcon platform="spotify" size={20} />
           <p className="text-sm font-semibold text-foreground">{link.title}</p>
         </div>
         <a
@@ -153,7 +153,7 @@ function TikTokBlock({ link }: { link: ProfileLink }) {
       </div>
       <div className="p-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg">🎬</span>
+          <SocialIcon platform="tiktok" size={20} />
           <p className="text-sm font-semibold text-foreground">{link.title}</p>
         </div>
         <a
@@ -172,7 +172,6 @@ function TikTokBlock({ link }: { link: ProfileLink }) {
 
 function StandardLinkBlock({ link }: { link: ProfileLink }) {
   const platform = link.icon || "website";
-  const icon = getPlatformIcon(platform);
   const color = getPlatformColor(platform);
   const label = getPlatformLabel(platform);
 
@@ -185,10 +184,10 @@ function StandardLinkBlock({ link }: { link: ProfileLink }) {
       className="flex items-center gap-4 p-4 rounded-2xl border border-border/50 bg-card hover:shadow-card hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group"
     >
       <div
-        className="w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-        style={{ backgroundColor: `${color}15` }}
+        className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+        style={{ backgroundColor: `${color}18` }}
       >
-        {icon}
+        <SocialIcon platform={platform} size={24} />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
@@ -200,6 +199,7 @@ function StandardLinkBlock({ link }: { link: ProfileLink }) {
     </a>
   );
 }
+
 
 async function incrementClick(linkId: string) {
   // Increment click count via select+update pattern
@@ -218,12 +218,146 @@ async function incrementClick(linkId: string) {
   } catch (_) { /* silent fail */ }
 }
 
+// ─── Social Icons Block ────────────────────────────────────────────────────────
+
+function SocialIconsBlock({ content }: { content: Record<string, unknown> }) {
+  const networks = ["facebook","instagram","twitter","tiktok","youtube","linkedin","whatsapp","snapchat","discord","telegram","pinterest","github"];
+  const filled = networks.filter(n => content[n]);
+  if (filled.length === 0) return null;
+  return (
+    <div className="flex flex-wrap justify-center gap-3 py-2">
+      {filled.map(n => (
+        <a
+          key={n}
+          href={content[n] as string}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-11 h-11 rounded-full flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
+          style={{ backgroundColor: `${(PLATFORM_COLORS as Record<string,string>)[n] || "#999"}18` }}
+        >
+          <SocialIcon platform={n} size={22} />
+        </a>
+      ))}
+    </div>
+  );
+}
+
+// ─── Page Block Renderer ────────────────────────────────────────────────────────
+
+function PageBlockRenderer({ block }: { block: { type: string; title: string | null; content: Record<string, unknown>; is_active: boolean } }) {
+  if (!block.is_active) return null;
+  const c = block.content;
+
+  if (block.type === "heading") {
+    return (
+      <div className="text-center py-2">
+        {c.text && <p className="font-dm font-bold text-xl text-foreground">{c.text as string}</p>}
+        {c.subtitle && <p className="text-sm text-muted-foreground mt-1">{c.subtitle as string}</p>}
+      </div>
+    );
+  }
+
+  if (block.type === "social_icons") {
+    return <SocialIconsBlock content={c} />;
+  }
+
+  if (block.type === "divider") {
+    const style = (c.style as string) || "solid";
+    return (
+      <div className={`my-1 border-t border-border/40 ${style === "dashed" ? "border-dashed" : style === "dotted" ? "border-dotted" : ""}`} />
+    );
+  }
+
+  if (block.type === "text") {
+    return (
+      <div className="bg-card rounded-2xl border border-border/50 p-4">
+        {block.title && <p className="font-dm font-semibold text-sm text-foreground mb-2">{block.title}</p>}
+        <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{c.text as string}</p>
+      </div>
+    );
+  }
+
+  if (block.type === "form") {
+    return <PublicFormBlock block={block} />;
+  }
+
+  return null;
+}
+
+function PublicFormBlock({ block }: { block: { type: string; title: string | null; content: Record<string, unknown>; is_active: boolean } & { profile_id?: string } }) {
+  const [form, setForm] = useState({ full_name: "", email: "", message: "" });
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const c = block.content;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await supabase.from("form_submissions").insert({
+        profile_id: (block as Record<string, unknown>).profile_id as string,
+        ...form,
+      });
+      setSubmitted(true);
+    } catch { /* silent */ }
+    setSubmitting(false);
+  };
+
+  if (submitted) {
+    return (
+      <div className="bg-card rounded-2xl border border-border/50 p-5 text-center">
+        <span className="text-3xl">✅</span>
+        <p className="font-semibold text-foreground mt-2">{(c.successMessage as string) || "Merci pour votre message !"}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-card rounded-2xl border border-border/50 p-5">
+      <p className="font-dm font-semibold text-base text-foreground mb-4">{(c.formTitle as string) || block.title || "Contactez-moi"}</p>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <input
+          type="text"
+          required
+          placeholder="Nom complet"
+          value={form.full_name}
+          onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))}
+          className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+        />
+        <input
+          type="email"
+          required
+          placeholder="Email"
+          value={form.email}
+          onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+          className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+        />
+        <textarea
+          rows={3}
+          placeholder="Message"
+          value={form.message}
+          onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
+          className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+        />
+        <button
+          type="submit"
+          disabled={submitting}
+          className="w-full py-3 gradient-cta text-primary-foreground rounded-xl font-semibold text-sm transition-opacity disabled:opacity-70"
+        >
+          {submitting ? "Envoi..." : "Envoyer"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
 // ─── Main Profile Page ────────────────────────────────────────────────────────
 
 const PublicProfile = () => {
   const { username } = useParams<{ username: string }>();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [links, setLinks] = useState<ProfileLink[]>([]);
+  const [blocks, setBlocks] = useState<Array<{ id: string; type: string; title: string | null; content: Record<string, unknown>; position: number; is_active: boolean; profile_id: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -244,14 +378,13 @@ const PublicProfile = () => {
 
       setProfile(profileData);
 
-      const { data: linksData } = await supabase
-        .from("profile_links")
-        .select("*")
-        .eq("profile_id", profileData.id)
-        .eq("is_active", true)
-        .order("position", { ascending: true });
+      const [linksResult, blocksResult] = await Promise.all([
+        supabase.from("profile_links").select("*").eq("profile_id", profileData.id).eq("is_active", true).order("position", { ascending: true }),
+        supabase.from("page_blocks").select("*").eq("profile_id", profileData.id).eq("is_active", true).order("position", { ascending: true }),
+      ]);
 
-      setLinks(linksData || []);
+      setLinks(linksResult.data || []);
+      setBlocks((blocksResult.data || []).map(b => ({ ...b, profile_id: profileData.id, content: (b.content as Record<string, unknown>) || {} })));
       setLoading(false);
     };
 
@@ -289,9 +422,13 @@ const PublicProfile = () => {
         {/* Profile header */}
         <div className="text-center mb-8">
           {/* Avatar */}
-          <div className="w-20 h-20 mx-auto mb-4 rounded-full gradient-primary flex items-center justify-center shadow-blue text-3xl font-bold text-primary-foreground">
-            {profile.display_name?.[0]?.toUpperCase() || profile.username?.[0]?.toUpperCase() || "?"}
-          </div>
+          {profile.avatar_url ? (
+            <img src={profile.avatar_url} alt={profile.display_name || ""} className="w-20 h-20 mx-auto mb-4 rounded-full object-cover shadow-blue" />
+          ) : (
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full gradient-primary flex items-center justify-center shadow-blue text-3xl font-bold text-primary-foreground">
+              {profile.display_name?.[0]?.toUpperCase() || profile.username?.[0]?.toUpperCase() || "?"}
+            </div>
+          )}
 
           <h1 className="font-dm font-bold text-2xl text-foreground mb-1">
             {profile.display_name || `@${profile.username}`}
@@ -304,8 +441,17 @@ const PublicProfile = () => {
           )}
         </div>
 
+        {/* Page blocks (social icons, headings, forms, text...) */}
+        {blocks.length > 0 && (
+          <div className="space-y-3 mb-4">
+            {blocks.map(block => (
+              <PageBlockRenderer key={block.id} block={block} />
+            ))}
+          </div>
+        )}
+
         {/* Links */}
-        {links.length === 0 ? (
+        {links.length === 0 && blocks.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <p>Aucun lien pour l'instant.</p>
           </div>
@@ -338,3 +484,4 @@ const PublicProfile = () => {
 };
 
 export default PublicProfile;
+
