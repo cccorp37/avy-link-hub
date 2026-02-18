@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Camera, Save, Loader2, Copy, Check, Globe, Plus, X, GripVertical, ChevronDown, ChevronUp, Trash2, Edit2 } from "lucide-react";
+import SocialIcon, { PLATFORM_COLORS } from "@/components/SocialIcon";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -180,19 +181,28 @@ function BlockEditor({ block, onSave, onClose }: { block: Partial<PageBlock>; on
                 { key: "linkedin", label: "LinkedIn", placeholder: "https://linkedin.com/in/..." },
                 { key: "whatsapp", label: "WhatsApp", placeholder: "https://wa.me/..." },
                 { key: "snapchat", label: "Snapchat", placeholder: "https://snapchat.com/add/..." },
+                { key: "discord", label: "Discord", placeholder: "https://discord.gg/..." },
+                { key: "telegram", label: "Telegram", placeholder: "https://t.me/..." },
+                { key: "pinterest", label: "Pinterest", placeholder: "https://pinterest.com/..." },
+                { key: "github", label: "GitHub", placeholder: "https://github.com/..." },
               ].map(sn => (
-                <div key={sn.key}>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">{sn.label}</label>
-                  <Input
-                    value={((form.content as Record<string, unknown>)?.[sn.key] as string) || ""}
-                    onChange={e => updateContent(sn.key, e.target.value)}
-                    placeholder={sn.placeholder}
-                    className="rounded-xl h-9 text-sm"
-                  />
+                <div key={sn.key} className="flex items-center gap-2">
+                  <div className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg" style={{ background: `${(PLATFORM_COLORS as Record<string,string>)[sn.key] || "#999"}18` }}>
+                    <SocialIcon platform={sn.key} size={16} />
+                  </div>
+                  <div className="flex-1">
+                    <Input
+                      value={((form.content as Record<string, unknown>)?.[sn.key] as string) || ""}
+                      onChange={e => updateContent(sn.key, e.target.value)}
+                      placeholder={sn.placeholder}
+                      className="rounded-xl h-9 text-sm"
+                    />
+                  </div>
                 </div>
               ))}
             </div>
           )}
+
 
           {block.type === "form" && (
             <div className="space-y-3">
@@ -305,18 +315,21 @@ function BlockPreview({ block }: { block: PageBlock }) {
     );
   }
   if (block.type === "social_icons") {
-    const networks = [
-      { key: "facebook", emoji: "📘" }, { key: "instagram", emoji: "📸" },
-      { key: "twitter", emoji: "🐦" }, { key: "tiktok", emoji: "🎵" },
-      { key: "youtube", emoji: "📺" }, { key: "linkedin", emoji: "💼" },
-      { key: "whatsapp", emoji: "💬" }, { key: "snapchat", emoji: "👻" },
-    ];
-    const filled = networks.filter(n => c[n.key]);
+    const networks = ["facebook","instagram","twitter","tiktok","youtube","linkedin","whatsapp","snapchat","discord","telegram","pinterest","github"];
+    const filled = networks.filter(n => c[n]);
     return (
       <div className="flex flex-wrap gap-2 py-1">
         {filled.length === 0
           ? <span className="text-xs text-muted-foreground">Aucun réseau configuré</span>
-          : filled.map(n => <span key={n.key} className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-sm">{n.emoji}</span>)}
+          : filled.map(n => (
+            <div
+              key={n}
+              className="w-9 h-9 rounded-full flex items-center justify-center shadow-sm"
+              style={{ backgroundColor: `${PLATFORM_COLORS[n]}18` }}
+            >
+              <SocialIcon platform={n} size={20} />
+            </div>
+          ))}
       </div>
     );
   }
