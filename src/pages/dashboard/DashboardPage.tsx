@@ -367,13 +367,16 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     display_name: profile?.display_name || "",
     username: profile?.username || "",
     bio: profile?.bio || "",
     website: profile?.website || "",
     avatar_url: profile?.avatar_url || "",
+    cover_url: (profile as Record<string, unknown>)?.cover_url as string || "",
   });
 
   // Blocks state
@@ -394,7 +397,14 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
 
   const handleSave = async () => {
     setSaving(true);
-    await onUpdate({ display_name: form.display_name, username: form.username, bio: form.bio, website: form.website, avatar_url: form.avatar_url });
+    await onUpdate({
+      display_name: form.display_name,
+      username: form.username,
+      bio: form.bio,
+      website: form.website,
+      avatar_url: form.avatar_url,
+      cover_url: form.cover_url,
+    } as Partial<Profile>);
     setSaving(false);
     toast({ title: "✅ Profil mis à jour !" });
   };
@@ -411,16 +421,33 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
     if (!file || !profile) return;
     setUploading(true);
     const ext = file.name.split(".").pop();
-    const path = `avatars/${profile.id}.${ext}`;
+    const path = `${profile.user_id}/avatar.${ext}`;
     const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
     if (error) { toast({ title: "Erreur upload", description: error.message, variant: "destructive" }); setUploading(false); return; }
     const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-    const avatarUrl = data.publicUrl;
+    const avatarUrl = data.publicUrl + `?t=${Date.now()}`;
     setForm(f => ({ ...f, avatar_url: avatarUrl }));
     await onUpdate({ avatar_url: avatarUrl });
     toast({ title: "✅ Photo de profil mise à jour !" });
     setUploading(false);
   };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !profile) return;
+    setUploadingCover(true);
+    const ext = file.name.split(".").pop();
+    const path = `${profile.user_id}/cover.${ext}`;
+    const { error } = await supabase.storage.from("covers").upload(path, file, { upsert: true });
+    if (error) { toast({ title: "Erreur upload", description: error.message, variant: "destructive" }); setUploadingCover(false); return; }
+    const { data } = supabase.storage.from("covers").getPublicUrl(path);
+    const coverUrl = data.publicUrl + `?t=${Date.now()}`;
+    setForm(f => ({ ...f, cover_url: coverUrl }));
+    await onUpdate({ cover_url: coverUrl } as Partial<Profile>);
+    toast({ title: "✅ Photo de couverture mise à jour !" });
+    setUploadingCover(false);
+  };
+
 
   const addBlock = (type: string) => {
     setEditingBlock({ type, title: "", content: {}, position: blocks.length, is_active: true });
@@ -524,33 +551,54 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
         </div>
       )}
 
-      {/* Avatar section */}
-      <div className="bg-card rounded-2xl border border-border/50 shadow-card p-6">
-        <h3 className="font-dm font-bold text-base text-foreground mb-4">Photo de profil</h3>
-        <div className="flex items-center gap-5">
-          <div className="relative">
-            {form.avatar_url ? (
-              <img src={form.avatar_url} alt="Avatar" className="w-20 h-20 rounded-full object-cover shadow-blue" />
-            ) : (
-              <div className="w-20 h-20 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-blue">
-                {(form.display_name || form.username || "U")[0].toUpperCase()}
-              </div>
-            )}
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-sm hover:bg-primary/90 transition-colors"
-            >
-              {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
-            </button>
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+      {/* Cover photo + Avatar section */}
+      <div className="bg-card rounded-2xl border border-border/50 shadow-card overflow-hidden">
+        {/* Cover photo */}
+        <div className="relative h-36 bg-gradient-to-br from-primary/20 to-primary/5 group">
+          {form.cover_url ? (
+            <img src={form.cover_url} alt="Couverture" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <p className="text-xs text-muted-foreground">Aucune photo de couverture</p>
+            </div>
+          )}
+          <button
+            onClick={() => coverInputRef.current?.click()}
+            className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-all opacity-0 group-hover:opacity-100"
+          >
+            <div className="flex items-center gap-2 bg-white/90 text-foreground px-4 py-2 rounded-xl text-sm font-semibold shadow">
+              {uploadingCover ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+              {uploadingCover ? "Upload..." : "Modifier la couverture"}
+            </div>
+          </button>
+          <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+        </div>
+
+        {/* Avatar */}
+        <div className="px-6 pb-6">
+          <div className="flex items-end gap-4 -mt-10 mb-4">
+            <div className="relative flex-shrink-0">
+              {form.avatar_url ? (
+                <img src={form.avatar_url} alt="Avatar" className="w-20 h-20 rounded-full object-cover shadow-blue border-4 border-card" />
+              ) : (
+                <div className="w-20 h-20 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-blue border-4 border-card">
+                  {(form.display_name || form.username || "U")[0].toUpperCase()}
+                </div>
+              )}
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-sm hover:bg-primary/90 transition-colors"
+              >
+                {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+              </button>
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+            </div>
+            <div className="pb-1">
+              <p className="font-dm font-bold text-base text-foreground">{form.display_name || "Ton nom"}</p>
+              {form.username && <p className="text-xs text-muted-foreground">@{form.username}</p>}
+            </div>
           </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-foreground">Photo de profil</p>
-            <p className="text-xs text-muted-foreground">JPG, PNG ou GIF. Max 5MB.</p>
-            <button onClick={() => fileInputRef.current?.click()} className="text-xs text-primary hover:underline font-medium">
-              {uploading ? "Upload en cours..." : "Choisir une photo"}
-            </button>
-          </div>
+          <p className="text-xs text-muted-foreground">Photo de profil : JPG, PNG. Max 5MB. &nbsp;|&nbsp; Couverture : recommandé 1200×400px.</p>
         </div>
       </div>
 
