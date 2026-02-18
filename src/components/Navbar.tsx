@@ -1,5 +1,6 @@
-import { Menu, X, LogOut, User } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import AuthModal from "@/components/AuthModal";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,10 +13,16 @@ const Navbar = () => {
   const [authModal, setAuthModal] = useState<"login" | "signup" | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await signOut();
     toast({ title: "À bientôt ! 👋", description: "Vous êtes déconnecté." });
+    navigate("/");
+  };
+
+  const handleAuthSuccess = () => {
+    navigate("/dashboard");
   };
 
   return (
@@ -49,14 +56,16 @@ const Navbar = () => {
 
           {/* CTA */}
           <div className="hidden md:flex items-center gap-3">
-            {user ? (
+          {user ? (
               <>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center">
-                    <User className="w-3.5 h-3.5 text-primary-foreground" />
-                  </div>
-                  <span className="font-medium text-foreground">{user.email?.split("@")[0]}</span>
-                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-primary font-semibold"
+                  onClick={() => navigate("/dashboard")}
+                >
+                  Mon Dashboard
+                </Button>
                 <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-muted-foreground hover:text-destructive gap-2">
                   <LogOut className="w-4 h-4" />
                   Déconnexion
@@ -117,6 +126,7 @@ const Navbar = () => {
         <AuthModal
           defaultMode={authModal}
           onClose={() => setAuthModal(null)}
+          onSuccess={handleAuthSuccess}
         />
       )}
     </>
