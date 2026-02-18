@@ -12,7 +12,7 @@ const Footer = () => {
                 <Link2 className="w-4 h-4 text-white" />
               </div>
               <span className="font-dm font-bold text-xl text-white">
-                Avy<span className="text-primary">Link</span>
+                Avy<span className="text-primary-light">Link</span>
               </span>
             </div>
             <p className="text-background/60 text-sm leading-relaxed">
@@ -63,7 +63,7 @@ const Footer = () => {
         </div>
 
         {/* Newsletter */}
-        <div className="glass-pink rounded-2xl p-6 mb-10 flex flex-col sm:flex-row items-center gap-4">
+        <div className="glass-blue rounded-2xl p-6 mb-10 flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1">
             <h4 className="font-dm font-bold text-white mb-1">Reste informé 💌</h4>
             <p className="text-background/60 text-sm">Nouveautés, astuces et offres exclusives directement dans ta boîte mail.</p>

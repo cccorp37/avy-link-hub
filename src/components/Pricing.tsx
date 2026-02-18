@@ -106,7 +106,7 @@ const Pricing = () => {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12 space-y-4">
-          <div className="inline-flex items-center gap-2 glass-pink px-4 py-2 rounded-full text-sm font-medium text-primary">
+          <div className="inline-flex items-center gap-2 glass-blue px-4 py-2 rounded-full text-sm font-medium text-primary">
             🌍 Prix accessibles à tous
           </div>
           <h2 className="font-dm font-bold text-4xl md:text-5xl text-foreground tracking-tight">
@@ -125,7 +125,7 @@ const Pricing = () => {
             <button
               onClick={() => setAnnual(false)}
               className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                !annual ? "gradient-cta text-primary-foreground shadow-rose" : "text-muted-foreground hover:text-foreground"
+                !annual ? "gradient-cta text-primary-foreground shadow-blue" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Mensuel
@@ -133,7 +133,7 @@ const Pricing = () => {
             <button
               onClick={() => setAnnual(true)}
               className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${
-                annual ? "gradient-cta text-primary-foreground shadow-rose" : "text-muted-foreground hover:text-foreground"
+                annual ? "gradient-cta text-primary-foreground shadow-blue" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Annuel
@@ -148,7 +148,7 @@ const Pricing = () => {
                 key={cur}
                 onClick={() => setCurrency(cur)}
                 className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                  currency === cur ? "gradient-primary text-primary-foreground shadow-rose" : "text-muted-foreground hover:text-foreground"
+                  currency === cur ? "gradient-primary text-primary-foreground shadow-blue" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {cur === "fcfa" ? "🇨🇮 FCFA" : "💵 USD"}
@@ -169,11 +169,11 @@ const Pricing = () => {
               <div
                 key={plan.id}
                 className={`relative bg-card rounded-3xl p-6 shadow-card border-2 transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover flex flex-col ${plan.color} ${
-                  plan.popular ? "shadow-rose lg:scale-105 z-10" : ""
+                  plan.popular ? "shadow-blue lg:scale-105 z-10" : ""
                 }`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 gradient-cta text-primary-foreground text-xs font-bold px-4 py-1.5 rounded-full shadow-rose">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 gradient-cta text-primary-foreground text-xs font-bold px-4 py-1.5 rounded-full shadow-blue">
                     ⭐ LE PLUS POPULAIRE
                   </div>
                 )}
@@ -214,7 +214,7 @@ const Pricing = () => {
                   variant={plan.popular ? "default" : "outline"}
                   className={`w-full rounded-xl font-semibold mb-6 ${
                     plan.popular
-                      ? "gradient-cta text-primary-foreground shadow-rose hover:shadow-rose-lg"
+                      ? "gradient-cta text-primary-foreground shadow-blue hover:shadow-blue-lg"
                       : "border-primary/30 text-primary hover:bg-primary/5"
                   }`}
                 >

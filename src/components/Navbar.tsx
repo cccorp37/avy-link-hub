@@ -1,67 +1,117 @@
-import { Link2, Menu, X } from "lucide-react";
+import { Link2, Menu, X, LogOut, User } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import AuthModal from "@/components/AuthModal";
+import { useAuth } from "@/hooks/useAuth";
+import { signOut } from "@/lib/supabase-auth";
+import { useToast } from "@/hooks/use-toast";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const [authModal, setAuthModal] = useState<"login" | "signup" | null>(null);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({ title: "À bientôt ! 👋", description: "Vous êtes déconnecté." });
+  };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/30">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl gradient-cta flex items-center justify-center shadow-rose">
-            <Link2 className="w-4 h-4 text-primary-foreground" />
+    <>
+      <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/40">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl gradient-cta flex items-center justify-center shadow-blue">
+              <Link2 className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <span className="font-dm font-bold text-xl text-foreground tracking-tight">
+              Avy<span className="text-gradient">Link</span>
+            </span>
           </div>
-          <span className="font-dm font-700 text-xl text-foreground tracking-tight">
-            Avy<span className="text-gradient">Link</span>
-          </span>
-        </div>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8">
-          {["Fonctionnalités", "Tarifs", "Démo"].map((item) => (
-            <a
-              key={item}
-              href={`#${item.toLowerCase().replace("é", "e").replace("î", "i")}`}
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              {item}
-            </a>
-          ))}
-        </nav>
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-8">
+            {["Fonctionnalités", "Tarifs", "Démo"].map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase().replace("é", "e").replace("î", "i")}`}
+                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              >
+                {item}
+              </a>
+            ))}
+          </nav>
 
-        {/* CTA */}
-        <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
-            Connexion
-          </Button>
-          <Button size="sm" className="gradient-cta text-primary-foreground shadow-rose hover:shadow-rose-lg transition-shadow rounded-xl font-semibold">
-            Commencer Gratuitement
-          </Button>
-        </div>
-
-        {/* Mobile menu */}
-        <button className="md:hidden" onClick={() => setOpen(!open)}>
-          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
-      </div>
-
-      {/* Mobile dropdown */}
-      {open && (
-        <div className="md:hidden glass border-t border-white/30 px-4 py-4 space-y-3 animate-fade-up">
-          {["Fonctionnalités", "Tarifs", "Démo"].map((item) => (
-            <a key={item} href="#" className="block text-sm font-medium text-muted-foreground hover:text-primary">
-              {item}
-            </a>
-          ))}
-          <div className="pt-2 flex flex-col gap-2">
-            <Button variant="outline" size="sm">Connexion</Button>
-            <Button size="sm" className="gradient-cta text-primary-foreground">Commencer Gratuitement</Button>
+          {/* CTA */}
+          <div className="hidden md:flex items-center gap-3">
+            {user ? (
+              <>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center">
+                    <User className="w-3.5 h-3.5 text-primary-foreground" />
+                  </div>
+                  <span className="font-medium text-foreground">{user.email?.split("@")[0]}</span>
+                </div>
+                <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-muted-foreground hover:text-destructive gap-2">
+                  <LogOut className="w-4 h-4" />
+                  Déconnexion
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary" onClick={() => setAuthModal("login")}>
+                  Connexion
+                </Button>
+                <Button
+                  size="sm"
+                  className="gradient-cta text-primary-foreground shadow-blue hover:shadow-blue-lg transition-shadow rounded-xl font-semibold"
+                  onClick={() => setAuthModal("signup")}
+                >
+                  Commencer Gratuitement
+                </Button>
+              </>
+            )}
           </div>
+
+          {/* Mobile menu */}
+          <button className="md:hidden" onClick={() => setOpen(!open)}>
+            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
+
+        {/* Mobile dropdown */}
+        {open && (
+          <div className="md:hidden glass border-t border-white/30 px-4 py-4 space-y-3 animate-fade-up">
+            {["Fonctionnalités", "Tarifs", "Démo"].map((item) => (
+              <a key={item} href="#" className="block text-sm font-medium text-muted-foreground hover:text-primary">
+                {item}
+              </a>
+            ))}
+            <div className="pt-2 flex flex-col gap-2">
+              {user ? (
+                <Button variant="outline" size="sm" onClick={handleSignOut} className="gap-2">
+                  <LogOut className="w-4 h-4" /> Déconnexion
+                </Button>
+              ) : (
+                <>
+                  <Button variant="outline" size="sm" onClick={() => { setAuthModal("login"); setOpen(false); }}>Connexion</Button>
+                  <Button size="sm" className="gradient-cta text-primary-foreground" onClick={() => { setAuthModal("signup"); setOpen(false); }}>Commencer Gratuitement</Button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </header>
+
+      {authModal && (
+        <AuthModal
+          defaultMode={authModal}
+          onClose={() => setAuthModal(null)}
+        />
       )}
-    </header>
+    </>
   );
 };
 
