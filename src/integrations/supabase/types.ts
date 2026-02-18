@@ -217,6 +217,7 @@ export type Database = {
           background_color: string | null
           bio: string | null
           button_style: string
+          cover_url: string | null
           created_at: string
           custom_domain: string | null
           display_name: string | null
@@ -240,6 +241,7 @@ export type Database = {
           background_color?: string | null
           bio?: string | null
           button_style?: string
+          cover_url?: string | null
           created_at?: string
           custom_domain?: string | null
           display_name?: string | null
@@ -263,6 +265,7 @@ export type Database = {
           background_color?: string | null
           bio?: string | null
           button_style?: string
+          cover_url?: string | null
           created_at?: string
           custom_domain?: string | null
           display_name?: string | null
