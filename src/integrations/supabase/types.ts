@@ -14,6 +14,70 @@ export type Database = {
   }
   public: {
     Tables: {
+      link_clicks: {
+        Row: {
+          clicked_at: string
+          id: string
+          link_id: string
+          referrer: string | null
+        }
+        Insert: {
+          clicked_at?: string
+          id?: string
+          link_id: string
+          referrer?: string | null
+        }
+        Update: {
+          clicked_at?: string
+          id?: string
+          link_id?: string
+          referrer?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "link_clicks_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "profile_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_views: {
+        Row: {
+          country: string | null
+          device: string | null
+          id: string
+          profile_id: string
+          referrer: string | null
+          viewed_at: string
+        }
+        Insert: {
+          country?: string | null
+          device?: string | null
+          id?: string
+          profile_id: string
+          referrer?: string | null
+          viewed_at?: string
+        }
+        Update: {
+          country?: string | null
+          device?: string | null
+          id?: string
+          profile_id?: string
+          referrer?: string | null
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_views_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_links: {
         Row: {
           click_count: number
@@ -61,11 +125,16 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          background_color: string | null
           bio: string | null
+          button_style: string
           created_at: string
           display_name: string | null
+          font_style: string
           id: string
           plan: string
+          social_links: Json | null
+          theme: string
           updated_at: string
           user_id: string
           username: string | null
@@ -73,11 +142,16 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          background_color?: string | null
           bio?: string | null
+          button_style?: string
           created_at?: string
           display_name?: string | null
+          font_style?: string
           id?: string
           plan?: string
+          social_links?: Json | null
+          theme?: string
           updated_at?: string
           user_id: string
           username?: string | null
@@ -85,11 +159,16 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          background_color?: string | null
           bio?: string | null
+          button_style?: string
           created_at?: string
           display_name?: string | null
+          font_style?: string
           id?: string
           plan?: string
+          social_links?: Json | null
+          theme?: string
           updated_at?: string
           user_id?: string
           username?: string | null
