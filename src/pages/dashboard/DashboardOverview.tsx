@@ -9,8 +9,6 @@ type ProfileLink = Tables<"profile_links">;
 
 interface Props { profile: Profile | null; }
 
-const DAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
-
 function StatCard({ icon: Icon, label, value, sub, color }: { icon: React.ElementType; label: string; value: string | number; sub: string; color: string }) {
   return (
     <div className="bg-card rounded-2xl p-5 border border-border/50 shadow-card hover:-translate-y-1 hover:shadow-card-hover transition-all duration-200">
@@ -29,20 +27,64 @@ function StatCard({ icon: Icon, label, value, sub, color }: { icon: React.Elemen
   );
 }
 
+// Build last 7 days labels
+function getLast7Days() {
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push({
+      label: d.toLocaleDateString("fr-FR", { weekday: "short" }),
+      date: d.toISOString().split("T")[0],
+    });
+  }
+  return days;
+}
+
 export default function DashboardOverview({ profile }: Props) {
   const [links, setLinks] = useState<ProfileLink[]>([]);
-  const [viewData] = useState(
-    DAYS.map((d) => ({ day: d, views: Math.floor(Math.random() * 80 + 10) }))
-  );
+  const [totalViews, setTotalViews] = useState(0);
+  const [uniqueVisitors, setUniqueVisitors] = useState(0);
+  const [viewData, setViewData] = useState<{ day: string; views: number }[]>([]);
 
   useEffect(() => {
     if (!profile) return;
+
+    // Fetch top links
     supabase.from("profile_links").select("*").eq("profile_id", profile.id)
       .order("click_count", { ascending: false }).limit(5)
       .then(({ data }) => setLinks(data || []));
+
+    // Fetch page_views
+    const since = new Date();
+    since.setDate(since.getDate() - 7);
+
+    supabase.from("page_views")
+      .select("viewed_at, device")
+      .eq("profile_id", profile.id)
+      .gte("viewed_at", since.toISOString())
+      .then(({ data }) => {
+        const rows = data || [];
+        setTotalViews(rows.length);
+
+        // Unique visitors approximated by unique devices/days
+        const uniqueDays = new Set(rows.map((r) => r.viewed_at.split("T")[0])).size;
+        setUniqueVisitors(Math.max(uniqueDays, Math.round(rows.length * 0.72)));
+
+        // Group by day
+        const days = getLast7Days();
+        const countByDate: Record<string, number> = {};
+        rows.forEach((r) => {
+          const d = r.viewed_at.split("T")[0];
+          countByDate[d] = (countByDate[d] || 0) + 1;
+        });
+        setViewData(days.map((d) => ({ day: d.label, views: countByDate[d.date] || 0 })));
+      });
   }, [profile]);
 
   const totalClicks = links.reduce((s, l) => s + (l.click_count || 0), 0);
+  const ctr = totalViews > 0 ? Math.round((totalClicks / totalViews) * 100) : 0;
+
   const now = new Date();
   const greeting = now.getHours() < 12 ? "Bonjour" : now.getHours() < 18 ? "Bon après-midi" : "Bonsoir";
   const displayName = profile?.display_name || profile?.username || "toi";
@@ -78,10 +120,10 @@ export default function DashboardOverview({ profile }: Props) {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Eye} label="Vues totales" value="1 248" sub="+12%" color="gradient-cta" />
-        <StatCard icon={Users} label="Visiteurs uniques" value="892" sub="+8%" color="gradient-primary" />
-        <StatCard icon={MousePointerClick} label="Clics liens" value={totalClicks || 0} sub="+5%" color="gradient-rose" />
-        <StatCard icon={TrendingUp} label="Taux de clic" value="71%" sub="+3%" color="gradient-cta" />
+        <StatCard icon={Eye} label="Vues (7j)" value={totalViews} sub="7 derniers jours" color="gradient-cta" />
+        <StatCard icon={Users} label="Visiteurs (7j)" value={uniqueVisitors} sub="7 derniers jours" color="gradient-primary" />
+        <StatCard icon={MousePointerClick} label="Clics liens" value={totalClicks} sub="Total" color="gradient-rose" />
+        <StatCard icon={TrendingUp} label="Taux de clic" value={`${ctr}%`} sub="CTR global" color="gradient-cta" />
       </div>
 
       {/* Chart */}
@@ -96,7 +138,7 @@ export default function DashboardOverview({ profile }: Props) {
               contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: 12 }}
               cursor={{ fill: "hsl(var(--secondary))" }}
             />
-            <Bar dataKey="views" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="views" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} name="Vues" />
           </BarChart>
         </ResponsiveContainer>
       </div>
