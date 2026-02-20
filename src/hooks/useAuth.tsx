@@ -6,9 +6,15 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  waitForAuth: () => Promise<User | null>;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, session: null, loading: true });
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  session: null,
+  loading: true,
+  waitForAuth: () => Promise.resolve(null),
+});
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -31,7 +37,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  return <AuthContext.Provider value={{ user, session, loading }}>{children}</AuthContext.Provider>;
+  // Waits until auth is resolved, then returns the user
+  const waitForAuth = (): Promise<User | null> => {
+    return new Promise((resolve) => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        resolve(session?.user ?? null);
+      });
+    });
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, session, loading, waitForAuth }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => useContext(AuthContext);
