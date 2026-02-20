@@ -11,7 +11,7 @@ import avylinkLogo from "@/assets/avylink-logo.jpg";
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [authModal, setAuthModal] = useState<"login" | "signup" | null>(null);
-  const { user } = useAuth();
+  const { user, waitForAuth } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -21,8 +21,11 @@ const Navbar = () => {
     navigate("/");
   };
 
-  const handleAuthSuccess = () => {
-    navigate("/dashboard");
+  const handleAuthSuccess = async () => {
+    const authedUser = await waitForAuth();
+    if (authedUser) {
+      navigate("/dashboard");
+    }
   };
 
   return (
