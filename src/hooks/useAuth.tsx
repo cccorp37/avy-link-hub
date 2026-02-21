@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useRef, ReactNode, useCallback } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -20,31 +20,53 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const initializedRef = useRef(false);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+    // Set up the auth listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
+      // Only set loading false after initial getSession has run
+      if (initializedRef.current) {
+        setLoading(false);
+      }
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    // Then check the current session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      initializedRef.current = true;
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Waits until auth is resolved, then returns the user
-  const waitForAuth = (): Promise<User | null> => {
+  const waitForAuth = useCallback((): Promise<User | null> => {
     return new Promise((resolve) => {
-      supabase.auth.getSession().then(({ data: { session } }) => {
+      // If already resolved, return immediately
+      if (initializedRef.current && !loading) {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          resolve(session?.user ?? null);
+        });
+        return;
+      }
+      // Otherwise wait for auth state change
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        subscription.unsubscribe();
         resolve(session?.user ?? null);
       });
+      // Fallback timeout
+      setTimeout(() => {
+        subscription.unsubscribe();
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          resolve(session?.user ?? null);
+        });
+      }, 3000);
     });
-  };
+  }, [loading]);
 
   return (
     <AuthContext.Provider value={{ user, session, loading, waitForAuth }}>
