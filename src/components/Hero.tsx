@@ -1,6 +1,7 @@
 import { ArrowRight, Sparkles, Star, Users, TrendingUp, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import AuthModal from "@/components/AuthModal";
 import heroBg from "@/assets/hero-bg.jpg";
 
@@ -11,163 +12,244 @@ const stats = [
   { value: "50+", label: "Pays couverts", icon: Zap },
 ];
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.12, duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
+  }),
+};
+
 const Hero = () => {
   const [showAuth, setShowAuth] = useState(false);
 
   return (
     <>
-      <section className="relative min-h-screen flex items-center overflow-hidden pt-16">
-        {/* Animated mesh gradient background */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,hsl(204,94%,52%,0.15),transparent)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_100%_100%,hsl(338,85%,65%,0.08),transparent)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_40%_at_0%_50%,hsl(204,100%,97%,0.8),transparent)]" />
-        
-        {/* Geometric grid pattern */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: `linear-gradient(hsl(204,94%,52%) 1px, transparent 1px), linear-gradient(90deg, hsl(204,94%,52%) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px'
-        }} />
-
-        {/* Floating orbs */}
-        <div className="absolute top-32 right-[15%] w-3 h-3 rounded-full bg-primary/40 animate-float" />
-        <div className="absolute top-[60%] left-[10%] w-2 h-2 rounded-full bg-[hsl(338,85%,65%)]/30 animate-float-delayed" />
-        <div className="absolute bottom-32 right-[30%] w-4 h-4 rounded-full bg-primary/20 animate-float" />
-
-        <div className="container mx-auto px-4 py-20 grid lg:grid-cols-2 gap-16 items-center relative z-10">
-          {/* Left content */}
-          <div className="space-y-8">
-            {/* Badge with shimmer */}
-            <div className="inline-flex items-center gap-2 bg-primary/5 border border-primary/15 px-5 py-2.5 rounded-full text-sm font-semibold text-primary backdrop-blur-sm">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
-              </span>
-              🌍 Fait pour l'Afrique, ouvert au Monde
-            </div>
-
-            {/* Title with more dynamic styling */}
-            <div className="space-y-4">
-              <h1 className="font-dm font-extrabold text-5xl lg:text-7xl text-foreground leading-[1.05] tracking-tight">
-                Ton univers
-                <br />
-                en <span className="relative">
-                  <span className="text-gradient">un seul lien</span>
-                  <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 200 8" fill="none">
-                    <path d="M1 5.5C47 2.5 153 2.5 199 5.5" stroke="hsl(204,94%,52%)" strokeWidth="3" strokeLinecap="round" opacity="0.4"/>
-                  </svg>
-                </span>
-              </h1>
-              <p className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-lg">
-                Crée ta page de liens personnalisée en quelques minutes.
-                Centralise tes réseaux sociaux, tes produits et ton contenu.
-                <strong className="text-foreground font-semibold"> Monétise ta présence en ligne.</strong>
-              </p>
-            </div>
-
-            {/* CTA Buttons — redesigned */}
-            <div className="flex flex-wrap gap-4">
-              <Button
-                size="lg"
-                onClick={() => setShowAuth(true)}
-                className="gradient-cta text-primary-foreground shadow-blue hover:shadow-blue-lg transition-all rounded-2xl font-bold text-base px-10 py-6 group"
-              >
-                Créer ma page gratuitement
-                <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
-              </Button>
-              <Button
-                size="lg"
-                variant="ghost"
-                className="rounded-2xl text-foreground hover:bg-primary/5 font-semibold text-base px-8 py-6"
-              >
-                <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-2">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                </span>
-                Voir la démo
-              </Button>
-            </div>
-
-            {/* Social proof — redesigned */}
-            <div className="flex items-center gap-4 pt-2">
-              <div className="flex -space-x-3">
-                {["🧑🏿", "👩🏽", "👨🏾", "👩🏿", "🧑🏾"].map((emoji, i) => (
-                  <div key={i} className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-sm border-[3px] border-background shadow-sm">
-                    {emoji}
-                  </div>
-                ))}
-              </div>
-              <div>
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-warning text-warning" />
-                  ))}
-                  <span className="text-sm font-bold text-foreground ml-1">4.9</span>
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  <strong className="text-foreground">+10 000</strong> créateurs
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Hero visual — redesigned with stacked cards */}
-          <div className="relative flex justify-center lg:justify-end">
-            <div className="relative">
-              {/* Main image with gradient border */}
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/20 via-transparent to-[hsl(338,85%,65%)]/10 z-10 pointer-events-none" />
-                <img
-                  src={heroBg}
-                  alt="AVYLINK - Portfolio personnalisable"
-                  className="w-full max-w-lg rounded-3xl object-cover"
-                />
-              </div>
-              
-              {/* Floating stat cards — glassmorphism redesign */}
-              <div className="absolute -left-10 top-1/4 backdrop-blur-xl bg-background/80 rounded-2xl px-5 py-4 shadow-lg border border-border/50 animate-float-delayed">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-sm">
-                    <TrendingUp className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground font-medium">Clics aujourd'hui</div>
-                    <div className="font-dm font-bold text-lg text-foreground leading-tight">+2 847</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="absolute -right-8 bottom-1/4 backdrop-blur-xl bg-background/80 rounded-2xl px-5 py-4 shadow-lg border border-border/50 animate-float">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-[hsl(207,89%,42%)] flex items-center justify-center shadow-sm">
-                    <Users className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground font-medium">Nouveaux abonnés</div>
-                    <div className="font-dm font-bold text-lg text-foreground leading-tight">+142</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+      <section className="relative min-h-screen flex items-center overflow-hidden pt-20">
+        {/* Cinematic gradient background */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[conic-gradient(from_180deg_at_70%_20%,hsl(204,94%,97%)_0deg,hsl(204,94%,52%,0.08)_120deg,hsl(338,85%,65%,0.06)_240deg,hsl(204,94%,97%)_360deg)]" />
+          <div className="absolute top-0 right-0 w-[60%] h-[60%] bg-[radial-gradient(ellipse,hsl(204,94%,52%,0.12),transparent_70%)]" />
+          <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-[radial-gradient(ellipse,hsl(338,85%,65%,0.06),transparent_70%)]" />
         </div>
 
-        {/* Stats bar — redesigned as floating glass bar */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 w-full max-w-3xl px-4">
-          <div className="backdrop-blur-xl bg-background/70 rounded-2xl border border-border/50 shadow-lg px-8 py-5 grid grid-cols-2 sm:grid-cols-4 gap-6">
-            {stats.map((stat) => {
-              const Icon = stat.icon;
-              return (
-                <div key={stat.label} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="font-dm font-bold text-xl text-foreground leading-tight">{stat.value}</div>
-                    <div className="text-xs text-muted-foreground">{stat.label}</div>
-                  </div>
+        {/* Dot matrix pattern */}
+        <div className="absolute inset-0 opacity-[0.025]" style={{
+          backgroundImage: `radial-gradient(circle, hsl(204,94%,52%) 1px, transparent 1px)`,
+          backgroundSize: '32px 32px'
+        }} />
+
+        {/* Diagonal accent line */}
+        <div className="absolute top-0 right-[20%] w-px h-full bg-gradient-to-b from-transparent via-primary/10 to-transparent rotate-12 origin-top" />
+
+        <div className="container mx-auto px-4 py-16 relative z-10">
+          <div className="grid lg:grid-cols-12 gap-12 items-center">
+            {/* Left content — 7 cols */}
+            <div className="lg:col-span-7 space-y-8">
+              {/* Badge */}
+              <motion.div
+                variants={fadeUp}
+                initial="hidden"
+                animate="visible"
+                custom={0}
+                className="inline-flex items-center gap-2.5 bg-primary/[0.06] border border-primary/10 pl-2 pr-5 py-1.5 rounded-full"
+              >
+                <span className="bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full">
+                  Nouveau
+                </span>
+                <span className="text-sm font-medium text-foreground/70">
+                  🌍 Fait pour l'Afrique, ouvert au Monde
+                </span>
+              </motion.div>
+
+              {/* Title — massive with text-clip gradient */}
+              <motion.h1
+                variants={fadeUp}
+                initial="hidden"
+                animate="visible"
+                custom={1}
+                className="font-dm font-black text-[3.5rem] sm:text-[4.5rem] lg:text-[5.5rem] text-foreground leading-[0.95] tracking-[-0.03em]"
+              >
+                Ton univers
+                <br />
+                en{" "}
+                <span className="relative inline-block">
+                  <span className="bg-gradient-to-r from-primary via-[hsl(199,89%,60%)] to-[hsl(338,85%,65%)] bg-clip-text text-transparent">
+                    un lien
+                  </span>
+                  {/* Underline decoration */}
+                  <motion.div
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ delay: 0.8, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute -bottom-2 left-0 right-0 h-3 bg-primary/10 rounded-full origin-left"
+                  />
+                </span>
+              </motion.h1>
+
+              <motion.p
+                variants={fadeUp}
+                initial="hidden"
+                animate="visible"
+                custom={2}
+                className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-xl"
+              >
+                Centralise tes réseaux sociaux, produits et contenus.{" "}
+                <span className="text-foreground font-semibold">Monétise ta présence en ligne</span> avec une page unique et personnalisable.
+              </motion.p>
+
+              {/* CTA */}
+              <motion.div
+                variants={fadeUp}
+                initial="hidden"
+                animate="visible"
+                custom={3}
+                className="flex flex-wrap gap-4 pt-2"
+              >
+                <Button
+                  size="lg"
+                  onClick={() => setShowAuth(true)}
+                  className="relative gradient-cta text-primary-foreground rounded-2xl font-bold text-base px-10 py-7 group overflow-hidden"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    Créer ma page gratuitement
+                    <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1.5" />
+                  </span>
+                  {/* Shine effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="rounded-2xl border-border/60 text-foreground font-semibold text-base px-8 py-7 hover:bg-primary/5 hover:border-primary/30 transition-all"
+                >
+                  <Sparkles className="w-5 h-5 mr-2 text-primary" />
+                  Voir la démo
+                </Button>
+              </motion.div>
+
+              {/* Social proof — horizontal */}
+              <motion.div
+                variants={fadeUp}
+                initial="hidden"
+                animate="visible"
+                custom={4}
+                className="flex items-center gap-5 pt-4"
+              >
+                <div className="flex -space-x-2.5">
+                  {["🧑🏿", "👩🏽", "👨🏾", "👩🏿", "🧑🏾"].map((emoji, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.6 + i * 0.08 }}
+                      className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-sm border-[3px] border-background shadow-sm"
+                    >
+                      {emoji}
+                    </motion.div>
+                  ))}
                 </div>
-              );
-            })}
+                <div className="border-l border-border/50 pl-5">
+                  <div className="flex items-center gap-1 mb-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-3.5 h-3.5 fill-warning text-warning" />
+                    ))}
+                    <span className="text-sm font-bold text-foreground ml-1">4.9</span>
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    Rejoint par <strong className="text-foreground">+10 000</strong> créateurs
+                  </span>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Right: Hero visual — 5 cols */}
+            <motion.div
+              initial={{ opacity: 0, x: 60, rotateY: -5 }}
+              animate={{ opacity: 1, x: 0, rotateY: 0 }}
+              transition={{ delay: 0.4, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+              className="lg:col-span-5 relative flex justify-center"
+            >
+              <div className="relative">
+                {/* Glow behind image */}
+                <div className="absolute -inset-8 bg-gradient-to-br from-primary/15 via-transparent to-[hsl(338,85%,65%)]/10 rounded-[3rem] blur-2xl" />
+                
+                {/* Main image */}
+                <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border border-white/20">
+                  <img
+                    src={heroBg}
+                    alt="AVYLINK - Portfolio personnalisable"
+                    className="w-full max-w-md rounded-[2rem] object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 via-transparent to-transparent" />
+                </div>
+
+                {/* Floating cards */}
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.9, duration: 0.6 }}
+                  className="absolute -left-12 top-1/4 backdrop-blur-2xl bg-background/90 rounded-2xl px-5 py-4 shadow-xl border border-border/30"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-sm">
+                      <TrendingUp className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-[11px] text-muted-foreground font-medium">Clics aujourd'hui</div>
+                      <div className="font-dm font-black text-xl text-foreground leading-tight">+2 847</div>
+                    </div>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.1, duration: 0.6 }}
+                  className="absolute -right-10 bottom-1/4 backdrop-blur-2xl bg-background/90 rounded-2xl px-5 py-4 shadow-xl border border-border/30"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-[hsl(207,89%,42%)] flex items-center justify-center shadow-sm">
+                      <Users className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-[11px] text-muted-foreground font-medium">Nouveaux abonnés</div>
+                      <div className="font-dm font-black text-xl text-foreground leading-tight">+142</div>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
           </div>
+
+          {/* Stats bar — bottom of hero */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.6 }}
+            className="mt-20 max-w-4xl mx-auto"
+          >
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 bg-card rounded-3xl border border-border/40 shadow-lg overflow-hidden">
+              {stats.map((stat, i) => {
+                const Icon = stat.icon;
+                return (
+                  <div
+                    key={stat.label}
+                    className={`flex items-center gap-3 px-6 py-5 ${i < 3 ? "border-r border-border/30 hidden sm:flex" : ""} ${i < 2 ? "" : ""}`}
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-primary/[0.07] flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <div className="font-dm font-black text-xl text-foreground leading-tight">{stat.value}</div>
+                      <div className="text-xs text-muted-foreground">{stat.label}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
         </div>
       </section>
 
