@@ -37,7 +37,15 @@ const Dashboard = () => {
   const [profileLoading, setProfileLoading] = useState(true);
 
   useEffect(() => {
-    if (!loading && !user) navigate("/");
+    // Only redirect if auth is fully resolved AND there's no user
+    if (!loading && !user) {
+      // Double-check with a fresh session call to avoid race conditions
+      supabase.auth.getSession().then(({ data: { session: freshSession } }) => {
+        if (!freshSession?.user) {
+          navigate("/", { replace: true });
+        }
+      });
+    }
   }, [user, loading, navigate]);
 
   useEffect(() => {
