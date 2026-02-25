@@ -16,6 +16,10 @@ import {
   Plug,
   BadgeCheck,
   Sparkles,
+  MessageSquare,
+  Users,
+  Zap,
+  Activity,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -36,6 +40,10 @@ const navItems = [
   { to: "/dashboard/apparence", label: "Apparence", icon: Palette },
   { to: "/dashboard/integrations", label: "Intégrations", icon: Plug },
   { to: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/dashboard/heatmap", label: "Heatmap & A/B", icon: Activity },
+  { to: "/dashboard/equipe", label: "Équipe", icon: Users },
+  { to: "/dashboard/api", label: "API & Webhooks", icon: Zap },
+  { to: "/dashboard/support", label: "Support", icon: MessageSquare },
   { to: "/dashboard/parametres", label: "Paramètres", icon: Settings },
 ];
 

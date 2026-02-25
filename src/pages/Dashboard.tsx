@@ -18,6 +18,10 @@ import DashboardAnalytics from "./dashboard/DashboardAnalytics";
 import DashboardSettings from "./dashboard/DashboardSettings";
 import DashboardTemplates from "./dashboard/DashboardTemplates";
 import DashboardIntegrations from "./dashboard/DashboardIntegrations";
+import DashboardSupport from "./dashboard/DashboardSupport";
+import DashboardTeam from "./dashboard/DashboardTeam";
+import DashboardAPI from "./dashboard/DashboardAPI";
+import DashboardHeatmap from "./dashboard/DashboardHeatmap";
 
 type Profile = Tables<"profiles">;
 
@@ -30,6 +34,10 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard/parametres": "Paramètres",
   "/dashboard/modeles": "Modèles",
   "/dashboard/integrations": "Intégrations",
+  "/dashboard/support": "Support",
+  "/dashboard/equipe": "Équipe",
+  "/dashboard/api": "API & Webhooks",
+  "/dashboard/heatmap": "Heatmap & A/B",
 };
 
 const pageTransition = {
@@ -138,6 +146,18 @@ const Dashboard = () => {
             } />
             <Route path="/integrations" element={
               <AnimatedPage><DashboardIntegrations profile={profile} /></AnimatedPage>
+            } />
+            <Route path="/support" element={
+              <AnimatedPage><DashboardSupport /></AnimatedPage>
+            } />
+            <Route path="/equipe" element={
+              <AnimatedPage><DashboardTeam profile={profile} /></AnimatedPage>
+            } />
+            <Route path="/api" element={
+              <AnimatedPage><DashboardAPI /></AnimatedPage>
+            } />
+            <Route path="/heatmap" element={
+              <AnimatedPage><DashboardHeatmap profile={profile} /></AnimatedPage>
             } />
           </Routes>
         </AnimatePresence>
