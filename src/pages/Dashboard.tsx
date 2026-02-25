@@ -145,7 +145,7 @@ const Dashboard = () => {
               <AnimatedPage><DashboardTemplates profile={profile} onUpdate={updateProfile} /></AnimatedPage>
             } />
             <Route path="/integrations" element={
-              <AnimatedPage><DashboardIntegrations profile={profile} /></AnimatedPage>
+              <AnimatedPage><DashboardIntegrations profile={profile} onUpdate={updateProfile} /></AnimatedPage>
             } />
             <Route path="/support" element={
               <AnimatedPage><DashboardSupport /></AnimatedPage>
