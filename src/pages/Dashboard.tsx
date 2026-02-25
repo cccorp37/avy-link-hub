@@ -40,16 +40,24 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard/heatmap": "Heatmap & A/B",
 };
 
-const pageTransition = {
-  initial: { opacity: 0, y: 8 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -8 },
-  transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] as const },
+const ease = [0.22, 1, 0.36, 1] as const;
+const pageVariants = {
+  initial: { opacity: 0, x: 20, filter: "blur(4px)" },
+  animate: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.35, ease } },
+  exit: { opacity: 0, x: -20, filter: "blur(4px)", transition: { duration: 0.2, ease } },
 };
 
 function AnimatedPage({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
   return (
-    <motion.div {...pageTransition} className="flex-1 overflow-y-auto pb-20 md:pb-6">
+    <motion.div
+      key={location.pathname}
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      className="flex-1 overflow-y-auto pb-20 md:pb-6"
+    >
       {children}
     </motion.div>
   );
