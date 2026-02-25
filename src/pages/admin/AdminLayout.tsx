@@ -9,12 +9,15 @@ import AdminOverview from "./AdminOverview";
 import AdminUsers from "./AdminUsers";
 import AdminLinks from "./AdminLinks";
 import AdminAnalytics from "./AdminAnalytics";
+import AdminSourceCode from "./AdminSourceCode";
+import { FileCode } from "lucide-react";
 
 const navItems = [
   { to: "/admin", label: "Vue d'ensemble", icon: LayoutDashboard, end: true },
   { to: "/admin/users", label: "Utilisateurs", icon: Users },
   { to: "/admin/links", label: "Liens", icon: Link2 },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/admin/source-code", label: "Code Source", icon: FileCode },
 ];
 
 export default function AdminLayout() {
@@ -119,6 +122,7 @@ export default function AdminLayout() {
             <Route path="/users" element={<AdminUsers />} />
             <Route path="/links" element={<AdminLinks />} />
             <Route path="/analytics" element={<AdminAnalytics />} />
+            <Route path="/source-code" element={<AdminSourceCode />} />
           </Routes>
         </main>
 
