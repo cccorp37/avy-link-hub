@@ -1,11 +1,10 @@
-import { Bell, Search, Eye, Menu } from "lucide-react";
+import { Bell, Eye, Search, Command, X } from "lucide-react";
 import { useState } from "react";
 import avylinkLogo from "@/assets/avylink-logo.jpg";
 import type { Tables } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
-import { signOut } from "@/lib/supabase-auth";
 import { useNavigate } from "react-router-dom";
-import AuthModal from "@/components/AuthModal";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Profile = Tables<"profiles">;
 
@@ -19,37 +18,125 @@ export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const profileUrl = profile?.username ? `${window.location.origin}/u/${profile.username}` : null;
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  const notifications = [
+    { id: 1, text: "Bienvenue sur AvyLink ! 🎉", time: "Maintenant", unread: true },
+    { id: 2, text: "Complétez votre profil pour plus de visibilité", time: "2min", unread: true },
+    { id: 3, text: "Astuce : ajoutez vos réseaux sociaux", time: "5min", unread: false },
+  ];
+
+  const unreadCount = notifications.filter(n => n.unread).length;
 
   return (
-    <header className="h-14 px-4 md:px-6 flex items-center justify-between border-b border-border bg-card/80 backdrop-blur-sm flex-shrink-0 z-30">
+    <header className="h-16 px-4 md:px-6 flex items-center justify-between border-b border-border/40 flex-shrink-0 z-30"
+      style={{ background: "linear-gradient(90deg, hsl(var(--card) / 0.9), hsl(var(--card) / 0.95))", backdropFilter: "blur(12px)" }}>
       {/* Left */}
       <div className="flex items-center gap-3">
         {/* Mobile logo */}
         <div className="flex md:hidden items-center gap-2">
-          <img src={avylinkLogo} alt="AvyLink" className="w-7 h-7 rounded-lg object-cover" />
-          <span className="font-dm font-bold text-sm text-foreground">Avy<span className="text-gradient">Link</span></span>
+          <img src={avylinkLogo} alt="AvyLink" className="w-8 h-8 rounded-xl object-cover shadow-sm" />
+          <span className="font-dm font-bold text-base text-foreground">Avy<span className="text-gradient">Link</span></span>
         </div>
-        <h1 className="hidden md:block font-dm font-bold text-lg text-foreground">{title}</h1>
+        <div className="hidden md:block">
+          <h1 className="font-dm font-bold text-lg text-foreground">{title}</h1>
+          <p className="text-xs text-muted-foreground -mt-0.5">Dashboard</p>
+        </div>
       </div>
 
       {/* Right */}
       <div className="flex items-center gap-2">
+        {/* Search trigger */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setSearchOpen(!searchOpen)}
+          className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border/60 text-xs text-muted-foreground hover:border-primary/30 hover:text-foreground transition-all bg-secondary/40"
+        >
+          <Search className="w-3.5 h-3.5" />
+          <span>Rechercher...</span>
+          <kbd className="ml-2 px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono border border-border/40">⌘K</kbd>
+        </motion.button>
+
+        {/* Profile link */}
         {profileUrl && (
-          <a
+          <motion.a
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             href={profileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl border border-border hover:bg-secondary hover:text-primary text-muted-foreground transition-colors"
+            className="hidden sm:flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border border-border/60 hover:border-primary/30 hover:text-primary text-muted-foreground transition-all"
           >
             <Eye className="w-3.5 h-3.5" />
-            Voir le profil
-          </a>
+            Profil
+          </motion.a>
         )}
 
-        <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold cursor-pointer"
-          title={user?.email}>
-          {(profile?.display_name || user?.email || "U")[0].toUpperCase()}
+        {/* Notifications */}
+        <div className="relative">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setNotifOpen(!notifOpen)}
+            className="relative p-2 rounded-xl border border-border/60 hover:border-primary/30 text-muted-foreground hover:text-foreground transition-all"
+          >
+            <Bell className="w-4 h-4" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full gradient-cta text-[9px] text-primary-foreground font-bold flex items-center justify-center">
+                {unreadCount}
+              </span>
+            )}
+          </motion.button>
+
+          <AnimatePresence>
+            {notifOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute right-0 top-full mt-2 w-80 bg-card rounded-2xl border border-border/60 shadow-lg z-50 overflow-hidden"
+                >
+                  <div className="p-4 border-b border-border/40 flex items-center justify-between">
+                    <h3 className="font-dm font-bold text-sm text-foreground">Notifications</h3>
+                    <button onClick={() => setNotifOpen(false)} className="p-1 rounded-lg hover:bg-secondary">
+                      <X className="w-3.5 h-3.5 text-muted-foreground" />
+                    </button>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto">
+                    {notifications.map((n) => (
+                      <div key={n.id} className={`px-4 py-3 border-b border-border/30 last:border-0 hover:bg-secondary/50 transition-colors ${n.unread ? "" : "opacity-60"}`}>
+                        <div className="flex items-start gap-2">
+                          {n.unread && <div className="w-2 h-2 rounded-full gradient-cta mt-1.5 flex-shrink-0" />}
+                          <div className={!n.unread ? "ml-4" : ""}>
+                            <p className="text-xs text-foreground">{n.text}</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">{n.time}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="p-3 border-t border-border/40">
+                    <button className="w-full text-xs text-primary font-medium hover:underline">Tout marquer comme lu</button>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
+
+        {/* Avatar */}
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold cursor-pointer shadow-sm"
+          title={user?.email}
+        >
+          {(profile?.display_name || user?.email || "U")[0].toUpperCase()}
+        </motion.div>
       </div>
     </header>
   );
