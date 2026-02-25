@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { Eye, Users, MousePointerClick, TrendingUp, ArrowUp, Link2, Star } from "lucide-react";
+import { Eye, Users, MousePointerClick, TrendingUp, ArrowUp, Link2, Star, Zap, CheckCircle2, ArrowRight, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area } from "recharts";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
@@ -9,25 +11,102 @@ type ProfileLink = Tables<"profile_links">;
 
 interface Props { profile: Profile | null; }
 
-function StatCard({ icon: Icon, label, value, sub, color }: { icon: React.ElementType; label: string; value: string | number; sub: string; color: string }) {
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1, y: 0,
+    transition: { delay: i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+  }),
+};
+
+function StatCard({ icon: Icon, label, value, sub, gradient, index }: {
+  icon: React.ElementType; label: string; value: string | number; sub: string; gradient: string; index: number;
+}) {
   return (
-    <div className="bg-card rounded-2xl p-5 border border-border/50 shadow-card hover:-translate-y-1 hover:shadow-card-hover transition-all duration-200">
+    <motion.div
+      custom={index}
+      initial="hidden"
+      animate="visible"
+      variants={fadeUp}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      className="relative rounded-2xl p-5 border border-border/40 shadow-card overflow-hidden group cursor-default"
+      style={{ background: "hsl(var(--card))" }}
+    >
+      <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-[0.04] -translate-y-1/3 translate-x-1/3"
+        style={{ background: gradient }} />
       <div className="flex items-start justify-between mb-3">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm`} style={{ background: gradient }}>
           <Icon className="w-5 h-5 text-primary-foreground" />
         </div>
-        <span className="flex items-center gap-1 text-xs text-success font-medium bg-success/10 px-2 py-0.5 rounded-full">
-          <ArrowUp className="w-3 h-3" />
+        <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-100">
+          <ArrowUp className="w-2.5 h-2.5" />
           {sub}
         </span>
       </div>
-      <div className="font-dm font-bold text-2xl text-foreground">{value}</div>
-      <div className="text-sm text-muted-foreground mt-0.5">{label}</div>
-    </div>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: index * 0.08 + 0.2, type: "spring", stiffness: 200 }}
+        className="font-dm font-bold text-2xl text-foreground"
+      >
+        {value}
+      </motion.div>
+      <div className="text-xs text-muted-foreground mt-0.5">{label}</div>
+    </motion.div>
   );
 }
 
-// Build last 7 days labels
+function ProfileCompletion({ profile }: { profile: Profile | null }) {
+  const steps = [
+    { label: "Photo de profil", done: !!profile?.avatar_url },
+    { label: "Nom d'affichage", done: !!profile?.display_name },
+    { label: "Bio", done: !!profile?.bio },
+    { label: "Nom d'utilisateur", done: !!profile?.username },
+    { label: "Site web", done: !!profile?.website },
+  ];
+  const completed = steps.filter(s => s.done).length;
+  const pct = Math.round((completed / steps.length) * 100);
+
+  if (pct === 100) return null;
+
+  return (
+    <motion.div
+      custom={1}
+      initial="hidden"
+      animate="visible"
+      variants={fadeUp}
+      className="rounded-2xl border border-border/40 shadow-card p-5 relative overflow-hidden"
+      style={{ background: "hsl(var(--card))" }}
+    >
+      <div className="absolute top-0 left-0 w-full h-1 bg-muted/50">
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
+          className="h-full gradient-cta rounded-r-full"
+        />
+      </div>
+      <div className="flex items-center justify-between mb-3 mt-1">
+        <div className="flex items-center gap-2">
+          <Zap className="w-4 h-4 text-primary" />
+          <h3 className="font-dm font-bold text-sm text-foreground">Complétion du profil</h3>
+        </div>
+        <span className="text-xs font-bold text-primary">{pct}%</span>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {steps.map((step) => (
+          <div key={step.label} className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-all ${
+            step.done ? "bg-green-50 text-green-700 border border-green-100" : "bg-muted/30 text-muted-foreground border border-border/30"
+          }`}>
+            <CheckCircle2 className={`w-3.5 h-3.5 flex-shrink-0 ${step.done ? "text-green-500" : "text-muted-foreground/40"}`} />
+            <span className="truncate">{step.label}</span>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
 function getLast7Days() {
   const days = [];
   for (let i = 6; i >= 0; i--) {
@@ -42,6 +121,7 @@ function getLast7Days() {
 }
 
 export default function DashboardOverview({ profile }: Props) {
+  const navigate = useNavigate();
   const [links, setLinks] = useState<ProfileLink[]>([]);
   const [totalViews, setTotalViews] = useState(0);
   const [uniqueVisitors, setUniqueVisitors] = useState(0);
@@ -50,12 +130,10 @@ export default function DashboardOverview({ profile }: Props) {
   useEffect(() => {
     if (!profile) return;
 
-    // Fetch top links
     supabase.from("profile_links").select("*").eq("profile_id", profile.id)
       .order("click_count", { ascending: false }).limit(5)
       .then(({ data }) => setLinks(data || []));
 
-    // Fetch page_views
     const since = new Date();
     since.setDate(since.getDate() - 7);
 
@@ -66,12 +144,8 @@ export default function DashboardOverview({ profile }: Props) {
       .then(({ data }) => {
         const rows = data || [];
         setTotalViews(rows.length);
-
-        // Unique visitors approximated by unique devices/days
         const uniqueDays = new Set(rows.map((r) => r.viewed_at.split("T")[0])).size;
         setUniqueVisitors(Math.max(uniqueDays, Math.round(rows.length * 0.72)));
-
-        // Group by day
         const days = getLast7Days();
         const countByDate: Record<string, number> = {};
         rows.forEach((r) => {
@@ -91,131 +165,226 @@ export default function DashboardOverview({ profile }: Props) {
   const dateStr = now.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto">
+    <div className="p-4 md:p-6 space-y-5 max-w-5xl mx-auto">
       {/* Greeting */}
-      <div>
-        <h2 className="font-dm font-bold text-2xl text-foreground">
-          {greeting}, {displayName} 👋
-        </h2>
-        <p className="text-muted-foreground text-sm capitalize">{dateStr}</p>
-      </div>
-
-      {/* Profile URL quick copy */}
-      {profile?.username && (
-        <div className="glass-blue rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <Link2 className="w-4 h-4 text-primary flex-shrink-0" />
-            <span className="text-sm font-medium text-foreground truncate">
-              avylink.app/u/{profile.username}
-            </span>
-          </div>
-          <button
-            className="text-xs font-semibold text-primary border border-primary/30 px-3 py-1.5 rounded-lg hover:bg-primary/10 transition-colors flex-shrink-0"
-            onClick={() => navigator.clipboard.writeText(`${window.location.origin}/u/${profile.username}`)}
-          >
-            Copier le lien
-          </button>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3"
+      >
+        <div>
+          <h2 className="font-dm font-bold text-2xl md:text-3xl text-foreground">
+            {greeting}, {displayName} <span className="inline-block animate-float">👋</span>
+          </h2>
+          <p className="text-muted-foreground text-sm capitalize mt-0.5">{dateStr}</p>
         </div>
-      )}
+        {profile?.username && (
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => navigator.clipboard.writeText(`${window.location.origin}/u/${profile.username}`)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass-blue text-sm font-medium text-foreground hover:shadow-blue transition-all self-start"
+          >
+            <Link2 className="w-4 h-4 text-primary" />
+            <span className="truncate">avylink.app/u/{profile.username}</span>
+            <span className="text-xs text-primary font-semibold ml-1">Copier</span>
+          </motion.button>
+        )}
+      </motion.div>
+
+      {/* Profile completion */}
+      <ProfileCompletion profile={profile} />
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Eye} label="Vues (7j)" value={totalViews} sub="7 derniers jours" color="gradient-cta" />
-        <StatCard icon={Users} label="Visiteurs (7j)" value={uniqueVisitors} sub="7 derniers jours" color="gradient-primary" />
-        <StatCard icon={MousePointerClick} label="Clics liens" value={totalClicks} sub="Total" color="gradient-rose" />
-        <StatCard icon={TrendingUp} label="Taux de clic" value={`${ctr}%`} sub="CTR global" color="gradient-cta" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <StatCard icon={Eye} label="Vues (7j)" value={totalViews} sub="7 jours" gradient="var(--gradient-cta)" index={0} />
+        <StatCard icon={Users} label="Visiteurs" value={uniqueVisitors} sub="7 jours" gradient="var(--gradient-primary)" index={1} />
+        <StatCard icon={MousePointerClick} label="Clics" value={totalClicks} sub="Total" gradient="var(--gradient-rose)" index={2} />
+        <StatCard icon={TrendingUp} label="CTR" value={`${ctr}%`} sub="Global" gradient="var(--gradient-cta)" index={3} />
       </div>
 
       {/* Chart */}
-      <div className="bg-card rounded-2xl border border-border/50 shadow-card p-5">
-        <h3 className="font-dm font-semibold text-base text-foreground mb-4">Vues des 7 derniers jours</h3>
+      <motion.div
+        custom={2}
+        initial="hidden"
+        animate="visible"
+        variants={fadeUp}
+        className="rounded-2xl border border-border/40 shadow-card p-5"
+        style={{ background: "hsl(var(--card))" }}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Activity className="w-4 h-4 text-primary" />
+            <h3 className="font-dm font-semibold text-sm text-foreground">Vues des 7 derniers jours</h3>
+          </div>
+          <button
+            onClick={() => navigate("/dashboard/analytics")}
+            className="text-xs text-primary font-medium flex items-center gap-1 hover:underline"
+          >
+            Voir tout <ArrowRight className="w-3 h-3" />
+          </button>
+        </div>
         <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={viewData} barSize={28}>
+          <AreaChart data={viewData}>
+            <defs>
+              <linearGradient id="viewsGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="hsl(204, 94%, 52%)" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="hsl(204, 94%, 52%)" stopOpacity={0} />
+              </linearGradient>
+            </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-            <XAxis dataKey="day" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+            <XAxis dataKey="day" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
             <YAxis hide />
             <Tooltip
-              contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: 12 }}
-              cursor={{ fill: "hsl(var(--secondary))" }}
+              contentStyle={{
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "12px",
+                fontSize: 12,
+                boxShadow: "var(--shadow-md)",
+              }}
+              cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1, strokeDasharray: "4 4" }}
             />
-            <Bar dataKey="views" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} name="Vues" />
-          </BarChart>
+            <Area type="monotone" dataKey="views" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#viewsGradient)" name="Vues" />
+          </AreaChart>
         </ResponsiveContainer>
-      </div>
+      </motion.div>
 
       {/* Two columns */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Top links */}
-        <div className="bg-card rounded-2xl border border-border/50 shadow-card p-5">
-          <h3 className="font-dm font-semibold text-base text-foreground mb-4">Top Liens</h3>
+        <motion.div
+          custom={3}
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          className="rounded-2xl border border-border/40 shadow-card p-5"
+          style={{ background: "hsl(var(--card))" }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-dm font-semibold text-sm text-foreground flex items-center gap-2">
+              <Link2 className="w-4 h-4 text-primary" /> Top Liens
+            </h3>
+            <button
+              onClick={() => navigate("/dashboard/liens")}
+              className="text-xs text-primary font-medium flex items-center gap-1 hover:underline"
+            >
+              Gérer <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
           {links.length === 0 ? (
-            <div className="text-center py-6 text-muted-foreground text-sm">
-              <Link2 className="w-8 h-8 mx-auto mb-2 opacity-30" />
-              Aucun lien encore
+            <div className="text-center py-8">
+              <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-3">
+                <Link2 className="w-6 h-6 text-primary/30" />
+              </div>
+              <p className="text-sm text-muted-foreground">Aucun lien encore</p>
+              <button
+                onClick={() => navigate("/dashboard/liens")}
+                className="mt-3 text-xs text-primary font-semibold hover:underline"
+              >
+                Ajouter mon premier lien →
+              </button>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {links.map((link, i) => (
-                <div key={link.id} className="flex items-center gap-3 py-2">
-                  <span className="w-6 h-6 rounded-lg bg-primary/10 text-primary text-xs font-bold flex items-center justify-center flex-shrink-0">
+                <motion.div
+                  key={link.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05 + 0.3 }}
+                  className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-secondary/60 transition-colors group"
+                >
+                  <span className="w-6 h-6 rounded-lg gradient-cta text-primary-foreground text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                     {i + 1}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{link.title}</p>
-                    <p className="text-xs text-muted-foreground truncate">{link.url}</p>
+                    <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{link.title}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">{link.url}</p>
                   </div>
-                  <span className="text-sm font-semibold text-primary flex-shrink-0">
+                  <span className="text-sm font-bold text-primary flex-shrink-0">
                     {link.click_count || 0}
                   </span>
-                </div>
+                </motion.div>
               ))}
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Quick actions */}
-        <div className="bg-card rounded-2xl border border-border/50 shadow-card p-5">
-          <h3 className="font-dm font-semibold text-base text-foreground mb-4">Actions Rapides</h3>
-          <div className="space-y-2">
+        <motion.div
+          custom={4}
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          className="rounded-2xl border border-border/40 shadow-card p-5"
+          style={{ background: "hsl(var(--card))" }}
+        >
+          <h3 className="font-dm font-semibold text-sm text-foreground mb-4 flex items-center gap-2">
+            <Zap className="w-4 h-4 text-primary" /> Actions Rapides
+          </h3>
+          <div className="space-y-1.5">
             {[
-              { label: "Ajouter un nouveau lien", href: "/dashboard/liens", icon: "🔗" },
-              { label: "Personnaliser l'apparence", href: "/dashboard/apparence", icon: "🎨" },
-              { label: "Voir mon profil public", href: profile?.username ? `/u/${profile.username}` : "#", icon: "👁️", target: "_blank" },
-              { label: "Voir mes analytics", href: "/dashboard/analytics", icon: "📊" },
-            ].map((action) => (
-              <a
-                key={action.href}
-                href={action.href}
+              { label: "Ajouter un nouveau lien", href: "/dashboard/liens", icon: "🔗", color: "bg-blue-50 border-blue-100" },
+              { label: "Personnaliser l'apparence", href: "/dashboard/apparence", icon: "🎨", color: "bg-purple-50 border-purple-100" },
+              { label: "Voir mon profil public", href: profile?.username ? `/u/${profile.username}` : "#", icon: "👁️", target: "_blank", color: "bg-green-50 border-green-100" },
+              { label: "Voir mes analytics", href: "/dashboard/analytics", icon: "📊", color: "bg-orange-50 border-orange-100" },
+              { label: "Explorer les modèles", href: "/dashboard/modeles", icon: "🎭", color: "bg-pink-50 border-pink-100" },
+            ].map((action, i) => (
+              <motion.a
+                key={action.href + action.label}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.05 + 0.4 }}
+                href={action.target ? action.href : undefined}
+                onClick={!action.target ? (e) => { e.preventDefault(); navigate(action.href); } : undefined}
                 target={action.target}
                 rel={action.target ? "noopener noreferrer" : undefined}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors group"
+                className={`flex items-center gap-3 px-3 py-3 rounded-xl border hover:shadow-sm transition-all group cursor-pointer ${action.color}`}
               >
                 <span className="text-lg">{action.icon}</span>
-                <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors flex-1">
                   {action.label}
                 </span>
-              </a>
+                <ArrowRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+              </motion.a>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      {/* Upgrade banner (free plan) */}
+      {/* Upgrade banner */}
       {(!profile?.plan || profile?.plan === "free") && (
-        <div className="gradient-cta rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <Star className="w-4 h-4 text-primary-foreground" />
-              <span className="font-dm font-bold text-primary-foreground text-sm">Passe à Premium</span>
+        <motion.div
+          custom={5}
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          className="rounded-2xl p-6 relative overflow-hidden"
+          style={{ background: "var(--gradient-cta)" }}
+        >
+          <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/4" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-white/5 translate-y-1/2 -translate-x-1/4" />
+          <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Star className="w-5 h-5 text-primary-foreground" />
+                <span className="font-dm font-bold text-primary-foreground text-base">Passe à Premium</span>
+              </div>
+              <p className="text-primary-foreground/80 text-sm leading-relaxed">
+                Débloques analytics avancés, thèmes premium, domaine custom et bien plus encore.
+              </p>
             </div>
-            <p className="text-primary-foreground/80 text-sm">
-              Débloques analytics avancés, thèmes premium, domaine custom et bien plus.
-            </p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-6 py-2.5 bg-white text-primary font-bold text-sm rounded-xl shadow-lg hover:shadow-xl transition-all flex-shrink-0"
+            >
+              Voir les plans ✨
+            </motion.button>
           </div>
-          <button className="px-5 py-2 bg-white text-primary font-semibold text-sm rounded-xl hover:bg-primary-foreground/90 transition-colors flex-shrink-0">
-            Voir les plans
-          </button>
-        </div>
+        </motion.div>
       )}
     </div>
   );
