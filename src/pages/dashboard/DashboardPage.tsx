@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Camera, Save, Loader2, Copy, Check, Globe, Plus, X, GripVertical, ChevronDown, ChevronUp, Trash2, Edit2 } from "lucide-react";
+import { Camera, Save, Loader2, Copy, Check, Globe, Plus, X, GripVertical, ChevronDown, ChevronUp, Trash2, Edit2, Heading, Video, Music, Link2, ClipboardList, Minus, Type, Mic, Clapperboard, Instagram, Youtube, LucideIcon } from "lucide-react";
 import SocialIcon, { PLATFORM_COLORS } from "@/components/SocialIcon";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,24 +23,26 @@ interface PageBlock {
   is_active: boolean;
 }
 
-const BLOCK_TYPES = [
-  { type: "heading", label: "Entête", icon: "📝", desc: "Titre ou sous-titre de section", preview: "bg-purple-50 border-purple-200" },
-  { type: "social_icons", label: "Icônes sociales", icon: "🌐", desc: "Facebook, Instagram, Twitter, TikTok...", preview: "bg-blue-50 border-blue-200" },
-  { type: "video", label: "Vidéo", icon: "🎬", desc: "YouTube, Vimeo, TikTok, Twitch", preview: "bg-red-50 border-red-200" },
-  { type: "music", label: "La musique", icon: "🎵", desc: "Spotify, Apple Music, SoundCloud", preview: "bg-green-50 border-green-200" },
-  { type: "group", label: "Groupe de liens", icon: "🔗", desc: "Grouper plusieurs liens", preview: "bg-indigo-50 border-indigo-200" },
-  { type: "form", label: "Formulaire", icon: "📋", desc: "Collecte nom, email, message", preview: "bg-orange-50 border-orange-200" },
-  { type: "divider", label: "Diviseur", icon: "➖", desc: "Ligne de séparation décorative", preview: "bg-gray-50 border-gray-200" },
-  { type: "text", label: "Texte", icon: "✏️", desc: "Bloc de texte libre", preview: "bg-yellow-50 border-yellow-200" },
-  { type: "podcast", label: "Podcast", icon: "🎙️", desc: "Intégrer un épisode de podcast", preview: "bg-pink-50 border-pink-200" },
-  { type: "tiktok", label: "TikTok", icon: "🎤", desc: "Intégrer ta page TikTok", preview: "bg-gray-900/5 border-gray-300" },
-  { type: "instagram", label: "Instagram", icon: "📸", desc: "Grille de photos Instagram", preview: "bg-pink-50 border-pink-200" },
-  { type: "youtube_sub", label: "YouTube abonné", icon: "📺", desc: "Bouton d'abonnement YouTube", preview: "bg-red-50 border-red-200" },
+const BLOCK_TYPES: { type: string; label: string; Icon: LucideIcon; iconColor: string; desc: string; preview: string }[] = [
+  { type: "heading", label: "Entête", Icon: Heading, iconColor: "text-violet-500 bg-violet-100", desc: "Titre ou sous-titre de section", preview: "bg-purple-50 border-purple-200" },
+  { type: "social_icons", label: "Icônes sociales", Icon: Globe, iconColor: "text-sky-500 bg-sky-100", desc: "Facebook, Instagram, Twitter, TikTok...", preview: "bg-blue-50 border-blue-200" },
+  { type: "video", label: "Vidéo", Icon: Clapperboard, iconColor: "text-rose-500 bg-rose-100", desc: "YouTube, Vimeo, TikTok, Twitch", preview: "bg-red-50 border-red-200" },
+  { type: "music", label: "La musique", Icon: Music, iconColor: "text-emerald-500 bg-emerald-100", desc: "Spotify, Apple Music, SoundCloud", preview: "bg-green-50 border-green-200" },
+  { type: "group", label: "Groupe de liens", Icon: Link2, iconColor: "text-indigo-500 bg-indigo-100", desc: "Grouper plusieurs liens", preview: "bg-indigo-50 border-indigo-200" },
+  { type: "form", label: "Formulaire", Icon: ClipboardList, iconColor: "text-amber-500 bg-amber-100", desc: "Collecte nom, email, message", preview: "bg-orange-50 border-orange-200" },
+  { type: "divider", label: "Diviseur", Icon: Minus, iconColor: "text-gray-500 bg-gray-100", desc: "Ligne de séparation décorative", preview: "bg-gray-50 border-gray-200" },
+  { type: "text", label: "Texte", Icon: Type, iconColor: "text-yellow-600 bg-yellow-100", desc: "Bloc de texte libre", preview: "bg-yellow-50 border-yellow-200" },
+  { type: "podcast", label: "Podcast", Icon: Mic, iconColor: "text-pink-500 bg-pink-100", desc: "Intégrer un épisode de podcast", preview: "bg-pink-50 border-pink-200" },
+  { type: "tiktok", label: "TikTok", Icon: Video, iconColor: "text-gray-800 bg-gray-200", desc: "Intégrer ta page TikTok", preview: "bg-gray-900/5 border-gray-300" },
+  { type: "instagram", label: "Instagram", Icon: Instagram, iconColor: "text-fuchsia-500 bg-fuchsia-100", desc: "Grille de photos Instagram", preview: "bg-pink-50 border-pink-200" },
+  { type: "youtube_sub", label: "YouTube abonné", Icon: Youtube, iconColor: "text-red-500 bg-red-100", desc: "Bouton d'abonnement YouTube", preview: "bg-red-50 border-red-200" },
 ];
 
 function BlockPreviewIcon({ type }: { type: string }) {
   const b = BLOCK_TYPES.find(bt => bt.type === type);
-  return <span className="text-xl">{b?.icon || "📦"}</span>;
+  if (!b) return <span className="text-xl">📦</span>;
+  const IconComp = b.Icon;
+  return <IconComp className={`w-5 h-5 ${b.iconColor.split(" ")[0]}`} />;
 }
 
 function BlockEditor({ block, onSave, onClose }: { block: Partial<PageBlock>; onSave: (data: Partial<PageBlock>) => void; onClose: () => void }) {
@@ -346,7 +348,7 @@ function BlockPreview({ block }: { block: PageBlock }) {
   if (block.type === "video" || block.type === "music" || block.type === "podcast") {
     return (
       <div className="flex items-center gap-3 py-1">
-        <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-xl flex-shrink-0">{def?.icon}</div>
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${def?.iconColor.split(" ")[1] || "bg-muted"}`}>{def && <def.Icon className={`w-6 h-6 ${def.iconColor.split(" ")[0]}`} />}</div>
         <div>
           <p className="text-xs font-medium text-foreground">{block.title || def?.label}</p>
           <p className="text-xs text-muted-foreground truncate max-w-[180px]">{(c.url as string) || "URL non configurée"}</p>
@@ -356,7 +358,7 @@ function BlockPreview({ block }: { block: PageBlock }) {
   }
   return (
     <div className="flex items-center gap-2 py-1">
-      <span className="text-base">{def?.icon}</span>
+      {def && <def.Icon className={`w-4 h-4 ${def.iconColor.split(" ")[0]}`} />}
       <span className="text-xs text-muted-foreground">{def?.desc}</span>
     </div>
   );
@@ -521,7 +523,7 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
                   onClick={() => addBlock(bt.type)}
                   className={`flex flex-col items-center gap-2 p-3 rounded-2xl border-2 ${bt.preview} hover:border-primary/40 transition-all text-center group`}
                 >
-                  <span className="text-2xl">{bt.icon}</span>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${bt.iconColor.split(" ")[1]}`}><bt.Icon className={`w-5 h-5 ${bt.iconColor.split(" ")[0]}`} /></div>
                   <span className="text-[11px] font-semibold text-foreground leading-tight">{bt.label}</span>
                 </button>
               ))}
