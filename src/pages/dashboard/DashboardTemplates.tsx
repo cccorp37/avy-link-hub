@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Crown, Search, Check, Loader2 } from "lucide-react";
+import { Crown, Search, Check, Loader2, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
@@ -99,29 +100,48 @@ const TEMPLATES = [
   },
 ];
 
-function TemplateCard({ tpl, onUse, applying }: { tpl: typeof TEMPLATES[0]; onUse: () => void; applying: boolean }) {
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1, y: 0,
+    transition: { delay: i * 0.06, duration: 0.5, ease: [0.22, 1, 0.36, 1] as const }
+  }),
+};
+
+function TemplateCard({ tpl, onUse, applying, index }: { tpl: typeof TEMPLATES[0]; onUse: () => void; applying: boolean; index: number }) {
   const [hovered, setHovered] = useState(false);
   return (
-    <div
-      className="relative rounded-2xl overflow-hidden border border-border/50 shadow-card cursor-pointer group transition-all hover:shadow-blue hover:scale-[1.02]"
+    <motion.div
+      custom={index}
+      variants={fadeUp}
+      initial="hidden"
+      animate="visible"
+      layout
+      className="relative rounded-2xl overflow-hidden border border-border/50 bg-card/80 backdrop-blur-sm cursor-pointer group transition-shadow hover:shadow-[0_8px_30px_-8px_hsl(var(--primary)/0.25)]"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      whileHover={{ y: -4, scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
     >
-      {/* Premium badge */}
       {tpl.isPro && (
-        <div className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-amber-400 flex items-center justify-center shadow-md">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.3, type: "spring" }}
+          className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center shadow-lg"
+        >
           <Crown className="w-3.5 h-3.5 text-amber-900" />
-        </div>
+        </motion.div>
       )}
 
-      {/* Preview */}
-      <div className="h-48 p-4 flex flex-col items-center justify-start gap-2" style={{ background: tpl.preview.bg }}>
-        <div className="mt-2 w-12 h-12 rounded-full flex items-center justify-center border-2 border-white/30 text-2xl" style={{ background: "rgba(255,255,255,0.15)" }}>
+      <div className="h-48 p-4 flex flex-col items-center justify-start gap-2 relative overflow-hidden" style={{ background: tpl.preview.bg }}>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.15),transparent_70%)]" />
+        <div className="mt-2 w-12 h-12 rounded-full flex items-center justify-center border-2 border-white/30 text-2xl backdrop-blur-sm relative z-10" style={{ background: "rgba(255,255,255,0.15)" }}>
           👤
         </div>
-        <p className="font-bold text-sm text-center drop-shadow" style={{ color: tpl.preview.textColor }}>{tpl.name}</p>
-        <p className="text-xs text-center opacity-70" style={{ color: tpl.preview.textColor }}>{tpl.desc}</p>
-        <div className="w-full space-y-1.5 mt-1">
+        <p className="font-bold text-sm text-center drop-shadow relative z-10" style={{ color: tpl.preview.textColor }}>{tpl.name}</p>
+        <p className="text-xs text-center opacity-70 relative z-10" style={{ color: tpl.preview.textColor }}>{tpl.desc}</p>
+        <div className="w-full space-y-1.5 mt-1 relative z-10">
           {tpl.preview.buttons.slice(0, 2).map((btn, i) => (
             <div key={i} className="w-full py-1.5 px-3 rounded-lg text-xs text-center backdrop-blur-sm" style={{ background: "rgba(255,255,255,0.2)", color: tpl.preview.textColor }}>
               {btn}
@@ -130,8 +150,7 @@ function TemplateCard({ tpl, onUse, applying }: { tpl: typeof TEMPLATES[0]; onUs
         </div>
       </div>
 
-      {/* Info */}
-      <div className="p-3 bg-card">
+      <div className="p-3 border-t border-border/30">
         <div className="flex items-center justify-between">
           <div>
             <p className="font-dm font-semibold text-sm text-foreground">{tpl.name}</p>
@@ -143,20 +162,30 @@ function TemplateCard({ tpl, onUse, applying }: { tpl: typeof TEMPLATES[0]; onUs
         </div>
       </div>
 
-      {/* Hover overlay */}
-      {hovered && (
-        <div className="absolute inset-0 bg-foreground/60 flex items-center justify-center transition-all">
-          <button
-            onClick={onUse}
-            disabled={applying}
-            className="px-6 py-2.5 bg-white text-foreground rounded-xl font-semibold text-sm shadow-lg hover:bg-primary hover:text-primary-foreground transition-colors flex items-center gap-2"
+      <AnimatePresence>
+        {hovered && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="absolute inset-0 bg-foreground/60 backdrop-blur-[2px] flex items-center justify-center"
           >
-            {applying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-            {applying ? "Application..." : "Utiliser ce modèle"}
-          </button>
-        </div>
-      )}
-    </div>
+            <motion.button
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              onClick={onUse}
+              disabled={applying}
+              className="px-6 py-2.5 bg-background text-foreground rounded-xl font-semibold text-sm shadow-lg hover:bg-primary hover:text-primary-foreground transition-colors flex items-center gap-2"
+            >
+              {applying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+              {applying ? "Application..." : "Utiliser ce modèle"}
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 
@@ -174,17 +203,10 @@ export default function DashboardTemplates({ profile, onUpdate }: Props) {
 
   const handleUseTemplate = async (tpl: typeof TEMPLATES[0]) => {
     if (!profile) return;
-
-    // Check pro access
     if (tpl.isPro && profile.plan === "free") {
-      toast({
-        title: "Modèle Premium 👑",
-        description: "Passe au plan Premium pour utiliser ce modèle.",
-        variant: "destructive",
-      });
+      toast({ title: "Modèle Premium 👑", description: "Passe au plan Premium pour utiliser ce modèle.", variant: "destructive" });
       return;
     }
-
     setApplyingId(tpl.id);
     try {
       const updates: Partial<Profile> = {
@@ -192,18 +214,13 @@ export default function DashboardTemplates({ profile, onUpdate }: Props) {
         button_style: tpl.button_style,
         font_style: tpl.font_style,
       };
-
       if (onUpdate) {
         await onUpdate(updates);
       } else {
         await supabase.from("profiles").update(updates).eq("id", profile.id);
       }
-
-      toast({
-        title: `✅ Modèle "${tpl.name}" appliqué !`,
-        description: "Va dans Apparence pour personnaliser davantage.",
-      });
-    } catch (err) {
+      toast({ title: `✅ Modèle "${tpl.name}" appliqué !`, description: "Va dans Apparence pour personnaliser davantage." });
+    } catch {
       toast({ title: "Erreur", description: "Impossible d'appliquer le modèle.", variant: "destructive" });
     } finally {
       setApplyingId(null);
@@ -213,28 +230,40 @@ export default function DashboardTemplates({ profile, onUpdate }: Props) {
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-5">
       {/* Header */}
-      <div className="bg-card rounded-2xl border border-border/50 shadow-card p-5">
-        <div className="flex items-center gap-3 mb-3">
-          <span className="text-2xl">🎨</span>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="bg-card/80 backdrop-blur-xl rounded-2xl border border-border/50 shadow-sm p-5 relative overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.08),transparent_60%)]" />
+        <div className="flex items-center gap-3 mb-3 relative z-10">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-primary" />
+          </div>
           <div>
             <h2 className="font-dm font-bold text-lg text-foreground">Modèles de page</h2>
-            <p className="text-sm text-muted-foreground">Choisis un template et applique-le en un clic à ton profil</p>
+            <p className="text-sm text-muted-foreground">Choisis un template et applique-le en un clic</p>
           </div>
         </div>
-        {/* Search */}
-        <div className="relative">
+        <div className="relative z-10">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Rechercher un modèle..."
-            className="pl-9 rounded-xl"
+            className="pl-9 rounded-xl bg-background/60 backdrop-blur-sm border-border/50"
           />
         </div>
-      </div>
+      </motion.div>
 
       {/* Category tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide"
+      >
         {CATEGORIES.map(cat => (
           <button
             key={cat}
@@ -242,43 +271,66 @@ export default function DashboardTemplates({ profile, onUpdate }: Props) {
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
               activeCategory === cat
                 ? "bg-foreground text-background shadow-md"
-                : "bg-card border border-border text-muted-foreground hover:border-primary/40"
+                : "bg-card/80 backdrop-blur-sm border border-border/50 text-muted-foreground hover:border-primary/40"
             }`}
           >
             {cat}
           </button>
         ))}
-      </div>
+      </motion.div>
 
       {/* Grid */}
-      {filtered.length === 0 ? (
-        <div className="text-center py-16 bg-card rounded-2xl border border-border/50">
-          <div className="text-4xl mb-3">🔍</div>
-          <p className="font-medium text-foreground">Aucun modèle trouvé</p>
-          <p className="text-sm text-muted-foreground mt-1">Essaie une autre catégorie</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map(tpl => (
-            <TemplateCard
-              key={tpl.id}
-              tpl={tpl}
-              applying={applyingId === tpl.id}
-              onUse={() => handleUseTemplate(tpl)}
-            />
-          ))}
-        </div>
-      )}
+      <AnimatePresence mode="wait">
+        {filtered.length === 0 ? (
+          <motion.div
+            key="empty"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="text-center py-16 bg-card/80 backdrop-blur-xl rounded-2xl border border-border/50"
+          >
+            <div className="text-4xl mb-3">🔍</div>
+            <p className="font-medium text-foreground">Aucun modèle trouvé</p>
+            <p className="text-sm text-muted-foreground mt-1">Essaie une autre catégorie</p>
+          </motion.div>
+        ) : (
+          <motion.div key={activeCategory} className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            {filtered.map((tpl, i) => (
+              <TemplateCard
+                key={tpl.id}
+                tpl={tpl}
+                index={i}
+                applying={applyingId === tpl.id}
+                onUse={() => handleUseTemplate(tpl)}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Pro CTA */}
-      <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-200 p-5 text-center">
-        <Crown className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-        <h3 className="font-dm font-bold text-base text-foreground mb-1">Accède à tous les modèles Pro</h3>
-        <p className="text-sm text-muted-foreground mb-4">Débloque les modèles animés, boutiques et festivals avec le plan Premium</p>
-        <button className="px-6 py-2.5 gradient-cta text-primary-foreground rounded-xl font-semibold text-sm shadow-blue">
-          Passer à Premium 👑
-        </button>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.5 }}
+        className="relative rounded-2xl border border-amber-200/50 p-6 text-center overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-50/80 to-orange-50/80 backdrop-blur-xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,hsl(40_100%_50%/0.1),transparent_60%)]" />
+        <div className="relative z-10">
+          <motion.div
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+          >
+            <Crown className="w-8 h-8 text-amber-500 mx-auto mb-2" />
+          </motion.div>
+          <h3 className="font-dm font-bold text-base text-foreground mb-1">Accède à tous les modèles Pro</h3>
+          <p className="text-sm text-muted-foreground mb-4">Débloque les modèles animés, boutiques et festivals avec le plan Premium</p>
+          <button className="px-6 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all hover:scale-105">
+            Passer à Premium 👑
+          </button>
+        </div>
+      </motion.div>
     </div>
   );
 }
