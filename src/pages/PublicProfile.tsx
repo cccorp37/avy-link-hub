@@ -354,6 +354,29 @@ const PublicProfile = () => {
     loadProfile();
   }, [username]);
 
+  // Heatmap click tracking
+  useEffect(() => {
+    if (!profile) return;
+    const handleClick = (e: MouseEvent) => {
+      const x = (e.clientX / window.innerWidth) * 100;
+      const y = (e.clientY / document.documentElement.scrollHeight) * 100;
+      const target = e.target as HTMLElement;
+      const elementType = target.tagName.toLowerCase();
+      const elementId = target.closest("[data-link-id]")?.getAttribute("data-link-id") || target.id || undefined;
+      supabase.from("click_heatmap").insert({
+        profile_id: profile.id,
+        element_type: elementType,
+        element_id: elementId,
+        x_percent: Math.round(x * 100) / 100,
+        y_percent: Math.round(y * 100) / 100,
+        viewport_width: window.innerWidth,
+        viewport_height: window.innerHeight,
+      }).then(() => {});
+    };
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [profile]);
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
       <Loader2 className="w-8 h-8 animate-spin text-primary" />

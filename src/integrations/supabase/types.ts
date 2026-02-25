@@ -14,6 +14,126 @@ export type Database = {
   }
   public: {
     Tables: {
+      ab_tests: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          name: string
+          profile_id: string
+          started_at: string | null
+          status: string
+          variant_a: Json
+          variant_a_clicks: number
+          variant_a_views: number
+          variant_b: Json
+          variant_b_clicks: number
+          variant_b_views: number
+          winner: string | null
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          name: string
+          profile_id: string
+          started_at?: string | null
+          status?: string
+          variant_a?: Json
+          variant_a_clicks?: number
+          variant_a_views?: number
+          variant_b?: Json
+          variant_b_clicks?: number
+          variant_b_views?: number
+          winner?: string | null
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          name?: string
+          profile_id?: string
+          started_at?: string | null
+          status?: string
+          variant_a?: Json
+          variant_a_clicks?: number
+          variant_a_views?: number
+          variant_b?: Json
+          variant_b_clicks?: number
+          variant_b_views?: number
+          winner?: string | null
+        }
+        Relationships: []
+      }
+      api_keys: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          key_hash: string
+          key_preview: string
+          last_used_at: string | null
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key_hash: string
+          key_preview: string
+          last_used_at?: string | null
+          name?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key_hash?: string
+          key_preview?: string
+          last_used_at?: string | null
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      click_heatmap: {
+        Row: {
+          clicked_at: string
+          element_id: string | null
+          element_type: string
+          id: string
+          profile_id: string
+          viewport_height: number | null
+          viewport_width: number | null
+          x_percent: number
+          y_percent: number
+        }
+        Insert: {
+          clicked_at?: string
+          element_id?: string | null
+          element_type: string
+          id?: string
+          profile_id: string
+          viewport_height?: number | null
+          viewport_width?: number | null
+          x_percent: number
+          y_percent: number
+        }
+        Update: {
+          clicked_at?: string
+          element_id?: string | null
+          element_type?: string
+          id?: string
+          profile_id?: string
+          viewport_height?: number | null
+          viewport_width?: number | null
+          x_percent?: number
+          y_percent?: number
+        }
+        Relationships: []
+      }
       form_submissions: {
         Row: {
           block_id: string | null
@@ -227,11 +347,15 @@ export type Database = {
           google_analytics_id: string | null
           id: string
           is_verified: boolean
+          linkedin_insight_tag: string | null
+          pinterest_tag_id: string | null
           plan: string
           seo_description: string | null
           seo_title: string | null
+          snapchat_pixel_id: string | null
           social_links: Json | null
           theme: string
+          tiktok_pixel_id: string | null
           updated_at: string
           user_id: string
           username: string | null
@@ -252,11 +376,15 @@ export type Database = {
           google_analytics_id?: string | null
           id?: string
           is_verified?: boolean
+          linkedin_insight_tag?: string | null
+          pinterest_tag_id?: string | null
           plan?: string
           seo_description?: string | null
           seo_title?: string | null
+          snapchat_pixel_id?: string | null
           social_links?: Json | null
           theme?: string
+          tiktok_pixel_id?: string | null
           updated_at?: string
           user_id: string
           username?: string | null
@@ -277,15 +405,85 @@ export type Database = {
           google_analytics_id?: string | null
           id?: string
           is_verified?: boolean
+          linkedin_insight_tag?: string | null
+          pinterest_tag_id?: string | null
           plan?: string
           seo_description?: string | null
           seo_title?: string | null
+          snapchat_pixel_id?: string | null
           social_links?: Json | null
           theme?: string
+          tiktok_pixel_id?: string | null
           updated_at?: string
           user_id?: string
           username?: string | null
           website?: string | null
+        }
+        Relationships: []
+      }
+      support_tickets: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          priority: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          priority?: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          priority?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          invited_by: string
+          profile_id: string
+          role: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          invited_by: string
+          profile_id: string
+          role?: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          invited_by?: string
+          profile_id?: string
+          role?: string
+          status?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -303,6 +501,36 @@ export type Database = {
         Update: {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      webhooks: {
+        Row: {
+          created_at: string
+          events: string[]
+          id: string
+          is_active: boolean
+          secret: string | null
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          events?: string[]
+          id?: string
+          is_active?: boolean
+          secret?: string | null
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          events?: string[]
+          id?: string
+          is_active?: boolean
+          secret?: string | null
+          url?: string
           user_id?: string
         }
         Relationships: []
