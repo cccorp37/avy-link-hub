@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Save, Loader2, LogOut, Trash2, Shield, Bell, Globe, ChevronRight, HelpCircle, Mail, Facebook, Instagram, Settings2, Wallet, MessageSquare, ExternalLink } from "lucide-react";
+import { Save, Loader2, LogOut, Trash2, Shield, Bell, Globe, ChevronRight, HelpCircle, Mail, Facebook, Instagram, Settings2, Wallet, MessageSquare, ExternalLink, BadgeCheck, Lock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -130,6 +131,68 @@ export default function DashboardSettings({ profile, onUpdate }: Props) {
             </div>
           </div>
         </div>
+      </motion.div>
+
+      {/* Badge Verified */}
+      <motion.div custom={1.5} variants={fadeUp} initial="hidden" animate="visible"
+        className="bg-card/80 backdrop-blur-xl rounded-2xl border border-border/50 shadow-sm p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+            <BadgeCheck className="w-4 h-4 text-primary" />
+          </div>
+          <h3 className="font-dm font-bold text-base text-foreground">Badge Vérifié</h3>
+          {profile?.plan === "free" && (
+            <span className="ml-auto px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 flex items-center gap-1">
+              <Lock className="w-3 h-3" /> Premium
+            </span>
+          )}
+        </div>
+        {profile?.plan !== "free" ? (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">Affiche un badge vérifié à côté de ton nom sur ta page publique pour renforcer ta crédibilité.</p>
+            <div className="flex items-center justify-between py-2">
+              <div className="flex items-center gap-3">
+                <BadgeCheck className="w-6 h-6 text-primary" strokeWidth={2.5} />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Activer le badge vérifié</p>
+                  <p className="text-xs text-muted-foreground">{profile?.is_verified ? "Visible sur votre profil public" : "Masqué actuellement"}</p>
+                </div>
+              </div>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={async () => {
+                  const newVal = !profile?.is_verified;
+                  await supabase.from("profiles").update({ is_verified: newVal }).eq("id", profile?.id);
+                  onUpdate({ is_verified: newVal });
+                  toast({ title: newVal ? "✅ Badge vérifié activé" : "Badge vérifié désactivé" });
+                }}
+                className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 ${profile?.is_verified ? "bg-primary" : "bg-muted"}`}
+              >
+                <motion.span
+                  layout
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md ${profile?.is_verified ? "left-6" : "left-1"}`}
+                />
+              </motion.button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">Le badge vérifié est réservé aux utilisateurs Premium. Passe à un plan payant pour l'activer.</p>
+            <div className="flex items-center gap-3 p-3 rounded-xl border border-border/50 bg-muted/20 opacity-60">
+              <BadgeCheck className="w-6 h-6 text-muted-foreground" strokeWidth={2.5} />
+              <p className="text-sm text-muted-foreground">Badge vérifié — indisponible</p>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 text-sm font-bold flex items-center justify-center gap-1 shadow-lg"
+              onClick={() => toast({ title: "Bientôt disponible 🔜" })}
+            >
+              Passer en Premium 👑
+            </motion.button>
+          </div>
+        )}
       </motion.div>
 
       {/* Général */}
