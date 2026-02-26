@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Crown, ExternalLink, Check, Plug, Zap, X, Save, Loader2, Settings2 } from "lucide-react";
+import { Crown, ExternalLink, Check, Plug, Zap, X, Save, Loader2, Settings2, BarChart3, CreditCard } from "lucide-react";
+import SocialIcon from "@/components/SocialIcon";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
@@ -15,66 +16,74 @@ interface IntegrationDef {
   name: string;
   category: string;
   desc: string;
-  icon: string;
+  socialKey?: string;
+  lucideIcon?: "analytics" | "stripe";
   color: string;
   bgColor: string;
   isPro: boolean;
   href: string;
   configFields: { key: string; label: string; placeholder: string; help: string }[];
-  profileField?: keyof Profile; // for pixel/analytics integrations stored in profiles
+  profileField?: keyof Profile;
+}
+
+function IntegrationIcon({ def, size = 32 }: { def: IntegrationDef; size?: number }) {
+  if (def.socialKey) return <SocialIcon platform={def.socialKey} size={size} />;
+  if (def.lucideIcon === "analytics") return <BarChart3 size={size} className="text-white drop-shadow-md" />;
+  if (def.lucideIcon === "stripe") return <CreditCard size={size} className="text-white drop-shadow-md" />;
+  return null;
 }
 
 const INTEGRATIONS: IntegrationDef[] = [
   {
-    id: "google_analytics", name: "Google Analytics", category: "Analytics", desc: "Suivez le trafic de votre page avec Google Analytics", icon: "📊", color: "bg-orange-100 text-orange-700", bgColor: "bg-gradient-to-br from-orange-400 to-yellow-500", isPro: false, href: "https://analytics.google.com",
+    id: "google_analytics", name: "Google Analytics", category: "Analytics", desc: "Suivez le trafic de votre page avec Google Analytics", lucideIcon: "analytics", color: "bg-orange-100 text-orange-700", bgColor: "bg-gradient-to-br from-orange-400 to-yellow-500", isPro: false, href: "https://analytics.google.com",
     configFields: [{ key: "measurement_id", label: "ID de mesure", placeholder: "G-XXXXXXXXXX", help: "Admin → Propriété → Flux de données" }],
     profileField: "google_analytics_id",
   },
   {
-    id: "facebook_pixel", name: "Facebook Pixel", category: "Pixels", desc: "Reciblage et conversions Facebook/Meta Ads", icon: "📘", color: "bg-blue-100 text-blue-700", bgColor: "bg-gradient-to-br from-blue-500 to-blue-700", isPro: false, href: "https://business.facebook.com",
+    id: "facebook_pixel", name: "Facebook Pixel", category: "Pixels", desc: "Reciblage et conversions Facebook/Meta Ads", socialKey: "facebook", color: "bg-blue-100 text-blue-700", bgColor: "bg-gradient-to-br from-blue-500 to-blue-700", isPro: false, href: "https://business.facebook.com",
     configFields: [{ key: "pixel_id", label: "ID du Pixel", placeholder: "123456789012345", help: "Facebook Events Manager → Pixels" }],
     profileField: "facebook_pixel_id",
   },
   {
-    id: "tiktok_pixel", name: "TikTok Pixel", category: "Pixels", desc: "Tracking des conversions TikTok Ads", icon: "🎵", color: "bg-gray-100 text-gray-700", bgColor: "bg-gradient-to-br from-gray-900 to-gray-700", isPro: true, href: "https://ads.tiktok.com",
+    id: "tiktok_pixel", name: "TikTok Pixel", category: "Pixels", desc: "Tracking des conversions TikTok Ads", socialKey: "tiktok", color: "bg-gray-100 text-gray-700", bgColor: "bg-gradient-to-br from-gray-900 to-gray-700", isPro: true, href: "https://ads.tiktok.com",
     configFields: [{ key: "pixel_id", label: "TikTok Pixel ID", placeholder: "XXXXXXXXXXXXXXXXX", help: "TikTok Ads Manager → Assets → Events" }],
     profileField: "tiktok_pixel_id",
   },
   {
-    id: "snapchat_pixel", name: "Snapchat Pixel", category: "Pixels", desc: "Tracking des conversions Snapchat Ads", icon: "👻", color: "bg-yellow-100 text-yellow-700", bgColor: "bg-gradient-to-br from-yellow-400 to-yellow-500", isPro: true, href: "https://ads.snapchat.com",
+    id: "snapchat_pixel", name: "Snapchat Pixel", category: "Pixels", desc: "Tracking des conversions Snapchat Ads", socialKey: "snapchat", color: "bg-yellow-100 text-yellow-700", bgColor: "bg-gradient-to-br from-yellow-400 to-yellow-500", isPro: true, href: "https://ads.snapchat.com",
     configFields: [{ key: "pixel_id", label: "Snapchat Pixel ID", placeholder: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", help: "Snapchat Ads Manager → Events Manager" }],
     profileField: "snapchat_pixel_id",
   },
   {
-    id: "pinterest_tag", name: "Pinterest Tag", category: "Pixels", desc: "Tracking des conversions Pinterest Ads", icon: "📌", color: "bg-red-100 text-red-700", bgColor: "bg-gradient-to-br from-red-500 to-red-600", isPro: true, href: "https://ads.pinterest.com",
+    id: "pinterest_tag", name: "Pinterest Tag", category: "Pixels", desc: "Tracking des conversions Pinterest Ads", socialKey: "pinterest", color: "bg-red-100 text-red-700", bgColor: "bg-gradient-to-br from-red-500 to-red-600", isPro: true, href: "https://ads.pinterest.com",
     configFields: [{ key: "tag_id", label: "Pinterest Tag ID", placeholder: "123456789", help: "Pinterest Ads → Conversions → Tag" }],
     profileField: "pinterest_tag_id",
   },
   {
-    id: "linkedin_insight", name: "LinkedIn Insight", category: "Pixels", desc: "Tracking LinkedIn Campaign Manager", icon: "💼", color: "bg-blue-100 text-blue-700", bgColor: "bg-gradient-to-br from-blue-600 to-blue-800", isPro: true, href: "https://www.linkedin.com/campaignmanager",
+    id: "linkedin_insight", name: "LinkedIn Insight", category: "Pixels", desc: "Tracking LinkedIn Campaign Manager", socialKey: "linkedin", color: "bg-blue-100 text-blue-700", bgColor: "bg-gradient-to-br from-blue-600 to-blue-800", isPro: true, href: "https://www.linkedin.com/campaignmanager",
     configFields: [{ key: "tag_id", label: "LinkedIn Insight Tag", placeholder: "123456", help: "LinkedIn Campaign Manager → Insight Tag" }],
     profileField: "linkedin_insight_tag",
   },
   {
-    id: "whatsapp", name: "WhatsApp Business", category: "Communication", desc: "Bouton WhatsApp direct sur votre page publique", icon: "💬", color: "bg-green-100 text-green-700", bgColor: "bg-gradient-to-br from-green-500 to-emerald-600", isPro: false, href: "https://wa.me",
+    id: "whatsapp", name: "WhatsApp Business", category: "Communication", desc: "Bouton WhatsApp direct sur votre page publique", socialKey: "whatsapp", color: "bg-green-100 text-green-700", bgColor: "bg-gradient-to-br from-green-500 to-emerald-600", isPro: false, href: "https://wa.me",
     configFields: [
       { key: "phone", label: "Numéro WhatsApp", placeholder: "+33612345678", help: "Format international avec indicatif pays" },
       { key: "message", label: "Message pré-rempli (optionnel)", placeholder: "Bonjour, je viens de votre AvyLink !", help: "Ce message sera pré-rempli quand un visiteur clique" },
     ],
   },
   {
-    id: "spotify", name: "Spotify", category: "Musique", desc: "Affichez vos playlists Spotify sur votre page", icon: "🎧", color: "bg-green-100 text-green-700", bgColor: "bg-gradient-to-br from-green-500 to-green-600", isPro: false, href: "https://open.spotify.com",
+    id: "spotify", name: "Spotify", category: "Musique", desc: "Affichez vos playlists Spotify sur votre page", socialKey: "spotify", color: "bg-green-100 text-green-700", bgColor: "bg-gradient-to-br from-green-500 to-green-600", isPro: false, href: "https://open.spotify.com",
     configFields: [{ key: "profile_url", label: "URL du profil ou playlist", placeholder: "https://open.spotify.com/playlist/...", help: "Copiez le lien de partage Spotify" }],
   },
   {
-    id: "youtube", name: "YouTube", category: "Vidéo", desc: "Intégrez votre chaîne YouTube sur votre page", icon: "📺", color: "bg-red-100 text-red-700", bgColor: "bg-gradient-to-br from-red-500 to-red-600", isPro: false, href: "https://youtube.com",
+    id: "youtube", name: "YouTube", category: "Vidéo", desc: "Intégrez votre chaîne YouTube sur votre page", socialKey: "youtube", color: "bg-red-100 text-red-700", bgColor: "bg-gradient-to-br from-red-500 to-red-600", isPro: false, href: "https://youtube.com",
     configFields: [
       { key: "channel_url", label: "URL de la chaîne", placeholder: "https://youtube.com/@machaîne", help: "Lien vers votre chaîne YouTube" },
       { key: "channel_id", label: "ID de chaîne (optionnel)", placeholder: "UC...", help: "Nécessaire pour le bouton d'abonnement" },
     ],
   },
   {
-    id: "stripe", name: "Stripe", category: "Paiement", desc: "Acceptez des paiements sur votre page AvyLink", icon: "💳", color: "bg-violet-100 text-violet-700", bgColor: "bg-gradient-to-br from-violet-500 to-purple-600", isPro: true, href: "https://stripe.com",
+    id: "stripe", name: "Stripe", category: "Paiement", desc: "Acceptez des paiements sur votre page AvyLink", lucideIcon: "stripe", color: "bg-violet-100 text-violet-700", bgColor: "bg-gradient-to-br from-violet-500 to-purple-600", isPro: true, href: "https://stripe.com",
     configFields: [{ key: "account_id", label: "ID du compte Stripe", placeholder: "acct_...", help: "Stripe Dashboard → Settings → Account details" }],
   },
 ];
@@ -281,13 +290,13 @@ export default function DashboardIntegrations({ profile, onUpdate }: Props) {
                   {/* Visual header */}
                   <div className={`h-24 ${integration.bgColor} flex items-center justify-center relative overflow-hidden`}>
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.2),transparent_70%)]" />
-                    <motion.span
-                      className="text-4xl relative z-10"
+                    <motion.div
+                      className="relative z-10"
                       whileHover={{ scale: 1.2, rotate: 5 }}
                       transition={{ type: "spring", stiffness: 400 }}
                     >
-                      {integration.icon}
-                    </motion.span>
+                      <IntegrationIcon def={integration} size={36} />
+                    </motion.div>
                     {integration.isPro && (
                       <motion.div
                         initial={{ scale: 0 }}
@@ -380,7 +389,9 @@ export default function DashboardIntegrations({ profile, onUpdate }: Props) {
               >
                 <div className="flex items-center justify-between p-5 border-b border-border sticky top-0 bg-card z-10">
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{def.icon}</span>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: def.bgColor.includes("from-") ? undefined : undefined }}>
+                      <IntegrationIcon def={def} size={24} />
+                    </div>
                     <div>
                       <h3 className="font-dm font-bold text-base text-foreground">{def.name}</h3>
                       <p className="text-xs text-muted-foreground">{def.category}</p>
