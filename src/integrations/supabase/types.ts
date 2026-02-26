@@ -134,6 +134,45 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_templates: {
+        Row: {
+          avatar_position: string
+          background_color: string | null
+          button_style: string
+          created_at: string
+          font_style: string
+          id: string
+          name: string
+          theme: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_position?: string
+          background_color?: string | null
+          button_style?: string
+          created_at?: string
+          font_style?: string
+          id?: string
+          name?: string
+          theme?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_position?: string
+          background_color?: string | null
+          button_style?: string
+          created_at?: string
+          font_style?: string
+          id?: string
+          name?: string
+          theme?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       form_submissions: {
         Row: {
           block_id: string | null
@@ -371,6 +410,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_position: string
           avatar_url: string | null
           background_color: string | null
           bio: string | null
@@ -400,6 +440,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          avatar_position?: string
           avatar_url?: string | null
           background_color?: string | null
           bio?: string | null
@@ -429,6 +470,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          avatar_position?: string
           avatar_url?: string | null
           background_color?: string | null
           bio?: string | null
