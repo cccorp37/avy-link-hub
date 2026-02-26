@@ -1,4 +1,4 @@
-import { Bell, Eye, Search, Command, X } from "lucide-react";
+import { ArrowLeft, Bell, Eye, Search, Command, X } from "lucide-react";
 import { useState } from "react";
 import avylinkLogo from "@/assets/avylink-logo.jpg";
 import type { Tables } from "@/integrations/supabase/types";
@@ -34,6 +34,16 @@ export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
       style={{ background: "linear-gradient(90deg, hsl(var(--card) / 0.9), hsl(var(--card) / 0.95))", backdropFilter: "blur(12px)" }}>
       {/* Left */}
       <div className="flex items-center gap-3">
+        {/* Back button */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate(-1)}
+          className="p-2 rounded-xl border border-border/60 hover:border-primary/30 text-muted-foreground hover:text-foreground transition-all"
+          title="Retour"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </motion.button>
         {/* Mobile logo */}
         <div className="flex md:hidden items-center gap-2">
           <img src={avylinkLogo} alt="AvyLink" className="w-8 h-8 rounded-xl object-cover shadow-sm" />
