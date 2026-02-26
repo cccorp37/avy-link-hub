@@ -319,6 +319,28 @@ function PageBlockRenderer({ block }: { block: PageBlock }) {
   }
 }
 
+// ─── Font mapping ─────────────────────────────────────────────────────────────
+
+const FONT_MAP: Record<string, string> = {
+  inter: "'Inter', sans-serif",
+  "dm-sans": "'DM Sans', sans-serif",
+  mono: "'JetBrains Mono', 'Fira Code', monospace",
+  playfair: "'Playfair Display', serif",
+  poppins: "'Poppins', sans-serif",
+  "space-grotesk": "'Space Grotesk', sans-serif",
+  cabinet: "'Cabinet Grotesk', 'DM Sans', sans-serif",
+  lora: "'Lora', serif",
+  satoshi: "'Satoshi', 'DM Sans', sans-serif",
+};
+
+const BUTTON_STYLES: Record<string, string> = {
+  rounded: "rounded-2xl",
+  pill: "rounded-full",
+  square: "rounded-lg",
+  outline: "rounded-2xl border-2 bg-transparent",
+  shadow: "rounded-2xl shadow-lg",
+};
+
 // ─── Main Public Profile ──────────────────────────────────────────────────────
 
 const PublicProfile = () => {
@@ -445,93 +467,126 @@ const PublicProfile = () => {
     </div>
   );
 
+  const fontFamily = FONT_MAP[profile.font_style] || FONT_MAP.inter;
+  const avatarPos = profile.avatar_position || "center";
+  const btnClass = BUTTON_STYLES[profile.button_style] || BUTTON_STYLES.rounded;
+  const bgColor = profile.background_color || undefined;
+  const isOutline = profile.button_style === "outline";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-background">
-      <div className="max-w-lg mx-auto pb-12">
+    <div className="min-h-screen" style={{ fontFamily, background: bgColor || undefined }}>
+      <div className={`min-h-screen ${!bgColor ? "bg-gradient-to-br from-background via-secondary/30 to-background" : ""}`}>
+        <div className="max-w-lg mx-auto pb-12">
 
-        {/* ── Cover + Avatar header ── */}
-        <div className="relative mb-6">
-          {/* Cover banner */}
-          <div className="h-44 w-full bg-gradient-to-br from-primary/30 to-primary/10 overflow-hidden">
-            {profile.cover_url ? (
-              <img src={profile.cover_url} alt="Couverture" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/30" />
-            )}
-          </div>
+          {/* ── Cover + Avatar header ── */}
+          <div className="relative mb-6">
+            <div className="h-44 w-full bg-gradient-to-br from-primary/30 to-primary/10 overflow-hidden">
+              {profile.cover_url ? (
+                <img src={profile.cover_url} alt="Couverture" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/30" />
+              )}
+            </div>
 
-          {/* Avatar — overlaps cover */}
-          <div className="px-5">
-            <div className="flex items-end justify-between -mt-10 mb-3">
-              <div className="relative">
-                {profile.avatar_url ? (
-                  <img src={profile.avatar_url} alt={profile.display_name || ""}
-                    className="w-20 h-20 rounded-full object-cover border-4 border-background shadow-blue" />
-                ) : (
-                  <div className="w-20 h-20 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-2xl font-bold border-4 border-background shadow-blue">
-                    {(profile.display_name || profile.username || "?")[0].toUpperCase()}
-                  </div>
+            {/* Avatar — positioned based on avatar_position */}
+            <div className="px-5">
+              <div className={`flex items-end -mt-10 mb-3 ${
+                avatarPos === "center" ? "justify-center" : avatarPos === "right" ? "justify-end" : "justify-between"
+              }`}>
+                <div className="relative">
+                  {profile.avatar_url ? (
+                    <img src={profile.avatar_url} alt={profile.display_name || ""}
+                      className="w-20 h-20 rounded-full object-cover border-4 border-background shadow-blue" />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-2xl font-bold border-4 border-background shadow-blue">
+                      {(profile.display_name || profile.username || "?")[0].toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                {avatarPos !== "center" && profile.website && (
+                  <a href={profile.website} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-card text-xs font-medium text-foreground hover:border-primary/40 transition-colors mb-1">
+                    <Globe className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="truncate max-w-[100px]">{profile.website.replace(/^https?:\/\//, "")}</span>
+                  </a>
                 )}
               </div>
-              {profile.website && (
-                <a href={profile.website} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-card text-xs font-medium text-foreground hover:border-primary/40 transition-colors mb-1">
-                  <Globe className="w-3.5 h-3.5 text-muted-foreground" />
-                  <span className="truncate max-w-[100px]">{profile.website.replace(/^https?:\/\//, "")}</span>
-                </a>
-              )}
-            </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="font-dm font-bold text-2xl text-foreground leading-tight">
-                {profile.display_name || `@${profile.username}`}
-              </h1>
-              {profile.is_verified && (
-                <span title="Profil vérifié" className="flex-shrink-0">
-                  <BadgeCheck className="w-6 h-6 text-primary drop-shadow-sm" strokeWidth={2.5} />
-                </span>
+              {avatarPos === "center" && profile.website && (
+                <div className="flex justify-center mb-2">
+                  <a href={profile.website} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-card text-xs font-medium text-foreground hover:border-primary/40 transition-colors">
+                    <Globe className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="truncate max-w-[100px]">{profile.website.replace(/^https?:\/\//, "")}</span>
+                  </a>
+                </div>
+              )}
+
+              <div className={`flex items-center gap-2 flex-wrap ${avatarPos === "center" ? "justify-center" : avatarPos === "right" ? "justify-end" : ""}`}>
+                <h1 className="font-bold text-2xl text-foreground leading-tight">
+                  {profile.display_name || `@${profile.username}`}
+                </h1>
+                {profile.is_verified && (
+                  <span title="Profil vérifié" className="flex-shrink-0">
+                    <BadgeCheck className="w-6 h-6 text-primary drop-shadow-sm" strokeWidth={2.5} />
+                  </span>
+                )}
+              </div>
+              {profile.username && (
+                <p className={`text-sm text-muted-foreground ${avatarPos === "center" ? "text-center" : avatarPos === "right" ? "text-right" : ""}`}>@{profile.username}</p>
+              )}
+              {profile.bio && (
+                <p className={`text-sm text-foreground/70 mt-2 leading-relaxed ${avatarPos === "center" ? "text-center" : avatarPos === "right" ? "text-right" : ""}`}>{profile.bio}</p>
               )}
             </div>
-            {profile.username && (
-              <p className="text-sm text-muted-foreground">@{profile.username}</p>
-            )}
-            {profile.bio && (
-              <p className="text-sm text-foreground/70 mt-2 leading-relaxed">{profile.bio}</p>
+          </div>
+
+          {/* ── Content area ── */}
+          <div className="px-4 space-y-3">
+
+            {/* Page Blocks */}
+            {blocks.map(block => (
+              <PageBlockRenderer key={block.id} block={block} />
+            ))}
+
+            {/* Links — apply button_style */}
+            {links.map(link => {
+              const displayType = getLinkDisplayType(link);
+              if (displayType === "youtube") return <YouTubeBlock key={link.id} link={link} />;
+              if (displayType === "spotify") return <SpotifyBlock key={link.id} link={link} />;
+              if (displayType === "tiktok") return <TikTokBlock key={link.id} link={link} />;
+              return (
+                <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer"
+                  onClick={() => incrementClick(link.id)}
+                  className={`flex items-center gap-4 p-4 border border-border/50 bg-card hover:shadow-card hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group ${btnClass} ${isOutline ? "border-foreground/20 hover:border-primary" : ""}`}>
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: `${getPlatformColor(link.icon || "website")}18` }}>
+                    <SocialIcon platform={link.icon || "website"} size={24} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">{link.title}</p>
+                    <p className="text-xs text-muted-foreground">{getPlatformLabel(link.icon || "website")}</p>
+                  </div>
+                  <ExternalLink className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary transition-colors flex-shrink-0" />
+                </a>
+              );
+            })}
+
+            {blocks.length === 0 && links.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                <p>Aucun lien pour l'instant.</p>
+              </div>
             )}
           </div>
-        </div>
 
-        {/* ── Content area ── */}
-        <div className="px-4 space-y-3">
-
-          {/* Page Blocks (social icons, headings, videos, forms...) */}
-          {blocks.map(block => (
-            <PageBlockRenderer key={block.id} block={block} />
-          ))}
-
-          {/* Links */}
-          {links.map(link => {
-            const displayType = getLinkDisplayType(link);
-            if (displayType === "youtube") return <YouTubeBlock key={link.id} link={link} />;
-            if (displayType === "spotify") return <SpotifyBlock key={link.id} link={link} />;
-            if (displayType === "tiktok") return <TikTokBlock key={link.id} link={link} />;
-            return <StandardLinkBlock key={link.id} link={link} />;
-          })}
-
-          {blocks.length === 0 && links.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              <p>Aucun lien pour l'instant.</p>
-            </div>
-          )}
-        </div>
-
-        {/* Footer branding */}
-        <div className="mt-10 text-center">
-          <a href="/" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
-            Créé avec
-            <img src={avylinkLogo} alt="AvyLink" className="w-4 h-4 rounded object-cover" />
-            <span className="font-dm font-bold">AvyLink</span>
-          </a>
+          {/* Footer branding */}
+          <div className="mt-10 text-center">
+            <a href="/" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
+              Créé avec
+              <img src={avylinkLogo} alt="AvyLink" className="w-4 h-4 rounded object-cover" />
+              <span className="font-bold">AvyLink</span>
+            </a>
+          </div>
         </div>
       </div>
     </div>
