@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Check, Loader2, Save, Palette, Type, MousePointer2, Eye } from "lucide-react";
+import { Check, Loader2, Save, Palette, Type, MousePointer2, Eye, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { TEMPLATES } from "./DashboardTemplates";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
@@ -44,6 +46,7 @@ const FONT_STYLES = [
 
 export default function DashboardAppearance({ profile, onUpdate }: Props) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState(profile?.theme || "default");
   const [selectedButton, setSelectedButton] = useState(profile?.button_style || "rounded");
@@ -58,7 +61,31 @@ export default function DashboardAppearance({ profile, onUpdate }: Props) {
 
   return (
     <div className="p-4 md:p-6 max-w-2xl mx-auto space-y-5">
-      {/* Themes */}
+      {/* Active template */}
+      {(() => {
+        const active = TEMPLATES.find(t =>
+          t.background_color === profile?.background_color &&
+          t.theme === profile?.theme &&
+          t.button_style === profile?.button_style &&
+          t.font_style === profile?.font_style
+        );
+        if (!active) return null;
+        return (
+          <motion.div custom={-1} initial="hidden" animate="visible" variants={fadeUp}
+            className="rounded-2xl border border-primary/20 bg-primary/5 p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex-shrink-0 overflow-hidden" style={{ background: active.preview.coverBg }} />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs text-muted-foreground">Modèle actif</p>
+              <p className="text-sm font-bold text-foreground truncate">{active.name}</p>
+              <p className="text-[10px] text-muted-foreground">{active.category}</p>
+            </div>
+            <button onClick={() => navigate("/dashboard/modeles")}
+              className="px-3 py-1.5 text-xs font-semibold text-primary bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors flex items-center gap-1">
+              <Sparkles className="w-3 h-3" /> Changer
+            </button>
+          </motion.div>
+        );
+      })()}
       <motion.div
         custom={0}
         initial="hidden"
