@@ -123,6 +123,10 @@ export default {
           "0%, 100%": { transform: "translateY(0px)" },
           "50%": { transform: "translateY(-12px)" },
         },
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
         "fade-up": {
           from: { opacity: "0", transform: "translateY(20px)" },
           to: { opacity: "1", transform: "translateY(0)" },
@@ -149,6 +153,7 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         "float": "float 6s ease-in-out infinite",
         "float-delayed": "float 6s ease-in-out infinite 2s",
+        "fade-in": "fade-in 0.4s ease-out forwards",
         "fade-up": "fade-up 0.6s ease-out forwards",
         "slide-in": "slide-in 0.5s ease-out forwards",
         "scale-in": "scale-in 0.4s ease-out forwards",
