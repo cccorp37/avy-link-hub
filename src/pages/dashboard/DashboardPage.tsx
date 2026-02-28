@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Camera, Save, Loader2, Copy, Check, Globe, Plus, X, GripVertical, ChevronDown, ChevronUp, Trash2, Edit2, Heading, Video, Music, Link2, ClipboardList, Minus, Type, Mic, Clapperboard, Instagram, Youtube, LucideIcon } from "lucide-react";
+import { Camera, Save, Loader2, Copy, Check, Globe, Plus, X, GripVertical, ChevronDown, ChevronUp, Trash2, Edit2, Heading, Video, Music, Link2, ClipboardList, Minus, Type, Mic, Clapperboard, Instagram, Youtube, ExternalLink, BadgeCheck, Smartphone } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import SocialIcon, { PLATFORM_COLORS } from "@/components/SocialIcon";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -364,6 +365,142 @@ function BlockPreview({ block }: { block: PageBlock }) {
   );
 }
 
+function LivePreviewBlock({ block }: { block: PageBlock }) {
+  const def = BLOCK_TYPES.find(b => b.type === block.type);
+  const c = (block.content || {}) as Record<string, unknown>;
+
+  if (block.type === "heading") {
+    return (
+      <div className="text-center py-1">
+        {c.text && <p className="font-dm font-bold text-xs text-foreground">{c.text as string}</p>}
+        {c.subtitle && <p className="text-[10px] text-muted-foreground">{c.subtitle as string}</p>}
+      </div>
+    );
+  }
+
+  if (block.type === "divider") {
+    const style = (c.style as string) || "solid";
+    return <div className={`my-1 border-t border-border/40 ${style === "dashed" ? "border-dashed" : style === "dotted" ? "border-dotted" : ""}`} />;
+  }
+
+  if (block.type === "social_icons") {
+    const networks = ["facebook","instagram","twitter","tiktok","youtube","linkedin","whatsapp","snapchat","discord","telegram","pinterest","github"];
+    const filled = networks.filter(n => c[n]);
+    if (filled.length === 0) return <p className="text-[10px] text-muted-foreground text-center">Aucun réseau configuré</p>;
+    return (
+      <div className="flex flex-wrap justify-center gap-1.5 py-1">
+        {filled.map(n => (
+          <div key={n} className="w-7 h-7 rounded-full flex items-center justify-center shadow-sm"
+            style={{ backgroundColor: `${(PLATFORM_COLORS as Record<string,string>)[n] || "#999"}18` }}>
+            <SocialIcon platform={n} size={14} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (block.type === "text") {
+    return (
+      <div className="rounded-xl border border-border/40 bg-secondary/20 p-2.5">
+        {block.title && <p className="font-dm font-semibold text-[10px] text-foreground mb-1">{block.title}</p>}
+        <p className="text-[10px] text-foreground/70 leading-snug line-clamp-3">{(c.text as string) || "..."}</p>
+      </div>
+    );
+  }
+
+  if (block.type === "form") {
+    return (
+      <div className="rounded-xl border border-border/40 bg-secondary/20 p-2.5 space-y-1.5">
+        <p className="text-[10px] font-semibold text-foreground">{(c.formTitle as string) || "Formulaire"}</p>
+        <div className="h-5 rounded-md bg-muted/50 border border-border/30 text-[8px] px-2 flex items-center text-muted-foreground">Nom</div>
+        <div className="h-5 rounded-md bg-muted/50 border border-border/30 text-[8px] px-2 flex items-center text-muted-foreground">Email</div>
+        <div className="h-5 rounded-md bg-primary/10 border border-primary/20 text-[8px] px-2 flex items-center justify-center text-primary font-medium">Envoyer</div>
+      </div>
+    );
+  }
+
+  if (block.type === "video" || block.type === "music" || block.type === "podcast") {
+    const url = c.url as string;
+    // YouTube thumbnail preview
+    if (block.type === "video" && url) {
+      const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/);
+      if (ytMatch) {
+        return (
+          <div className="rounded-xl overflow-hidden border border-border/40">
+            <div className="relative aspect-video">
+              <img src={`https://img.youtube.com/vi/${ytMatch[1]}/mqdefault.jpg`} alt="" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
+                  <div className="w-0 h-0 border-t-[5px] border-b-[5px] border-l-[8px] border-t-transparent border-b-transparent border-l-white ml-0.5" />
+                </div>
+              </div>
+            </div>
+            <div className="p-2">
+              <p className="text-[10px] font-medium text-foreground truncate">{block.title || "Vidéo"}</p>
+            </div>
+          </div>
+        );
+      }
+    }
+    // Spotify embed preview
+    if ((block.type === "music" || block.type === "podcast") && url) {
+      const spMatch = url.match(/spotify\.com\/(track|album|playlist|episode)\/([A-Za-z0-9]+)/);
+      if (spMatch) {
+        return (
+          <div className="rounded-xl overflow-hidden border border-border/40">
+            <iframe
+              src={`https://open.spotify.com/embed/${spMatch[1]}/${spMatch[2]}?utm_source=generator&theme=0`}
+              width="100%" height="80" allow="encrypted-media" loading="lazy"
+              className="block" style={{ border: 0 }} />
+          </div>
+        );
+      }
+    }
+    return (
+      <div className="flex items-center gap-2 p-2.5 rounded-xl border border-border/40 bg-secondary/20">
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${def?.iconBg || "bg-muted"}`}>
+          {def && <def.Icon className={`w-4 h-4 ${def.iconColor}`} />}
+        </div>
+        <div className="min-w-0">
+          <p className="text-[10px] font-medium text-foreground truncate">{block.title || def?.label}</p>
+          <p className="text-[9px] text-muted-foreground truncate">{(url as string) || "Non configuré"}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (block.type === "youtube_sub") {
+    return (
+      <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-border/40 bg-red-50 dark:bg-red-500/10">
+        <Youtube className="w-4 h-4 text-red-500" />
+        <span className="text-[10px] font-semibold text-red-600 dark:text-red-400">S'abonner — {(c.channelName as string) || "YouTube"}</span>
+      </div>
+    );
+  }
+
+  if (block.type === "tiktok" || block.type === "instagram") {
+    return (
+      <div className="flex items-center gap-2 p-2.5 rounded-xl border border-border/40 bg-secondary/20">
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${def?.iconBg || "bg-muted"}`}>
+          {def && <def.Icon className={`w-4 h-4 ${def.iconColor}`} />}
+        </div>
+        <div>
+          <p className="text-[10px] font-medium text-foreground">{def?.label}</p>
+          <p className="text-[9px] text-muted-foreground">@{(c.username as string) || "..."}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback
+  return (
+    <div className="flex items-center gap-2 p-2 rounded-xl border border-border/40 bg-secondary/20">
+      {def && <def.Icon className={`w-3.5 h-3.5 ${def.iconColor}`} />}
+      <span className="text-[10px] text-muted-foreground">{block.title || def?.label || "Bloc"}</span>
+    </div>
+  );
+}
+
 export default function DashboardPage({ profile, onUpdate }: Props) {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
@@ -706,29 +843,90 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
         )}
       </div>
 
-      {/* Preview card */}
-      <div className="bg-card rounded-2xl border border-border/50 shadow-card p-6">
-        <h3 className="font-dm font-bold text-base text-foreground mb-4">👁️ Aperçu du profil</h3>
-        <div className="flex flex-col items-center gap-3 py-4">
-          {form.avatar_url ? (
-            <img src={form.avatar_url} alt="Avatar" className="w-16 h-16 rounded-full object-cover shadow-blue" />
-          ) : (
-            <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xl font-bold shadow-blue">
-              {(form.display_name || form.username || "?")[0].toUpperCase()}
-            </div>
+      {/* Live Preview */}
+      <div className="bg-card rounded-2xl border border-border/50 shadow-card p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-dm font-bold text-base text-foreground flex items-center gap-2">
+            <Smartphone className="w-4 h-4 text-primary" /> Aperçu en direct
+          </h3>
+          {profile?.username && (
+            <a href={`/u/${profile.username}`} target="_blank" rel="noopener noreferrer"
+              className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
+              Ouvrir <ExternalLink className="w-3 h-3" />
+            </a>
           )}
-          <div className="text-center">
-            <p className="font-dm font-bold text-lg text-foreground">{form.display_name || "Ton nom"}</p>
-            {form.username && <p className="text-sm text-muted-foreground">@{form.username}</p>}
-            {form.bio && <p className="text-sm text-foreground/70 mt-1 max-w-xs">{form.bio}</p>}
+        </div>
+
+        {/* Phone mockup */}
+        <div className="mx-auto w-full max-w-[320px]">
+          <div className="rounded-[2rem] border-[6px] border-foreground/10 dark:border-foreground/20 bg-background shadow-lg overflow-hidden">
+            {/* Phone status bar */}
+            <div className="h-6 bg-foreground/5 flex items-center justify-center">
+              <div className="w-16 h-1.5 rounded-full bg-foreground/10" />
+            </div>
+
+            {/* Scrollable content */}
+            <div className="h-[480px] overflow-y-auto overflow-x-hidden" style={{ scrollbarWidth: "none" }}>
+              {/* Cover */}
+              <div className="relative">
+                <div className="h-28 w-full bg-gradient-to-br from-primary/30 to-primary/10 overflow-hidden">
+                  {form.cover_url ? (
+                    <img src={form.cover_url} alt="Cover" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/30" />
+                  )}
+                </div>
+
+                {/* Avatar */}
+                <div className="flex justify-center -mt-8 relative z-10">
+                  {form.avatar_url ? (
+                    <img src={form.avatar_url} alt="Avatar" className="w-16 h-16 rounded-full object-cover border-[3px] border-background shadow-md" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-lg font-bold border-[3px] border-background shadow-md">
+                      {(form.display_name || form.username || "?")[0].toUpperCase()}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Profile info */}
+              <div className="text-center px-4 mt-2 mb-3">
+                <div className="flex items-center justify-center gap-1.5">
+                  <p className="font-dm font-bold text-sm text-foreground">{form.display_name || "Ton nom"}</p>
+                  {profile?.is_verified && <BadgeCheck className="w-4 h-4 text-primary" strokeWidth={2.5} />}
+                </div>
+                {form.username && <p className="text-[11px] text-muted-foreground">@{form.username}</p>}
+                {form.bio && <p className="text-[11px] text-foreground/70 mt-1 leading-snug">{form.bio}</p>}
+                {form.website && (
+                  <div className="flex justify-center mt-1.5">
+                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-lg border border-border/50 bg-secondary/30 text-[10px] text-muted-foreground">
+                      <Globe className="w-2.5 h-2.5" />
+                      {form.website.replace(/^https?:\/\//, "").slice(0, 25)}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Live blocks */}
+              <div className="px-3 pb-4 space-y-2">
+                {blocks.filter(b => b.is_active).map(block => (
+                  <LivePreviewBlock key={block.id} block={block} />
+                ))}
+
+                {blocks.filter(b => b.is_active).length === 0 && (
+                  <div className="text-center py-6 text-muted-foreground">
+                    <p className="text-[10px]">Ajoute des blocs pour les voir ici</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Phone bottom bar */}
+            <div className="h-5 bg-foreground/5 flex items-center justify-center">
+              <div className="w-24 h-1 rounded-full bg-foreground/15" />
+            </div>
           </div>
         </div>
-        {profile?.username && (
-          <a href={`/u/${profile.username}`} target="_blank" rel="noopener noreferrer"
-            className="w-full flex items-center justify-center gap-2 py-2 text-sm font-medium text-primary hover:underline">
-            Voir la page complète →
-          </a>
-        )}
       </div>
     </div>
   );
