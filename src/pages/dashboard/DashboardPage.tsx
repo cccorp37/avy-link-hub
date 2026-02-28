@@ -516,18 +516,19 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-4 grid grid-cols-3 gap-3 overflow-y-auto flex-1">
+            <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-3 overflow-y-auto flex-1">
               {BLOCK_TYPES.map((bt, i) => (
                 <button
                   key={bt.type}
                   onClick={() => addBlock(bt.type)}
-                  className="flex flex-col items-center gap-2.5 p-4 rounded-2xl border border-border/60 bg-background hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-center group opacity-0 animate-fade-in"
+                  className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-border/60 bg-background hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-center group opacity-0 animate-fade-in"
                   style={{ animationDelay: `${i * 40}ms`, animationFillMode: "forwards" }}
                 >
                   <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${bt.iconBg} group-hover:shadow-md group-hover:scale-110 transition-all duration-200`}>
                     <bt.Icon className={`w-5 h-5 ${bt.iconColor}`} strokeWidth={1.8} />
                   </div>
                   <span className="text-[11px] font-semibold text-foreground leading-tight">{bt.label}</span>
+                  <span className="text-[10px] text-muted-foreground leading-snug line-clamp-2">{bt.desc}</span>
                 </button>
               ))}
             </div>
