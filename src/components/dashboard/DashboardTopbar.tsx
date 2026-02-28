@@ -1,8 +1,10 @@
-import { ArrowLeft, Bell, Eye, Search, Command, X } from "lucide-react";
+import { ArrowLeft, Bell, Eye, Search, Command, X, Sun, Moon, Languages } from "lucide-react";
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import avylinkLogo from "@/assets/avylink-logo.jpg";
 import type { Tables } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -16,15 +18,17 @@ interface Props {
 
 export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
   const { user } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const { lang, setLang, t } = useLanguage();
   const navigate = useNavigate();
   const profileUrl = profile?.username ? `${window.location.origin}/u/${profile.username}` : null;
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
 
   const notifications = [
-    { id: 1, text: "Bienvenue sur AvyLink ! 🎉", time: "Maintenant", unread: true },
-    { id: 2, text: "Complétez votre profil pour plus de visibilité", time: "2min", unread: true },
-    { id: 3, text: "Astuce : ajoutez vos réseaux sociaux", time: "5min", unread: false },
+    { id: 1, text: t("notif_welcome"), time: t("now"), unread: true },
+    { id: 2, text: t("notif_complete_profile"), time: "2min", unread: true },
+    { id: 3, text: t("notif_tip_social"), time: "5min", unread: false },
   ];
 
   const unreadCount = notifications.filter(n => n.unread).length;
@@ -57,6 +61,39 @@ export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
 
       {/* Right */}
       <div className="flex items-center gap-2">
+        {/* Language toggle */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setLang(lang === "fr" ? "en" : "fr")}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-border/60 hover:border-primary/30 text-muted-foreground hover:text-foreground transition-all text-xs font-medium"
+          title={lang === "fr" ? "Switch to English" : "Passer en Français"}
+        >
+          <Languages className="w-3.5 h-3.5" />
+          <span className="uppercase">{lang}</span>
+        </motion.button>
+
+        {/* Theme toggle */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="p-2 rounded-xl border border-border/60 hover:border-primary/30 text-muted-foreground hover:text-foreground transition-all"
+          title={theme === "dark" ? "Mode clair" : "Mode sombre"}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={theme}
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </motion.div>
+          </AnimatePresence>
+        </motion.button>
+
         {/* Search trigger */}
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -65,7 +102,7 @@ export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
           className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border/60 text-xs text-muted-foreground hover:border-primary/30 hover:text-foreground transition-all bg-secondary/40"
         >
           <Search className="w-3.5 h-3.5" />
-          <span>Rechercher...</span>
+          <span>{t("search")}</span>
           <kbd className="ml-2 px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono border border-border/40">⌘K</kbd>
         </motion.button>
 
@@ -80,7 +117,7 @@ export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
             className="hidden sm:flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border border-border/60 hover:border-primary/30 hover:text-primary text-muted-foreground transition-all"
           >
             <Eye className="w-3.5 h-3.5" />
-            Profil
+            {t("profile")}
           </motion.a>
         )}
 
@@ -112,7 +149,7 @@ export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
                   className="absolute right-0 top-full mt-2 w-80 bg-card rounded-2xl border border-border/60 shadow-lg z-50 overflow-hidden"
                 >
                   <div className="p-4 border-b border-border/40 flex items-center justify-between">
-                    <h3 className="font-dm font-bold text-sm text-foreground">Notifications</h3>
+                    <h3 className="font-dm font-bold text-sm text-foreground">{t("notifications")}</h3>
                     <button onClick={() => setNotifOpen(false)} className="p-1 rounded-lg hover:bg-secondary">
                       <X className="w-3.5 h-3.5 text-muted-foreground" />
                     </button>
@@ -131,7 +168,7 @@ export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
                     ))}
                   </div>
                   <div className="p-3 border-t border-border/40">
-                    <button className="w-full text-xs text-primary font-medium hover:underline">Tout marquer comme lu</button>
+                    <button className="w-full text-xs text-primary font-medium hover:underline">{t("mark_all_read")}</button>
                   </div>
                 </motion.div>
               </>
