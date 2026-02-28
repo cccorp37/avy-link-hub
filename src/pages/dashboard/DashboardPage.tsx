@@ -987,13 +987,23 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
 
                 {/* Avatar */}
                 <div className="flex justify-center -mt-8 relative z-10">
-                  {form.avatar_url ? (
-                    <img src={form.avatar_url} alt="Avatar" className="w-16 h-16 rounded-full object-cover border-[3px] border-background shadow-md" />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-lg font-bold border-[3px] border-background shadow-md">
-                      {(form.display_name || form.username || "?")[0].toUpperCase()}
-                    </div>
-                  )}
+                  <div className="relative">
+                    {form.avatar_url ? (
+                      <img src={form.avatar_url} alt="Avatar" className="w-16 h-16 rounded-full object-cover border-[3px] border-background shadow-md" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-lg font-bold border-[3px] border-background shadow-md">
+                        {(form.display_name || form.username || "?")[0].toUpperCase()}
+                      </div>
+                    )}
+                    {profile?.is_verified && (
+                      <span className="absolute -bottom-0.5 -right-0.5 bg-[#1D9BF0] rounded-full p-[2px] border-2 border-background shadow-sm">
+                        <svg viewBox="0 0 24 24" className="w-3 h-3 text-white fill-current">
+                          <path d="M9.585 7.17a2.66 2.66 0 0 1 4.83 0l.29.64a2.66 2.66 0 0 0 1.485 1.485l.64.29a2.66 2.66 0 0 1 0 4.83l-.64.29a2.66 2.66 0 0 0-1.485 1.485l-.29.64a2.66 2.66 0 0 1-4.83 0l-.29-.64a2.66 2.66 0 0 0-1.485-1.485l-.64-.29a2.66 2.66 0 0 1 0-4.83l.64-.29A2.66 2.66 0 0 0 9.295 7.81l.29-.64z" />
+                          <path d="M14.28 9.22a.75.75 0 0 1 0 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-1.5-1.5a.75.75 0 1 1 1.06-1.06l.97.97 2.97-2.97a.75.75 0 0 1 1.06 0z" fill="white" />
+                        </svg>
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -1001,7 +1011,6 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
               <div className="text-center px-4 mt-2 mb-3">
                 <div className="flex items-center justify-center gap-1.5">
                   <p className="font-dm font-bold text-sm text-foreground">{form.display_name || "Ton nom"}</p>
-                  {profile?.is_verified && <BadgeCheck className="w-4 h-4 text-primary" strokeWidth={2.5} />}
                 </div>
                 {form.username && <p className="text-[11px] text-muted-foreground">@{form.username}</p>}
                 {form.bio && <p className="text-[11px] text-foreground/70 mt-1 leading-snug">{form.bio}</p>}
