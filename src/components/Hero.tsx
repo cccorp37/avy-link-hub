@@ -69,7 +69,7 @@ const Hero = () => {
                 initial="hidden"
                 animate="visible"
                 custom={1}
-                className="font-dm font-black text-[3.5rem] sm:text-[4.5rem] lg:text-[5.5rem] text-foreground leading-[0.95] tracking-[-0.03em]"
+                className="font-dm font-black text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] text-foreground leading-[0.95] tracking-[-0.03em]"
               >
                 Ton univers
                 <br />
@@ -190,7 +190,7 @@ const Hero = () => {
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.9, duration: 0.6 }}
-                  className="absolute -left-12 top-1/4 backdrop-blur-2xl bg-background/90 rounded-2xl px-5 py-4 shadow-xl border border-border/30"
+                  className="absolute -left-4 sm:-left-12 top-1/4 backdrop-blur-2xl bg-background/90 rounded-2xl px-4 sm:px-5 py-3 sm:py-4 shadow-xl border border-border/30 hidden sm:block"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-sm">
@@ -207,7 +207,7 @@ const Hero = () => {
                   initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 1.1, duration: 0.6 }}
-                  className="absolute -right-10 bottom-1/4 backdrop-blur-2xl bg-background/90 rounded-2xl px-5 py-4 shadow-xl border border-border/30"
+                  className="absolute -right-4 sm:-right-10 bottom-1/4 backdrop-blur-2xl bg-background/90 rounded-2xl px-4 sm:px-5 py-3 sm:py-4 shadow-xl border border-border/30 hidden sm:block"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-[hsl(207,89%,42%)] flex items-center justify-center shadow-sm">
@@ -236,7 +236,7 @@ const Hero = () => {
                 return (
                   <div
                     key={stat.label}
-                    className={`flex items-center gap-3 px-6 py-5 ${i < 3 ? "border-r border-border/30 hidden sm:flex" : ""} ${i < 2 ? "" : ""}`}
+                    className={`flex items-center gap-3 px-4 sm:px-6 py-4 sm:py-5 ${i < 3 ? "sm:border-r border-border/30" : ""}`}
                   >
                     <div className="w-10 h-10 rounded-xl bg-primary/[0.07] flex items-center justify-center flex-shrink-0">
                       <Icon className="w-5 h-5 text-primary" />

@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import PublicProfile from "./pages/PublicProfile";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./pages/admin/AdminLayout";
+import InstallApp from "./pages/InstallApp";
 import { AuthProvider } from "@/hooks/useAuth";
 import { LanguageProvider } from "@/hooks/useLanguage";
 
@@ -28,6 +29,7 @@ const App = () => (
                 <Route path="/dashboard/*" element={<Dashboard />} />
                 <Route path="/admin/*" element={<AdminLayout />} />
                 <Route path="/u/:username" element={<PublicProfile />} />
+                <Route path="/install" element={<InstallApp />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
