@@ -277,14 +277,80 @@ function BlockEditor({ block, onSave, onClose }: { block: Partial<PageBlock>; on
           )}
 
           {block.type === "group" && (
-            <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">Description du groupe</label>
-              <Input
-                value={(form.content?.description as string) || ""}
-                onChange={e => updateContent("description", e.target.value)}
-                placeholder="Mes liens principaux"
-                className="rounded-xl"
-              />
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">Description du groupe</label>
+                <Input
+                  value={(form.content?.description as string) || ""}
+                  onChange={e => updateContent("description", e.target.value)}
+                  placeholder="Mes liens principaux"
+                  className="rounded-xl"
+                />
+              </div>
+              {/* Links list */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-foreground">Liens du groupe</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const links = ((form.content?.links as Array<{ title: string; url: string }>) || []);
+                      updateContent("links", [...links, { title: "", url: "" }]);
+                    }}
+                    className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Ajouter un lien
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {((form.content?.links as Array<{ title: string; url: string }>) || []).length === 0 && (
+                    <p className="text-xs text-muted-foreground text-center py-3 bg-muted/30 rounded-xl">
+                      Aucun lien ajouté. Clique sur "Ajouter un lien" pour commencer.
+                    </p>
+                  )}
+                  {((form.content?.links as Array<{ title: string; url: string }>) || []).map((link, idx) => (
+                    <div key={idx} className="p-3 bg-muted/30 rounded-xl space-y-2 relative">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const links = [...((form.content?.links as Array<{ title: string; url: string }>) || [])];
+                          links.splice(idx, 1);
+                          updateContent("links", links);
+                        }}
+                        className="absolute top-2 right-2 p-1 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-0.5 block">Titre du lien</label>
+                        <Input
+                          value={link.title}
+                          onChange={e => {
+                            const links = [...((form.content?.links as Array<{ title: string; url: string }>) || [])];
+                            links[idx] = { ...links[idx], title: e.target.value };
+                            updateContent("links", links);
+                          }}
+                          placeholder="Ex: Mon site web"
+                          className="rounded-lg h-9 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-0.5 block">URL</label>
+                        <Input
+                          value={link.url}
+                          onChange={e => {
+                            const links = [...((form.content?.links as Array<{ title: string; url: string }>) || [])];
+                            links[idx] = { ...links[idx], url: e.target.value };
+                            updateContent("links", links);
+                          }}
+                          placeholder="https://..."
+                          className="rounded-lg h-9 text-sm"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>
