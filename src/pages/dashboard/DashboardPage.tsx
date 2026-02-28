@@ -54,8 +54,8 @@ function BlockEditor({ block, onSave, onClose }: { block: Partial<PageBlock>; on
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-4">
-      <div className="bg-card rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center overflow-y-auto p-4 pt-[env(safe-area-inset-top,1rem)]">
+      <div className="bg-card rounded-2xl w-full max-w-md shadow-2xl flex flex-col my-auto" style={{ maxHeight: "calc(100vh - 2rem)" }}>
         <div className="flex items-center justify-between p-5 border-b border-border">
           <h3 className="font-dm font-bold text-base">
             {BLOCK_TYPES.find(b => b.type === block.type)?.label || "Bloc"}
@@ -64,7 +64,7 @@ function BlockEditor({ block, onSave, onClose }: { block: Partial<PageBlock>; on
             <X className="w-4 h-4" />
           </button>
         </div>
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-4 overflow-y-auto flex-1">
           {/* Title */}
           <div>
             <label className="text-sm font-medium text-foreground mb-1 block">Titre du bloc</label>
@@ -645,8 +645,8 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
     <div className="p-4 md:p-6 max-w-2xl mx-auto space-y-6">
       {/* Block type modal */}
       {showBlockModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowBlockModal(false)}>
-          <div className="bg-card rounded-2xl w-full max-w-md shadow-2xl max-h-[80vh] flex flex-col animate-scale-in" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center overflow-y-auto p-4 animate-fade-in" onClick={() => setShowBlockModal(false)}>
+          <div className="bg-card rounded-2xl w-full max-w-md shadow-2xl flex flex-col my-auto animate-scale-in" style={{ maxHeight: "calc(100vh - 2rem)" }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between p-5 border-b border-border flex-shrink-0">
               <h3 className="font-dm font-bold text-lg">Ajouter un bloc</h3>
               <button onClick={() => setShowBlockModal(false)} className="p-1.5 rounded-lg hover:bg-secondary transition-colors">

@@ -377,7 +377,7 @@ export default function DashboardIntegrations({ profile, onUpdate }: Props) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-4"
+              className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center overflow-y-auto p-4"
               onClick={e => { if (e.target === e.currentTarget) setConfiguring(null); }}
             >
               <motion.div
@@ -385,9 +385,9 @@ export default function DashboardIntegrations({ profile, onUpdate }: Props) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 40, scale: 0.95 }}
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className="bg-card rounded-2xl w-full max-w-md shadow-2xl max-h-[85vh] overflow-y-auto"
+                className="bg-card rounded-2xl w-full max-w-md shadow-2xl flex flex-col my-auto" style={{ maxHeight: "calc(100vh - 2rem)" }}
               >
-                <div className="flex items-center justify-between p-5 border-b border-border sticky top-0 bg-card z-10">
+                <div className="flex items-center justify-between p-5 border-b border-border bg-card z-10 flex-shrink-0">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: def.bgColor.includes("from-") ? undefined : undefined }}>
                       <IntegrationIcon def={def} size={24} />
