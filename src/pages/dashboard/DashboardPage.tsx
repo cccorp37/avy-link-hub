@@ -23,26 +23,26 @@ interface PageBlock {
   is_active: boolean;
 }
 
-const BLOCK_TYPES: { type: string; label: string; Icon: LucideIcon; iconColor: string; desc: string; preview: string }[] = [
-  { type: "heading", label: "Entête", Icon: Heading, iconColor: "text-violet-500 bg-violet-100", desc: "Titre ou sous-titre de section", preview: "bg-purple-50 border-purple-200" },
-  { type: "social_icons", label: "Icônes sociales", Icon: Globe, iconColor: "text-sky-500 bg-sky-100", desc: "Facebook, Instagram, Twitter, TikTok...", preview: "bg-blue-50 border-blue-200" },
-  { type: "video", label: "Vidéo", Icon: Clapperboard, iconColor: "text-rose-500 bg-rose-100", desc: "YouTube, Vimeo, TikTok, Twitch", preview: "bg-red-50 border-red-200" },
-  { type: "music", label: "La musique", Icon: Music, iconColor: "text-emerald-500 bg-emerald-100", desc: "Spotify, Apple Music, SoundCloud", preview: "bg-green-50 border-green-200" },
-  { type: "group", label: "Groupe de liens", Icon: Link2, iconColor: "text-indigo-500 bg-indigo-100", desc: "Grouper plusieurs liens", preview: "bg-indigo-50 border-indigo-200" },
-  { type: "form", label: "Formulaire", Icon: ClipboardList, iconColor: "text-amber-500 bg-amber-100", desc: "Collecte nom, email, message", preview: "bg-orange-50 border-orange-200" },
-  { type: "divider", label: "Diviseur", Icon: Minus, iconColor: "text-gray-500 bg-gray-100", desc: "Ligne de séparation décorative", preview: "bg-gray-50 border-gray-200" },
-  { type: "text", label: "Texte", Icon: Type, iconColor: "text-yellow-600 bg-yellow-100", desc: "Bloc de texte libre", preview: "bg-yellow-50 border-yellow-200" },
-  { type: "podcast", label: "Podcast", Icon: Mic, iconColor: "text-pink-500 bg-pink-100", desc: "Intégrer un épisode de podcast", preview: "bg-pink-50 border-pink-200" },
-  { type: "tiktok", label: "TikTok", Icon: Video, iconColor: "text-gray-800 bg-gray-200", desc: "Intégrer ta page TikTok", preview: "bg-gray-900/5 border-gray-300" },
-  { type: "instagram", label: "Instagram", Icon: Instagram, iconColor: "text-fuchsia-500 bg-fuchsia-100", desc: "Grille de photos Instagram", preview: "bg-pink-50 border-pink-200" },
-  { type: "youtube_sub", label: "YouTube abonné", Icon: Youtube, iconColor: "text-red-500 bg-red-100", desc: "Bouton d'abonnement YouTube", preview: "bg-red-50 border-red-200" },
+const BLOCK_TYPES: { type: string; label: string; Icon: LucideIcon; iconColor: string; iconBg: string; desc: string; preview: string }[] = [
+  { type: "heading", label: "Entête", Icon: Heading, iconColor: "text-violet-500", iconBg: "bg-violet-100 dark:bg-violet-500/20", desc: "Titre ou sous-titre de section", preview: "bg-purple-50 border-purple-200" },
+  { type: "social_icons", label: "Icônes sociales", Icon: Globe, iconColor: "text-sky-500", iconBg: "bg-sky-100 dark:bg-sky-500/20", desc: "Facebook, Instagram, Twitter, TikTok...", preview: "bg-blue-50 border-blue-200" },
+  { type: "video", label: "Vidéo", Icon: Clapperboard, iconColor: "text-rose-500", iconBg: "bg-rose-100 dark:bg-rose-500/20", desc: "YouTube, Vimeo, TikTok, Twitch", preview: "bg-red-50 border-red-200" },
+  { type: "music", label: "La musique", Icon: Music, iconColor: "text-emerald-500", iconBg: "bg-emerald-100 dark:bg-emerald-500/20", desc: "Spotify, Apple Music, SoundCloud", preview: "bg-green-50 border-green-200" },
+  { type: "group", label: "Groupe de liens", Icon: Link2, iconColor: "text-indigo-500", iconBg: "bg-indigo-100 dark:bg-indigo-500/20", desc: "Grouper plusieurs liens", preview: "bg-indigo-50 border-indigo-200" },
+  { type: "form", label: "Formulaire", Icon: ClipboardList, iconColor: "text-amber-500", iconBg: "bg-amber-100 dark:bg-amber-500/20", desc: "Collecte nom, email, message", preview: "bg-orange-50 border-orange-200" },
+  { type: "divider", label: "Diviseur", Icon: Minus, iconColor: "text-gray-500", iconBg: "bg-gray-100 dark:bg-gray-500/20", desc: "Ligne de séparation décorative", preview: "bg-gray-50 border-gray-200" },
+  { type: "text", label: "Texte", Icon: Type, iconColor: "text-yellow-500", iconBg: "bg-yellow-100 dark:bg-yellow-500/20", desc: "Bloc de texte libre", preview: "bg-yellow-50 border-yellow-200" },
+  { type: "podcast", label: "Podcast", Icon: Mic, iconColor: "text-pink-500", iconBg: "bg-pink-100 dark:bg-pink-500/20", desc: "Intégrer un épisode de podcast", preview: "bg-pink-50 border-pink-200" },
+  { type: "tiktok", label: "TikTok", Icon: Video, iconColor: "text-gray-700 dark:text-gray-300", iconBg: "bg-gray-200 dark:bg-gray-500/20", desc: "Intégrer ta page TikTok", preview: "bg-gray-900/5 border-gray-300" },
+  { type: "instagram", label: "Instagram", Icon: Instagram, iconColor: "text-fuchsia-500", iconBg: "bg-fuchsia-100 dark:bg-fuchsia-500/20", desc: "Grille de photos Instagram", preview: "bg-pink-50 border-pink-200" },
+  { type: "youtube_sub", label: "YouTube abonné", Icon: Youtube, iconColor: "text-red-500", iconBg: "bg-red-100 dark:bg-red-500/20", desc: "Bouton d'abonnement YouTube", preview: "bg-red-50 border-red-200" },
 ];
 
 function BlockPreviewIcon({ type }: { type: string }) {
   const b = BLOCK_TYPES.find(bt => bt.type === type);
   if (!b) return <span className="text-xl">📦</span>;
   const IconComp = b.Icon;
-  return <IconComp className={`w-5 h-5 ${b.iconColor.split(" ")[0]}`} />;
+  return <IconComp className={`w-5 h-5 ${b.iconColor}`} />;
 }
 
 function BlockEditor({ block, onSave, onClose }: { block: Partial<PageBlock>; onSave: (data: Partial<PageBlock>) => void; onClose: () => void }) {
@@ -348,7 +348,7 @@ function BlockPreview({ block }: { block: PageBlock }) {
   if (block.type === "video" || block.type === "music" || block.type === "podcast") {
     return (
       <div className="flex items-center gap-3 py-1">
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${def?.iconColor.split(" ")[1] || "bg-muted"}`}>{def && <def.Icon className={`w-6 h-6 ${def.iconColor.split(" ")[0]}`} />}</div>
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${def?.iconBg || "bg-muted"}`}>{def && <def.Icon className={`w-6 h-6 ${def.iconColor}`} />}</div>
         <div>
           <p className="text-xs font-medium text-foreground">{block.title || def?.label}</p>
           <p className="text-xs text-muted-foreground truncate max-w-[180px]">{(c.url as string) || "URL non configurée"}</p>
@@ -358,7 +358,7 @@ function BlockPreview({ block }: { block: PageBlock }) {
   }
   return (
     <div className="flex items-center gap-2 py-1">
-      {def && <def.Icon className={`w-4 h-4 ${def.iconColor.split(" ")[0]}`} />}
+      {def && <def.Icon className={`w-4 h-4 ${def.iconColor}`} />}
       <span className="text-xs text-muted-foreground">{def?.desc}</span>
     </div>
   );
@@ -524,8 +524,8 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
                   className="flex flex-col items-center gap-2.5 p-4 rounded-2xl border border-border/60 bg-background hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-center group opacity-0 animate-fade-in"
                   style={{ animationDelay: `${i * 40}ms`, animationFillMode: "forwards" }}
                 >
-                  <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${bt.iconColor.split(" ")[1]} group-hover:shadow-md group-hover:scale-110 transition-all duration-200`}>
-                    <bt.Icon className={`w-5 h-5 ${bt.iconColor.split(" ")[0]}`} strokeWidth={1.8} />
+                  <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${bt.iconBg} group-hover:shadow-md group-hover:scale-110 transition-all duration-200`}>
+                    <bt.Icon className={`w-5 h-5 ${bt.iconColor}`} strokeWidth={1.8} />
                   </div>
                   <span className="text-[11px] font-semibold text-foreground leading-tight">{bt.label}</span>
                 </button>
