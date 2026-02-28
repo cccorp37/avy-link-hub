@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Camera, Save, Loader2, Copy, Check, Globe, Plus, X, GripVertical, ChevronDown, ChevronUp, Trash2, Edit2, Heading, Video, Music, Link2, ClipboardList, Minus, Type, Mic, Clapperboard, Instagram, Youtube, ExternalLink, BadgeCheck, Smartphone } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Camera, Save, Loader2, Copy, Check, Globe, Plus, X, GripVertical, ChevronDown, ChevronUp, Trash2, Edit2, Heading, Video, Music, Link2, ClipboardList, Minus, Type, Mic, Clapperboard, Instagram, Youtube, ExternalLink, BadgeCheck, Smartphone, Palette, ArrowRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import SocialIcon, { PLATFORM_COLORS } from "@/components/SocialIcon";
 import { Input } from "@/components/ui/input";
@@ -568,6 +569,7 @@ function LivePreviewBlock({ block }: { block: PageBlock }) {
 }
 
 export default function DashboardPage({ profile, onUpdate }: Props) {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -722,6 +724,33 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
 
   return (
     <div className="p-4 md:p-6 max-w-2xl mx-auto space-y-6">
+      {/* Quick actions */}
+      <div className="flex gap-3">
+        <button
+          onClick={() => navigate("/dashboard/liens")}
+          className="flex-1 flex items-center gap-3 p-3.5 rounded-2xl border border-border/50 bg-card hover:border-primary/30 hover:shadow-md transition-all group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Link2 className="w-5 h-5 text-blue-500" />
+          </div>
+          <div className="flex-1 text-left">
+            <p className="text-sm font-semibold text-foreground">Ajouter un lien</p>
+          </div>
+          <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+        </button>
+        <button
+          onClick={() => navigate("/dashboard/apparence")}
+          className="flex-1 flex items-center gap-3 p-3.5 rounded-2xl border border-border/50 bg-card hover:border-primary/30 hover:shadow-md transition-all group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Palette className="w-5 h-5 text-purple-500" />
+          </div>
+          <div className="flex-1 text-left">
+            <p className="text-sm font-semibold text-foreground">Apparence</p>
+          </div>
+          <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+        </button>
+      </div>
       {/* Block type modal */}
       {showBlockModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center overflow-y-auto p-4 animate-fade-in" onClick={() => setShowBlockModal(false)}>
