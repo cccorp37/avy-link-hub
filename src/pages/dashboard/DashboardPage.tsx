@@ -595,9 +595,22 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
 
   useEffect(() => {
     if (!profile) return;
-    supabase.from("page_blocks").select("*").eq("profile_id", profile.id)
-      .order("position", { ascending: true })
-      .then(({ data }) => { setBlocks((data as PageBlock[]) || []); setBlocksLoading(false); });
+    const loadBlocks = () => {
+      supabase.from("page_blocks").select("*").eq("profile_id", profile.id)
+        .order("position", { ascending: true })
+        .then(({ data }) => { setBlocks((data as PageBlock[]) || []); setBlocksLoading(false); });
+    };
+    loadBlocks();
+
+    // Realtime subscription for instant updates
+    const channel = supabase
+      .channel(`page_blocks_${profile.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'page_blocks', filter: `profile_id=eq.${profile.id}` }, () => {
+        loadBlocks();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [profile]);
 
   const handleSave = async () => {
