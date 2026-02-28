@@ -336,20 +336,31 @@ export default function DashboardOverview({ profile }: Props) {
                 key={action.href + action.label}
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
+                whileHover={{ x: 6, scale: 1.01, transition: { type: "spring", stiffness: 400, damping: 20 } }}
+                whileTap={{ scale: 0.97 }}
                 transition={{ delay: i * 0.05 + 0.4 }}
                 href={('target' in action && action.target) ? action.href : undefined}
                 onClick={!('target' in action) ? (e: React.MouseEvent) => { e.preventDefault(); navigate(action.href); } : undefined}
                 target={('target' in action && action.target) ? action.target : undefined}
                 rel={('target' in action && action.target) ? "noopener noreferrer" : undefined}
-                className={`flex items-center gap-3 px-3 py-3 rounded-xl border hover:shadow-sm transition-all group cursor-pointer ${action.bg}`}
+                className={`flex items-center gap-3 px-3 py-3 rounded-xl border hover:shadow-md hover:border-primary/20 transition-all group cursor-pointer ${action.bg}`}
               >
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${action.iconColor} bg-white/80 dark:bg-white/10 shadow-sm`}>
+                <motion.div
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center ${action.iconColor} bg-white/80 dark:bg-white/10 shadow-sm group-hover:shadow-md transition-shadow`}
+                  whileHover={{ rotate: [0, -8, 8, 0], transition: { duration: 0.4 } }}
+                >
                   <action.Icon className="w-4.5 h-4.5" strokeWidth={1.8} />
-                </div>
+                </motion.div>
                 <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors flex-1">
                   {action.label}
                 </span>
-                <ArrowRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                <motion.div
+                  className="text-muted-foreground group-hover:text-primary"
+                  whileHover={{ x: 3 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </motion.div>
               </motion.a>
             ))}
           </div>
