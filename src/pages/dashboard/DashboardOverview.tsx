@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Eye, Users, MousePointerClick, TrendingUp, ArrowUp, Link2, Star, Zap, CheckCircle2, ArrowRight, Activity } from "lucide-react";
+import { Eye, Users, MousePointerClick, TrendingUp, ArrowUp, Link2, Star, Zap, CheckCircle2, ArrowRight, Activity, Palette, ExternalLink, BarChart3, LayoutTemplate, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area } from "recharts";
 import { motion } from "framer-motion";
@@ -325,25 +325,27 @@ export default function DashboardOverview({ profile }: Props) {
             <Zap className="w-4 h-4 text-primary" /> Actions Rapides
           </h3>
           <div className="space-y-1.5">
-            {[
-              { label: "Ajouter un nouveau lien", href: "/dashboard/liens", icon: "🔗", color: "bg-blue-50 border-blue-100" },
-              { label: "Personnaliser l'apparence", href: "/dashboard/apparence", icon: "🎨", color: "bg-purple-50 border-purple-100" },
-              { label: "Voir mon profil public", href: profile?.username ? `/u/${profile.username}` : "#", icon: "👁️", target: "_blank", color: "bg-green-50 border-green-100" },
-              { label: "Voir mes analytics", href: "/dashboard/analytics", icon: "📊", color: "bg-orange-50 border-orange-100" },
-              { label: "Explorer les modèles", href: "/dashboard/modeles", icon: "🎭", color: "bg-pink-50 border-pink-100" },
-            ].map((action, i) => (
+            {([
+              { label: "Ajouter un nouveau lien", href: "/dashboard/liens", Icon: Link2, iconColor: "text-sky-500", bg: "bg-sky-50 border-sky-100 dark:bg-sky-950/30 dark:border-sky-900/40" },
+              { label: "Personnaliser l'apparence", href: "/dashboard/apparence", Icon: Palette, iconColor: "text-violet-500", bg: "bg-violet-50 border-violet-100 dark:bg-violet-950/30 dark:border-violet-900/40" },
+              { label: "Voir mon profil public", href: profile?.username ? `/u/${profile.username}` : "#", Icon: ExternalLink, iconColor: "text-emerald-500", target: "_blank", bg: "bg-emerald-50 border-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900/40" },
+              { label: "Voir mes analytics", href: "/dashboard/analytics", Icon: BarChart3, iconColor: "text-amber-500", bg: "bg-amber-50 border-amber-100 dark:bg-amber-950/30 dark:border-amber-900/40" },
+              { label: "Explorer les modèles", href: "/dashboard/modeles", Icon: LayoutTemplate, iconColor: "text-rose-500", bg: "bg-rose-50 border-rose-100 dark:bg-rose-950/30 dark:border-rose-900/40" },
+            ] as const).map((action, i) => (
               <motion.a
                 key={action.href + action.label}
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 + 0.4 }}
-                href={action.target ? action.href : undefined}
-                onClick={!action.target ? (e) => { e.preventDefault(); navigate(action.href); } : undefined}
-                target={action.target}
-                rel={action.target ? "noopener noreferrer" : undefined}
-                className={`flex items-center gap-3 px-3 py-3 rounded-xl border hover:shadow-sm transition-all group cursor-pointer ${action.color}`}
+                href={('target' in action && action.target) ? action.href : undefined}
+                onClick={!('target' in action) ? (e: React.MouseEvent) => { e.preventDefault(); navigate(action.href); } : undefined}
+                target={('target' in action && action.target) ? action.target : undefined}
+                rel={('target' in action && action.target) ? "noopener noreferrer" : undefined}
+                className={`flex items-center gap-3 px-3 py-3 rounded-xl border hover:shadow-sm transition-all group cursor-pointer ${action.bg}`}
               >
-                <span className="text-lg">{action.icon}</span>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${action.iconColor} bg-white/80 dark:bg-white/10 shadow-sm`}>
+                  <action.Icon className="w-4.5 h-4.5" strokeWidth={1.8} />
+                </div>
                 <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors flex-1">
                   {action.label}
                 </span>
