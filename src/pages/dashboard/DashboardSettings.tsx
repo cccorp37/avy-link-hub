@@ -308,19 +308,27 @@ export default function DashboardSettings({ profile, onUpdate }: Props) {
         ))}
       </motion.div>
 
+      {/* Déconnexion */}
+      <motion.div custom={6} variants={fadeUp} initial="hidden" animate="visible">
+        <motion.button
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={handleSignOut}
+          className="w-full flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-2xl border border-border/50 bg-card/80 backdrop-blur-xl text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-all shadow-sm"
+        >
+          <LogOut className="w-4.5 h-4.5" />
+          <span className="text-sm font-semibold">Se déconnecter</span>
+        </motion.button>
+      </motion.div>
+
       {/* Danger zone */}
-      <motion.div custom={6} variants={fadeUp} initial="hidden" animate="visible"
+      <motion.div custom={7} variants={fadeUp} initial="hidden" animate="visible"
         className="bg-card/80 backdrop-blur-xl rounded-2xl border border-destructive/20 shadow-sm p-5">
         <h3 className="font-dm font-bold text-base text-destructive mb-4">⚠️ Zone dangereuse</h3>
-        <div className="space-y-3">
-          <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-secondary gap-2" onClick={handleSignOut}>
-            <LogOut className="w-4 h-4" /> Se déconnecter
-          </Button>
-          <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 gap-2"
-            onClick={() => toast({ title: "Fonctionnalité bientôt disponible", variant: "destructive" })}>
-            <Trash2 className="w-4 h-4" /> Supprimer mon compte
-          </Button>
-        </div>
+        <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 gap-2"
+          onClick={() => toast({ title: "Fonctionnalité bientôt disponible", variant: "destructive" })}>
+          <Trash2 className="w-4 h-4" /> Supprimer mon compte
+        </Button>
       </motion.div>
     </div>
   );
