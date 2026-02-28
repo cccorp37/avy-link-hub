@@ -314,6 +314,79 @@ function PageBlockRenderer({ block }: { block: PageBlock }) {
       return null;
     }
 
+    case "group": {
+      const links = (c.links as Array<{ title: string; url: string }>) || [];
+      const description = c.description as string;
+      if (links.length === 0) return null;
+      return (
+        <div className="bg-card rounded-2xl border border-border/50 p-4 space-y-3">
+          {block.title && <p className="font-dm font-semibold text-base text-foreground">{block.title}</p>}
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          <div className="space-y-2">
+            {links.map((link, i) => (
+              link.url ? (
+                <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-3 rounded-xl border border-border/40 bg-background hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group">
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <ExternalLink className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">{link.title || link.url}</p>
+                  </div>
+                  <ExternalLink className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-primary transition-colors flex-shrink-0" />
+                </a>
+              ) : null
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    case "tiktok": {
+      const url = c.url as string;
+      if (!url) return null;
+      const tkId = extractTikTokId(url);
+      if (!tkId) return null;
+      const fakeLink = { id: block.id, url, title: block.title || "TikTok", icon: "tiktok", click_count: 0 } as ProfileLink;
+      return <TikTokBlock link={fakeLink} />;
+    }
+
+    case "instagram": {
+      const url = c.url as string;
+      if (!url) return null;
+      return (
+        <a href={url} target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-4 p-4 rounded-2xl border border-border/50 bg-card hover:shadow-card hover:-translate-y-0.5 transition-all cursor-pointer group">
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#E4405F18" }}>
+            <SocialIcon platform="instagram" size={24} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground truncate">{block.title || "Instagram"}</p>
+            <p className="text-xs text-muted-foreground">Instagram</p>
+          </div>
+          <ExternalLink className="w-4 h-4 text-muted-foreground/50" />
+        </a>
+      );
+    }
+
+    case "youtube_sub": {
+      const channelId = c.channelId as string;
+      const channelUrl = c.url as string;
+      return (
+        <a href={channelUrl || `https://youtube.com/channel/${channelId}`} target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-4 p-4 rounded-2xl border border-border/50 bg-card hover:shadow-card hover:-translate-y-0.5 transition-all cursor-pointer group">
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#FF000018" }}>
+            <SocialIcon platform="youtube" size={24} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground truncate">{block.title || "S'abonner"}</p>
+            <p className="text-xs text-muted-foreground">YouTube</p>
+          </div>
+          <ExternalLink className="w-4 h-4 text-muted-foreground/50" />
+        </a>
+      );
+    }
+
     default:
       return null;
   }
