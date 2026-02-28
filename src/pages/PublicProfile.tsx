@@ -353,27 +353,49 @@ const PublicProfile = () => {
 
   useEffect(() => {
     if (!username) return;
-    const loadProfile = async () => {
-      const { data: profileData, error } = await supabase.from("profiles").select("*").eq("username", username).single();
-      if (error || !profileData) { setNotFound(true); setLoading(false); return; }
-      setProfile(profileData as Profile);
+    let profileId: string | null = null;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
+    const loadData = async (pid: string) => {
       const [linksRes, blocksRes] = await Promise.all([
-        supabase.from("profile_links").select("*").eq("profile_id", profileData.id).eq("is_active", true).order("position"),
-        supabase.from("page_blocks").select("*").eq("profile_id", profileData.id).eq("is_active", true).order("position"),
+        supabase.from("profile_links").select("*").eq("profile_id", pid).eq("is_active", true).order("position"),
+        supabase.from("page_blocks").select("*").eq("profile_id", pid).eq("is_active", true).order("position"),
       ]);
-
       setLinks(linksRes.data || []);
       setBlocks(
         (blocksRes.data || []).map(b => ({
           ...b,
-          profile_id: profileData.id,
+          profile_id: pid,
           content: (b.content as Record<string, unknown>) || {},
         }))
       );
+    };
+
+    const loadProfile = async () => {
+      const { data: profileData, error } = await supabase.from("profiles").select("*").eq("username", username).single();
+      if (error || !profileData) { setNotFound(true); setLoading(false); return; }
+      setProfile(profileData as Profile);
+      profileId = profileData.id;
+      await loadData(profileId);
       setLoading(false);
+
+      // Realtime subscriptions for instant updates
+      channel = supabase
+        .channel(`public_profile_${profileId}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'page_blocks', filter: `profile_id=eq.${profileId}` }, () => {
+          if (profileId) loadData(profileId);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'profile_links', filter: `profile_id=eq.${profileId}` }, () => {
+          if (profileId) loadData(profileId);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${profileId}` }, (payload) => {
+          if (payload.new) setProfile(payload.new as Profile);
+        })
+        .subscribe();
     };
     loadProfile();
+
+    return () => { if (channel) supabase.removeChannel(channel); };
   }, [username]);
 
   // Inject tracking scripts (GA, FB Pixel, TikTok, Snapchat, Pinterest, LinkedIn)
