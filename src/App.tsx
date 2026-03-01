@@ -18,8 +18,11 @@ import SplashScreen from "@/components/SplashScreen";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [splashDone, setSplashDone] = useState(false);
-  const handleSplashComplete = useCallback(() => setSplashDone(true), []);
+  const [splashDone, setSplashDone] = useState(() => sessionStorage.getItem("splashShown") === "true");
+  const handleSplashComplete = useCallback(() => {
+    sessionStorage.setItem("splashShown", "true");
+    setSplashDone(true);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
