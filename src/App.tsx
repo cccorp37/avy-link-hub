@@ -14,6 +14,7 @@ import InstallApp from "./pages/InstallApp";
 import { AuthProvider } from "@/hooks/useAuth";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import SplashScreen from "@/components/SplashScreen";
+import { MaintenanceGuard } from "@/components/MaintenanceGuard";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => {
               <Toaster />
               <Sonner />
               {!splashDone && <SplashScreen onComplete={handleSplashComplete} />}
+              <MaintenanceGuard>
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Index />} />
@@ -40,10 +42,10 @@ const App = () => {
                   <Route path="/admin/*" element={<AdminLayout />} />
                   <Route path="/u/:username" element={<PublicProfile />} />
                   <Route path="/install" element={<InstallApp />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
+              </MaintenanceGuard>
             </LanguageProvider>
           </AuthProvider>
         </TooltipProvider>

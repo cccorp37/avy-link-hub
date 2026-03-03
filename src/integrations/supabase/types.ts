@@ -65,6 +65,39 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_notifications: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          message: string
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          message: string
+          title: string
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          message?: string
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
       api_keys: {
         Row: {
           created_at: string
@@ -95,6 +128,27 @@ export type Database = {
           last_used_at?: string | null
           name?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
         }
         Relationships: []
       }
@@ -285,6 +339,35 @@ export type Database = {
           },
         ]
       }
+      notification_dismissals: {
+        Row: {
+          dismissed_at: string
+          id: string
+          notification_id: string
+          user_id: string
+        }
+        Insert: {
+          dismissed_at?: string
+          id?: string
+          notification_id: string
+          user_id: string
+        }
+        Update: {
+          dismissed_at?: string
+          id?: string
+          notification_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_dismissals_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "admin_notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_blocks: {
         Row: {
           content: Json
@@ -432,6 +515,7 @@ export type Database = {
           seo_title: string | null
           snapchat_pixel_id: string | null
           social_links: Json | null
+          status: string
           theme: string
           tiktok_pixel_id: string | null
           updated_at: string
@@ -462,6 +546,7 @@ export type Database = {
           seo_title?: string | null
           snapchat_pixel_id?: string | null
           social_links?: Json | null
+          status?: string
           theme?: string
           tiktok_pixel_id?: string | null
           updated_at?: string
@@ -492,6 +577,7 @@ export type Database = {
           seo_title?: string | null
           snapchat_pixel_id?: string | null
           social_links?: Json | null
+          status?: string
           theme?: string
           tiktok_pixel_id?: string | null
           updated_at?: string
