@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import { NotificationBanner } from "@/components/NotificationBanner";
 import { DashboardTopbar } from "@/components/dashboard/DashboardTopbar";
 import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
 import { Loader2 } from "lucide-react";
@@ -128,6 +129,7 @@ const Dashboard = () => {
 
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
         <DashboardTopbar profile={profile} title={currentTitle} />
+        <NotificationBanner />
 
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
