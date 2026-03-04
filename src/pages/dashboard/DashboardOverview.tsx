@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Eye, Users, MousePointerClick, TrendingUp, ArrowUp, Link2, Star, Zap, CheckCircle2, ArrowRight, Activity, Palette, ExternalLink, BarChart3, LayoutTemplate, type LucideIcon } from "lucide-react";
+import { Eye, Users, MousePointerClick, TrendingUp, ArrowUp, Link2, Star, Zap, CheckCircle2, ArrowRight, Activity, Palette, ExternalLink, BarChart3, LayoutTemplate, Shield, type LucideIcon } from "lucide-react";
+import { useAdmin } from "@/hooks/useAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area } from "recharts";
 import { motion } from "framer-motion";
@@ -122,6 +123,7 @@ function getLast7Days() {
 
 export default function DashboardOverview({ profile }: Props) {
   const navigate = useNavigate();
+  const { isAdmin } = useAdmin();
   const [links, setLinks] = useState<ProfileLink[]>([]);
   const [totalViews, setTotalViews] = useState(0);
   const [uniqueVisitors, setUniqueVisitors] = useState(0);
@@ -195,6 +197,30 @@ export default function DashboardOverview({ profile }: Props) {
 
       {/* Profile completion */}
       <ProfileCompletion profile={profile} />
+
+      {/* Admin quick access */}
+      {isAdmin && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          onClick={() => navigate("/dashboard/admin")}
+          className="rounded-2xl p-5 border border-destructive/20 bg-destructive/5 cursor-pointer hover:bg-destructive/10 transition-all group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-destructive/15 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-destructive" />
+              </div>
+              <div>
+                <h3 className="font-dm font-bold text-sm text-foreground">Espace Administration</h3>
+                <p className="text-xs text-muted-foreground">Gérer les utilisateurs, notifications, maintenance…</p>
+              </div>
+            </div>
+            <ArrowRight className="w-5 h-5 text-destructive group-hover:translate-x-1 transition-transform" />
+          </div>
+        </motion.div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">

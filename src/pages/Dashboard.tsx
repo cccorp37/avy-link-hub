@@ -31,6 +31,7 @@ import AdminAnalytics from "./admin/AdminAnalytics";
 import AdminNotifications from "./admin/AdminNotifications";
 import AdminMaintenance from "./admin/AdminMaintenance";
 import AdminTickets from "./admin/AdminTickets";
+import AdminSourceCode from "./admin/AdminSourceCode";
 import { useAdmin } from "@/hooks/useAdmin";
 
 type Profile = Tables<"profiles">;
@@ -54,6 +55,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard/admin/notifications": "Notifications",
   "/dashboard/admin/maintenance": "Maintenance",
   "/dashboard/admin/tickets": "Tickets Support",
+  "/dashboard/admin/source-code": "Code Source",
 };
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -194,6 +196,7 @@ const Dashboard = () => {
                 <Route path="/admin/notifications" element={<AnimatedPage><AdminNotifications /></AnimatedPage>} />
                 <Route path="/admin/maintenance" element={<AnimatedPage><AdminMaintenance /></AnimatedPage>} />
                 <Route path="/admin/tickets" element={<AnimatedPage><AdminTickets /></AnimatedPage>} />
+                <Route path="/admin/source-code" element={<AnimatedPage><AdminSourceCode /></AnimatedPage>} />
               </>
             )}
           </Routes>

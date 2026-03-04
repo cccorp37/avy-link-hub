@@ -20,6 +20,7 @@ import {
   Users,
   Zap,
   Activity,
+  FileCode,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -182,6 +183,7 @@ export function DashboardSidebar({ profile }: Props) {
               { to: "/dashboard/admin/notifications", label: "Notifications", icon: MessageSquare },
               { to: "/dashboard/admin/maintenance", label: "Maintenance", icon: Settings },
               { to: "/dashboard/admin/tickets", label: "Tickets", icon: MessageSquare },
+              { to: "/dashboard/admin/source-code", label: "Code Source", icon: FileCode },
             ].map((item) => {
               const isActive = item.end
                 ? location.pathname === item.to
