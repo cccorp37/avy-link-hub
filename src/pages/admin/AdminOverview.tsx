@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Link2, Star, UserCheck, MessageSquare, Ban, Bell, Eye, Clock, UserPlus, Activity } from "lucide-react";
+import { Users, Link2, Star, UserCheck, MessageSquare, Ban, Bell, Eye, Clock, UserPlus, Activity, Download, FileCode, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Stats {
   totalUsers: number;
@@ -16,6 +17,8 @@ interface Stats {
 }
 
 export default function AdminOverview() {
+  const navigate = useNavigate();
+  const [downloading, setDownloading] = useState(false);
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0, totalLinks: 0, totalViews: 0, premiumUsers: 0,
     todaySignups: 0, openTickets: 0, bannedUsers: 0, suspendedUsers: 0,
@@ -128,6 +131,32 @@ export default function AdminOverview() {
     banned: "bg-destructive/10 text-destructive",
   };
 
+  const handleDownloadSource = async () => {
+    setDownloading(true);
+    try {
+      const modules = import.meta.glob(
+        ["/index.html", "/README.md", "/package.json", "/vite.config.ts", "/tailwind.config.ts", "/tsconfig.json", "/tsconfig.app.json", "/tsconfig.node.json", "/components.json", "/postcss.config.js", "/eslint.config.js", "/vitest.config.ts", "/src/**/*.{tsx,ts,css,html}", "/supabase/**/*.{ts,json,toml}", "/public/robots.txt", "!**/node_modules/**"],
+        { query: "?raw", import: "default", eager: true }
+      ) as Record<string, string>;
+      const entries = Object.entries(modules).sort(([a], [b]) => a.localeCompare(b));
+      let doc = `// AvyLink - Code Source Complet\n// Généré le ${new Date().toLocaleString("fr-FR")}\n// ${entries.length} fichiers\n\n`;
+      for (const [path, content] of entries) {
+        doc += `${"=".repeat(80)}\n// FILE: ${path}\n${"=".repeat(80)}\n\n${content}\n\n`;
+      }
+      const blob = new Blob([doc], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `avylink-source-${new Date().toISOString().split("T")[0]}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between">
@@ -136,12 +165,20 @@ export default function AdminOverview() {
           <p className="text-muted-foreground text-sm">Vue globale en temps réel de la plateforme AvyLink</p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleDownloadSource}
+            disabled={downloading}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 transition-all disabled:opacity-50"
+          >
+            {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+            Code source
+          </button>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             <span className="text-xs text-muted-foreground">Live</span>
           </div>
           <span className="text-[11px] text-muted-foreground hidden sm:block">
-            Mis à jour : {lastRefresh.toLocaleTimeString("fr-FR")}
+            {lastRefresh.toLocaleTimeString("fr-FR")}
           </span>
         </div>
       </div>
