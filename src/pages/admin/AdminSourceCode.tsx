@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 const modules = import.meta.glob(
   [
     "/index.html",
+    "/README.md",
+    "/package.json",
     "/vite.config.ts",
     "/tailwind.config.ts",
     "/tsconfig.json",
@@ -15,8 +17,9 @@ const modules = import.meta.glob(
     "/postcss.config.js",
     "/eslint.config.js",
     "/vitest.config.ts",
-    "/src/**/*.{tsx,ts,css}",
+    "/src/**/*.{tsx,ts,css,html}",
     "/supabase/**/*.{ts,json,toml}",
+    "/public/robots.txt",
     "!**/node_modules/**",
   ],
   { query: "?raw", import: "default", eager: true }
