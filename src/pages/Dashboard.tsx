@@ -24,6 +24,15 @@ import DashboardTeam from "./dashboard/DashboardTeam";
 import DashboardAPI from "./dashboard/DashboardAPI";
 import DashboardHeatmap from "./dashboard/DashboardHeatmap";
 
+// Admin sub-pages
+import AdminOverview from "./admin/AdminOverview";
+import AdminUsers from "./admin/AdminUsers";
+import AdminAnalytics from "./admin/AdminAnalytics";
+import AdminNotifications from "./admin/AdminNotifications";
+import AdminMaintenance from "./admin/AdminMaintenance";
+import AdminTickets from "./admin/AdminTickets";
+import { useAdmin } from "@/hooks/useAdmin";
+
 type Profile = Tables<"profiles">;
 
 const PAGE_TITLES: Record<string, string> = {
@@ -39,6 +48,12 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard/equipe": "Équipe",
   "/dashboard/api": "API & Webhooks",
   "/dashboard/heatmap": "Heatmap & A/B",
+  "/dashboard/admin": "Administration",
+  "/dashboard/admin/users": "Utilisateurs",
+  "/dashboard/admin/analytics": "Analytics Admin",
+  "/dashboard/admin/notifications": "Notifications",
+  "/dashboard/admin/maintenance": "Maintenance",
+  "/dashboard/admin/tickets": "Tickets Support",
 };
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -66,6 +81,7 @@ function AnimatedPage({ children }: { children: React.ReactNode }) {
 
 const Dashboard = () => {
   const { user, loading } = useAuth();
+  const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const location = useLocation();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -169,6 +185,17 @@ const Dashboard = () => {
             <Route path="/heatmap" element={
               <AnimatedPage><DashboardHeatmap profile={profile} /></AnimatedPage>
             } />
+            {/* Admin routes */}
+            {isAdmin && (
+              <>
+                <Route path="/admin" element={<AnimatedPage><AdminOverview /></AnimatedPage>} />
+                <Route path="/admin/users" element={<AnimatedPage><AdminUsers /></AnimatedPage>} />
+                <Route path="/admin/analytics" element={<AnimatedPage><AdminAnalytics /></AnimatedPage>} />
+                <Route path="/admin/notifications" element={<AnimatedPage><AdminNotifications /></AnimatedPage>} />
+                <Route path="/admin/maintenance" element={<AnimatedPage><AdminMaintenance /></AnimatedPage>} />
+                <Route path="/admin/tickets" element={<AnimatedPage><AdminTickets /></AnimatedPage>} />
+              </>
+            )}
           </Routes>
         </AnimatePresence>
 

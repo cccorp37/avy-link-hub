@@ -166,27 +166,73 @@ export function DashboardSidebar({ profile }: Props) {
           );
         })}
 
-        {/* Admin link */}
+        {/* Admin section */}
         {isAdmin && (
           <>
             <div className="my-3 mx-3 h-px bg-border/50" />
-            <NavLink
-              to="/admin"
-              title={collapsed ? "Admin" : undefined}
-              className="block"
-            >
-              <motion.div
-                whileHover={{ x: collapsed ? 0 : 3 }}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  location.pathname.startsWith("/admin")
-                    ? "bg-destructive/10 text-destructive border border-destructive/15"
-                    : "text-muted-foreground hover:bg-destructive/5 hover:text-destructive"
-                } ${collapsed ? "justify-center" : ""}`}
-              >
-                <Shield className="w-[18px] h-[18px] flex-shrink-0" />
-                {!collapsed && <span>Administration</span>}
-              </motion.div>
-            </NavLink>
+            {!collapsed && (
+              <div className="px-4 mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-destructive/70">Administration</span>
+              </div>
+            )}
+            {[
+              { to: "/dashboard/admin", label: "Vue d'ensemble", icon: Shield, end: true },
+              { to: "/dashboard/admin/users", label: "Utilisateurs", icon: Users },
+              { to: "/dashboard/admin/analytics", label: "Analytics", icon: BarChart3 },
+              { to: "/dashboard/admin/notifications", label: "Notifications", icon: MessageSquare },
+              { to: "/dashboard/admin/maintenance", label: "Maintenance", icon: Settings },
+              { to: "/dashboard/admin/tickets", label: "Tickets", icon: MessageSquare },
+            ].map((item) => {
+              const isActive = item.end
+                ? location.pathname === item.to
+                : location.pathname.startsWith(item.to) && item.to !== "/dashboard/admin";
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  title={collapsed ? item.label : undefined}
+                  className="block"
+                >
+                  <motion.div
+                    whileHover={{ x: collapsed ? 0 : 3 }}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative ${
+                      isActive
+                        ? "text-destructive"
+                        : "text-muted-foreground hover:text-destructive"
+                    } ${collapsed ? "justify-center" : ""}`}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="sidebar-admin-active"
+                        className="absolute inset-0 rounded-xl bg-destructive/10 border border-destructive/15"
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
+                    {isActive && (
+                      <motion.div
+                        layoutId="sidebar-admin-indicator"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-destructive"
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
+                    <item.icon className="w-[18px] h-[18px] flex-shrink-0 relative z-10" />
+                    <AnimatePresence>
+                      {!collapsed && (
+                        <motion.span
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: "auto" }}
+                          exit={{ opacity: 0, width: 0 }}
+                          className="relative z-10 whitespace-nowrap"
+                        >
+                          {item.label}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                </NavLink>
+              );
+            })}
           </>
         )}
       </nav>

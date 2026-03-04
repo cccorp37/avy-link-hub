@@ -3,13 +3,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import PublicProfile from "./pages/PublicProfile";
 import NotFound from "./pages/NotFound";
-import AdminLayout from "./pages/admin/AdminLayout";
+
 import InstallApp from "./pages/InstallApp";
 import { AuthProvider } from "@/hooks/useAuth";
 import { LanguageProvider } from "@/hooks/useLanguage";
@@ -39,7 +39,7 @@ const App = () => {
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/dashboard/*" element={<Dashboard />} />
-                  <Route path="/admin/*" element={<AdminLayout />} />
+                  <Route path="/admin/*" element={<Navigate to="/dashboard/admin" replace />} />
                   <Route path="/u/:username" element={<PublicProfile />} />
                   <Route path="/install" element={<InstallApp />} />
                   <Route path="*" element={<NotFound />} />
