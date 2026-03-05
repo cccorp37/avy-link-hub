@@ -86,9 +86,11 @@ const Dashboard = () => {
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const location = useLocation();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
 
+  const profile = profiles.find(p => p.id === activeProfileId) || profiles[0] || null;
   const currentTitle = PAGE_TITLES[location.pathname] || "Dashboard";
 
   useEffect(() => {
@@ -103,17 +105,42 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!user) return;
-    const loadProfile = async () => {
+    const loadProfiles = async () => {
       const { data } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", user.id)
-        .single();
-      setProfile(data);
+        .order("created_at", { ascending: true });
+      const list = data || [];
+      setProfiles(list);
+      // Restore last active or pick first
+      const stored = localStorage.getItem("avylink_active_profile");
+      const found = list.find(p => p.id === stored);
+      setActiveProfileId(found?.id || list[0]?.id || null);
       setProfileLoading(false);
     };
-    loadProfile();
+    loadProfiles();
   }, [user]);
+
+  const switchProfile = (p: Profile) => {
+    setActiveProfileId(p.id);
+    localStorage.setItem("avylink_active_profile", p.id);
+  };
+
+  const handleProfileCreated = (newProfile: Profile) => {
+    setProfiles(prev => [...prev, newProfile]);
+    switchProfile(newProfile);
+  };
+
+  const handleProfileDeleted = (profileId: string) => {
+    setProfiles(prev => {
+      const next = prev.filter(p => p.id !== profileId);
+      if (activeProfileId === profileId && next.length > 0) {
+        switchProfile(next[0]);
+      }
+      return next;
+    });
+  };
 
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!profile) return;
@@ -123,7 +150,9 @@ const Dashboard = () => {
       .eq("id", profile.id)
       .select()
       .single();
-    if (data) setProfile(data);
+    if (data) {
+      setProfiles(prev => prev.map(p => p.id === data.id ? data : p));
+    }
   };
 
   if (loading || profileLoading) {
@@ -143,7 +172,13 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen flex w-full" style={{ background: "hsl(210, 20%, 98%)" }}>
-      <DashboardSidebar profile={profile} />
+      <DashboardSidebar
+        profile={profile}
+        profiles={profiles}
+        onSwitchProfile={switchProfile}
+        onProfileCreated={handleProfileCreated}
+        onProfileDeleted={handleProfileDeleted}
+      />
 
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
         <DashboardTopbar profile={profile} title={currentTitle} />
