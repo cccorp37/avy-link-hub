@@ -26,13 +26,14 @@ interface PageBlock {
   is_active: boolean;
 }
 
-const BLOCK_TYPES: { type: string; label: string; Icon: LucideIcon; iconColor: string; iconBg: string; desc: string; preview: string }[] = [
+const BLOCK_TYPES: { type: string; label: string; Icon: LucideIcon; iconColor: string; iconBg: string; desc: string; preview: string; premium?: boolean }[] = [
   { type: "heading", label: "Entête", Icon: Heading, iconColor: "text-violet-500", iconBg: "bg-violet-100 dark:bg-violet-500/20", desc: "Titre ou sous-titre de section", preview: "bg-purple-50 border-purple-200" },
   { type: "social_icons", label: "Icônes sociales", Icon: Globe, iconColor: "text-sky-500", iconBg: "bg-sky-100 dark:bg-sky-500/20", desc: "Facebook, Instagram, Twitter, TikTok...", preview: "bg-blue-50 border-blue-200" },
   { type: "video", label: "Vidéo", Icon: Clapperboard, iconColor: "text-rose-500", iconBg: "bg-rose-100 dark:bg-rose-500/20", desc: "YouTube, Vimeo, TikTok, Twitch", preview: "bg-red-50 border-red-200" },
   { type: "music", label: "La musique", Icon: Music, iconColor: "text-emerald-500", iconBg: "bg-emerald-100 dark:bg-emerald-500/20", desc: "Spotify, Apple Music, SoundCloud", preview: "bg-green-50 border-green-200" },
   { type: "group", label: "Groupe de liens", Icon: Link2, iconColor: "text-indigo-500", iconBg: "bg-indigo-100 dark:bg-indigo-500/20", desc: "Grouper plusieurs liens", preview: "bg-indigo-50 border-indigo-200" },
   { type: "form", label: "Formulaire", Icon: ClipboardList, iconColor: "text-amber-500", iconBg: "bg-amber-100 dark:bg-amber-500/20", desc: "Collecte nom, email, message", preview: "bg-orange-50 border-orange-200" },
+  { type: "social_embed", label: "Publication sociale", Icon: Instagram, iconColor: "text-pink-500", iconBg: "bg-pink-100 dark:bg-pink-500/20", desc: "Aperçu d'une publication Instagram, X, TikTok...", preview: "bg-pink-50 border-pink-200", premium: true },
   { type: "divider", label: "Diviseur", Icon: Minus, iconColor: "text-gray-500", iconBg: "bg-gray-100 dark:bg-gray-500/20", desc: "Ligne de séparation décorative", preview: "bg-gray-50 border-gray-200" },
   { type: "text", label: "Texte", Icon: Type, iconColor: "text-yellow-500", iconBg: "bg-yellow-100 dark:bg-yellow-500/20", desc: "Bloc de texte libre", preview: "bg-yellow-50 border-yellow-200" },
   { type: "podcast", label: "Podcast", Icon: Mic, iconColor: "text-pink-500", iconBg: "bg-pink-100 dark:bg-pink-500/20", desc: "Intégrer un épisode de podcast", preview: "bg-pink-50 border-pink-200" },
@@ -229,6 +230,31 @@ function BlockEditor({ block, onSave, onClose }: { block: Partial<PageBlock>; on
                   className="rounded-xl"
                 />
               </div>
+              <div className="flex items-center justify-between py-2 px-1">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Champ message</p>
+                  <p className="text-xs text-muted-foreground">Permettre aux visiteurs d'écrire un message</p>
+                </div>
+                <button
+                  onClick={() => updateContent("includeMessage", !(form.content?.includeMessage as boolean ?? true))}
+                  className={`w-9 h-5 rounded-full transition-colors relative ${(form.content?.includeMessage as boolean ?? true) ? "bg-primary" : "bg-muted"}`}
+                >
+                  <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${(form.content?.includeMessage as boolean ?? true) ? "left-4" : "left-0.5"}`} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {block.type === "social_embed" && (
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1 block">URL de la publication</label>
+              <Input
+                value={(form.content?.url as string) || ""}
+                onChange={e => updateContent("url", e.target.value)}
+                placeholder="https://www.instagram.com/p/... ou https://x.com/.../status/..."
+                className="rounded-xl"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Instagram, X (Twitter), TikTok, Facebook supportés</p>
             </div>
           )}
 
@@ -671,6 +697,11 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
 
 
   const addBlock = (type: string) => {
+    const blockDef = BLOCK_TYPES.find(b => b.type === type);
+    if (blockDef?.premium && profile?.plan === "free") {
+      toast({ title: "Fonctionnalité Premium 👑", description: "Passe au plan Premium pour utiliser ce bloc.", variant: "destructive" });
+      return;
+    }
     setEditingBlock({ type, title: "", content: {}, position: blocks.length, is_active: true });
     setShowBlockModal(false);
   };
@@ -767,9 +798,12 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
                 <button
                   key={bt.type}
                   onClick={() => addBlock(bt.type)}
-                  className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-border/60 bg-background hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-center group opacity-0 animate-fade-in"
+                  className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-border/60 bg-background hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-center group opacity-0 animate-fade-in relative"
                   style={{ animationDelay: `${i * 40}ms`, animationFillMode: "forwards" }}
                 >
+                  {bt.premium && (
+                    <span className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-[8px] font-bold bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950">👑</span>
+                  )}
                   <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${bt.iconBg} group-hover:shadow-md group-hover:scale-110 transition-all duration-200`}>
                     <bt.Icon className={`w-5 h-5 ${bt.iconColor}`} strokeWidth={1.8} />
                   </div>
