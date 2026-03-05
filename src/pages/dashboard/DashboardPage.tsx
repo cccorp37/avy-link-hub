@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 type Profile = Tables<"profiles">;
 
@@ -996,11 +997,8 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
                       </div>
                     )}
                     {profile?.is_verified && (
-                      <span className="absolute -bottom-0.5 -right-0.5 bg-[#1D9BF0] rounded-full p-[2px] border-2 border-background shadow-sm">
-                        <svg viewBox="0 0 24 24" className="w-3 h-3 text-white fill-current">
-                          <path d="M9.585 7.17a2.66 2.66 0 0 1 4.83 0l.29.64a2.66 2.66 0 0 0 1.485 1.485l.64.29a2.66 2.66 0 0 1 0 4.83l-.64.29a2.66 2.66 0 0 0-1.485 1.485l-.29.64a2.66 2.66 0 0 1-4.83 0l-.29-.64a2.66 2.66 0 0 0-1.485-1.485l-.64-.29a2.66 2.66 0 0 1 0-4.83l.64-.29A2.66 2.66 0 0 0 9.295 7.81l.29-.64z" />
-                          <path d="M14.28 9.22a.75.75 0 0 1 0 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-1.5-1.5a.75.75 0 1 1 1.06-1.06l.97.97 2.97-2.97a.75.75 0 0 1 1.06 0z" fill="white" />
-                        </svg>
+                      <span className="absolute -bottom-0.5 -right-0.5">
+                        <VerifiedBadge style={(profile as any).verified_badge_style} size="sm" />
                       </span>
                     )}
                   </div>

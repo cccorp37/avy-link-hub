@@ -9,6 +9,7 @@ import { signOut } from "@/lib/supabase-auth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
+import { VerifiedBadge, BADGE_STYLES } from "@/components/VerifiedBadge";
 import DashboardAdvancedSettings from "./DashboardAdvancedSettings";
 import DashboardFormMessages from "./DashboardFormMessages";
 
@@ -148,11 +149,11 @@ export default function DashboardSettings({ profile, onUpdate }: Props) {
           )}
         </div>
         {profile?.plan !== "free" ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <p className="text-sm text-muted-foreground">Affiche un badge vérifié à côté de ton nom sur ta page publique pour renforcer ta crédibilité.</p>
             <div className="flex items-center justify-between py-2">
               <div className="flex items-center gap-3">
-                <BadgeCheck className="w-6 h-6 text-primary" strokeWidth={2.5} />
+                <VerifiedBadge style={(profile as any)?.verified_badge_style} size="lg" />
                 <div>
                   <p className="text-sm font-medium text-foreground">Activer le badge vérifié</p>
                   <p className="text-xs text-muted-foreground">{profile?.is_verified ? "Visible sur votre profil public" : "Masqué actuellement"}</p>
@@ -162,8 +163,8 @@ export default function DashboardSettings({ profile, onUpdate }: Props) {
                 whileTap={{ scale: 0.9 }}
                 onClick={async () => {
                   const newVal = !profile?.is_verified;
-                  await supabase.from("profiles").update({ is_verified: newVal }).eq("id", profile?.id);
-                  onUpdate({ is_verified: newVal });
+                  await supabase.from("profiles").update({ is_verified: newVal } as never).eq("id", profile?.id);
+                  onUpdate({ is_verified: newVal } as any);
                   toast({ title: newVal ? "✅ Badge vérifié activé" : "Badge vérifié désactivé" });
                 }}
                 className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 ${profile?.is_verified ? "bg-primary" : "bg-muted"}`}
@@ -175,6 +176,35 @@ export default function DashboardSettings({ profile, onUpdate }: Props) {
                 />
               </motion.button>
             </div>
+
+            {/* Badge style picker */}
+            {profile?.is_verified && (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground">Choisis ton style de badge</p>
+                <div className="grid grid-cols-5 gap-2">
+                  {BADGE_STYLES.map((badge) => (
+                    <motion.button
+                      key={badge.id}
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={async () => {
+                        await supabase.from("profiles").update({ verified_badge_style: badge.id } as never).eq("id", profile?.id);
+                        onUpdate({ verified_badge_style: badge.id } as any);
+                        toast({ title: `Badge "${badge.label}" sélectionné ✅` });
+                      }}
+                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
+                        (profile as any)?.verified_badge_style === badge.id || (!((profile as any)?.verified_badge_style) && badge.id === "star")
+                          ? "border-primary bg-primary/10 shadow-sm"
+                          : "border-border/50 hover:border-primary/30 bg-card/50"
+                      }`}
+                    >
+                      <img src={badge.src} alt={badge.label} className="w-8 h-8 object-contain" />
+                      <span className="text-[10px] font-medium text-foreground">{badge.label}</span>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="space-y-3">
