@@ -1,26 +1,8 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard,
-  User,
-  Link2,
-  Palette,
-  BarChart3,
-  Settings,
-  LogOut,
-  Star,
-  Eye,
-  ChevronLeft,
-  ChevronRight,
-  Shield,
-  LayoutTemplate,
-  Plug,
-  BadgeCheck,
-  Sparkles,
-  MessageSquare,
-  Users,
-  Zap,
-  Activity,
-  FileCode,
+  LayoutDashboard, User, Link2, Palette, BarChart3, Settings, LogOut, Eye,
+  ChevronLeft, ChevronRight, Shield, LayoutTemplate, Plug, Sparkles,
+  MessageSquare, Users, Zap, Activity, FileCode,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -31,6 +13,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { PageSwitcher } from "./PageSwitcher";
 
 type Profile = Tables<"profiles"> & { is_verified?: boolean | null };
 
@@ -51,9 +34,13 @@ const navItems = [
 
 interface Props {
   profile: Profile | null;
+  profiles: Profile[];
+  onSwitchProfile: (p: Profile) => void;
+  onProfileCreated: (p: Profile) => void;
+  onProfileDeleted: (id: string) => void;
 }
 
-export function DashboardSidebar({ profile }: Props) {
+export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfileCreated, onProfileDeleted }: Props) {
   const { user } = useAuth();
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
@@ -109,9 +96,21 @@ export function DashboardSidebar({ profile }: Props) {
         </AnimatePresence>
       </div>
 
+      {/* Page Switcher */}
+      <PageSwitcher
+        profiles={profiles}
+        activeProfile={profile}
+        onSwitch={onSwitchProfile}
+        onCreated={onProfileCreated}
+        onDeleted={onProfileDeleted}
+        collapsed={collapsed}
+      />
+
+      <div className="mx-3 h-px bg-border/40" />
+
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-2.5 space-y-0.5">
-        {navItems.map((item, i) => {
+      <nav className="flex-1 overflow-y-auto py-3 px-2.5 space-y-0.5">
+        {navItems.map((item) => {
           const isActive = item.end
             ? location.pathname === item.to
             : location.pathname.startsWith(item.to);
@@ -131,7 +130,6 @@ export function DashboardSidebar({ profile }: Props) {
                     : "text-muted-foreground hover:text-foreground"
                 } ${collapsed ? "justify-center" : ""}`}
               >
-                {/* Active indicator */}
                 {isActive && (
                   <motion.div
                     layoutId="sidebar-active"
