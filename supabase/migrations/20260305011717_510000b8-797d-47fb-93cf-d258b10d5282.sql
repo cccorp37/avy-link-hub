@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS verified_badge_style text NOT NULL DEFAULT 'star';

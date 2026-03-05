@@ -521,6 +521,7 @@ export type Database = {
           updated_at: string
           user_id: string
           username: string | null
+          verified_badge_style: string
           website: string | null
         }
         Insert: {
@@ -552,6 +553,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           username?: string | null
+          verified_badge_style?: string
           website?: string | null
         }
         Update: {
@@ -583,6 +585,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           username?: string | null
+          verified_badge_style?: string
           website?: string | null
         }
         Relationships: []

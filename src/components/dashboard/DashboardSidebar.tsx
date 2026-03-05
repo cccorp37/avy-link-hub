@@ -30,6 +30,7 @@ import avylinkLogo from "@/assets/avylink-logo.jpg";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 type Profile = Tables<"profiles"> & { is_verified?: boolean | null };
 
@@ -314,7 +315,7 @@ export function DashboardSidebar({ profile }: Props) {
                     {profile?.display_name || user?.email?.split("@")[0]}
                   </p>
                   {profile?.is_verified && (
-                    <BadgeCheck className="w-3.5 h-3.5 text-primary flex-shrink-0" strokeWidth={2.5} />
+                    <VerifiedBadge style={(profile as any).verified_badge_style} size="sm" />
                   )}
                 </div>
                 <p className="text-[11px] text-muted-foreground truncate">
