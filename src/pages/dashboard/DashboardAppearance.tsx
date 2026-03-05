@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Check, Loader2, Save, Palette, Type, MousePointer2, Eye, Sparkles, AlignCenter, AlignLeft, AlignRight, Plus, Trash2, BookmarkPlus } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Check, Loader2, Save, Palette, Type, MousePointer2, Eye, Sparkles, AlignCenter, AlignLeft, AlignRight, Plus, Trash2, BookmarkPlus, ImageIcon, Lock, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -90,6 +90,9 @@ export default function DashboardAppearance({ profile, onUpdate }: Props) {
   const [selectedAvatarPos, setSelectedAvatarPos] = useState((profile as any)?.avatar_position || "center");
   const [selectedBgColor, setSelectedBgColor] = useState(profile?.background_color || "#ffffff");
   const [customBgColor, setCustomBgColor] = useState("");
+  const [bgImageUrl, setBgImageUrl] = useState((profile as any)?.background_image_url || "");
+  const [uploadingBg, setUploadingBg] = useState(false);
+  const bgInputRef = useRef<HTMLInputElement>(null);
 
   // Custom templates
   const [customTemplates, setCustomTemplates] = useState<CustomTemplate[]>([]);
@@ -111,12 +114,35 @@ export default function DashboardAppearance({ profile, onUpdate }: Props) {
       font_style: selectedFont,
       background_color: selectedBgColor,
     } as any);
-    // Save avatar_position via direct update since types may not include it yet
+    // Save avatar_position and background_image_url via direct update
     if (profile) {
-      await supabase.from("profiles").update({ avatar_position: selectedAvatarPos } as any).eq("id", profile.id);
+      await supabase.from("profiles").update({ 
+        avatar_position: selectedAvatarPos,
+        background_image_url: bgImageUrl || null,
+      } as any).eq("id", profile.id);
     }
     setSaving(false);
     toast({ title: "✅ Apparence sauvegardée !" });
+  };
+
+  const handleBgImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setUploadingBg(true);
+    const ext = file.name.split(".").pop();
+    const path = `${user.id}/background.${ext}`;
+    const { error } = await supabase.storage.from("backgrounds").upload(path, file, { upsert: true });
+    if (error) { toast({ title: "Erreur upload", description: error.message, variant: "destructive" }); setUploadingBg(false); return; }
+    const { data } = supabase.storage.from("backgrounds").getPublicUrl(path);
+    const url = data.publicUrl + `?t=${Date.now()}`;
+    setBgImageUrl(url);
+    toast({ title: "✅ Image de fond ajoutée — pense à sauvegarder !" });
+    setUploadingBg(false);
+  };
+
+  const removeBgImage = () => {
+    setBgImageUrl("");
+    toast({ title: "Image de fond supprimée — pense à sauvegarder !" });
   };
 
   const handleSaveCustomTemplate = async () => {
@@ -257,7 +283,68 @@ export default function DashboardAppearance({ profile, onUpdate }: Props) {
         </div>
       </motion.div>
 
-      {/* Button style */}
+      {/* Background image (Premium) */}
+      <motion.div custom={1.5} initial="hidden" animate="visible" variants={fadeUp}
+        className="rounded-2xl border border-border/40 shadow-card p-5"
+        style={{ background: "hsl(var(--card))" }}>
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center shadow-sm"
+            style={{ background: "linear-gradient(135deg, hsl(330, 70%, 55%), hsl(330, 70%, 45%))" }}>
+            <ImageIcon className="w-4 h-4 text-primary-foreground" />
+          </div>
+          <h3 className="font-dm font-bold text-base text-foreground">Image d'arrière-plan</h3>
+          {profile?.plan === "free" && (
+            <span className="ml-auto px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 flex items-center gap-1">
+              <Lock className="w-3 h-3" /> Premium
+            </span>
+          )}
+        </div>
+        {profile?.plan !== "free" ? (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">Choisis une photo de ta galerie comme arrière-plan de ta page portfolio.</p>
+            {bgImageUrl ? (
+              <div className="relative rounded-xl overflow-hidden border border-border/50">
+                <img src={bgImageUrl} alt="Arrière-plan" className="w-full h-32 object-cover" />
+                <div className="absolute inset-0 bg-black/20 flex items-center justify-center gap-2 opacity-0 hover:opacity-100 transition-opacity">
+                  <motion.button whileTap={{ scale: 0.95 }}
+                    onClick={() => bgInputRef.current?.click()}
+                    className="px-3 py-1.5 bg-white/90 text-foreground rounded-lg text-xs font-semibold shadow">
+                    {uploadingBg ? <Loader2 className="w-3 h-3 animate-spin" /> : "Changer"}
+                  </motion.button>
+                  <motion.button whileTap={{ scale: 0.95 }}
+                    onClick={removeBgImage}
+                    className="px-3 py-1.5 bg-destructive/90 text-white rounded-lg text-xs font-semibold shadow">
+                    Supprimer
+                  </motion.button>
+                </div>
+              </div>
+            ) : (
+              <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
+                onClick={() => bgInputRef.current?.click()}
+                disabled={uploadingBg}
+                className="w-full py-8 rounded-xl border-2 border-dashed border-border/50 hover:border-primary/40 transition-colors flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground">
+                {uploadingBg ? <Loader2 className="w-6 h-6 animate-spin" /> : <Upload className="w-6 h-6" />}
+                <span className="text-sm font-medium">{uploadingBg ? "Upload en cours..." : "Choisir une image"}</span>
+                <span className="text-xs">JPG, PNG. Recommandé : 1080×1920px</span>
+              </motion.button>
+            )}
+            <input ref={bgInputRef} type="file" accept="image/*" className="hidden" onChange={handleBgImageUpload} />
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">L'image d'arrière-plan personnalisée est réservée aux utilisateurs Premium.</p>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 text-sm font-bold flex items-center justify-center gap-1 shadow-lg"
+              onClick={() => toast({ title: "Bientôt disponible 🔜" })}
+            >
+              Passer en Premium 👑
+            </motion.button>
+          </div>
+        )}
+      </motion.div>
+
       <motion.div custom={2} initial="hidden" animate="visible" variants={fadeUp}
         className="rounded-2xl border border-border/40 shadow-card p-5"
         style={{ background: "hsl(var(--card))" }}>

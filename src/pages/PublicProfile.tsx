@@ -179,7 +179,12 @@ function SocialIconsBlock({ content }: { content: Record<string, unknown> }) {
   );
 }
 
-function ContactFormBlock({ block }: { block: PageBlock }) {
+function ContactFormBlock({ block, profilePlan }: { block: PageBlock; profilePlan?: string }) {
+  const includeMessage = (block.content as Record<string, unknown>)?.includeMessage as boolean ?? true;
+  const isFree = profilePlan === "free";
+  // Free plan: only name + email. Premium: name + email + message
+  const showMessage = includeMessage && !isFree;
+
   const [form, setForm] = useState({ full_name: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -192,7 +197,9 @@ function ContactFormBlock({ block }: { block: PageBlock }) {
       await supabase.from("form_submissions").insert({
         profile_id: block.profile_id,
         block_id: block.id,
-        ...form,
+        full_name: form.full_name,
+        email: form.email,
+        message: showMessage ? form.message : null,
       });
       setSubmitted(true);
     } catch { /* silent */ }
@@ -218,9 +225,11 @@ function ContactFormBlock({ block }: { block: PageBlock }) {
         <input type="email" required placeholder="Email" value={form.email}
           onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
           className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
-        <textarea rows={3} placeholder="Message (optionnel)" value={form.message}
-          onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-          className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none transition-all" />
+        {showMessage && (
+          <textarea rows={3} placeholder="Message (optionnel)" value={form.message}
+            onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
+            className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none transition-all" />
+        )}
         <button type="submit" disabled={submitting}
           className="w-full py-3 gradient-cta text-primary-foreground rounded-xl font-semibold text-sm transition-opacity disabled:opacity-70">
           {submitting ? "Envoi en cours..." : "Envoyer le message"}
@@ -240,7 +249,7 @@ interface PageBlock {
   profile_id: string;
 }
 
-function PageBlockRenderer({ block }: { block: PageBlock }) {
+function PageBlockRenderer({ block, profilePlan }: { block: PageBlock; profilePlan?: string }) {
   if (!block.is_active) return null;
   const c = block.content;
 
@@ -270,7 +279,7 @@ function PageBlockRenderer({ block }: { block: PageBlock }) {
       );
 
     case "form":
-      return <ContactFormBlock block={block} />;
+      return <ContactFormBlock block={block} profilePlan={profilePlan} />;
 
     case "video": {
       const url = c.url as string;
@@ -388,6 +397,72 @@ function PageBlockRenderer({ block }: { block: PageBlock }) {
       );
     }
 
+    case "social_embed": {
+      const url = c.url as string;
+      if (!url) return null;
+      // Detect platform and render embed
+      if (url.includes("instagram.com/p/") || url.includes("instagram.com/reel/")) {
+        const match = url.match(/instagram\.com\/(p|reel)\/([A-Za-z0-9_-]+)/);
+        if (match) {
+          return (
+            <div className="rounded-2xl overflow-hidden border border-border/50 bg-card">
+              <iframe
+                src={`https://www.instagram.com/${match[1]}/${match[2]}/embed/`}
+                width="100%" height="480" frameBorder="0" scrolling="no"
+                allowTransparency loading="lazy" className="block"
+                title={block.title || "Instagram"} />
+              {block.title && <p className="px-4 py-2 text-sm font-semibold text-foreground">{block.title}</p>}
+            </div>
+          );
+        }
+      }
+      if (url.includes("twitter.com/") || url.includes("x.com/")) {
+        return (
+          <div className="rounded-2xl overflow-hidden border border-border/50 bg-card p-4">
+            <blockquote className="twitter-tweet" data-dnt="true">
+              <a href={url}>{block.title || "Tweet"}</a>
+            </blockquote>
+            <script async src="https://platform.twitter.com/widgets.js" />
+            {block.title && <p className="text-sm font-semibold text-foreground mt-2">{block.title}</p>}
+          </div>
+        );
+      }
+      if (url.includes("tiktok.com/") && url.includes("/video/")) {
+        const tkId = extractTikTokId(url);
+        if (tkId) {
+          const fakeLink = { id: block.id, url, title: block.title || "TikTok", icon: "tiktok", click_count: 0 } as ProfileLink;
+          return <TikTokBlock link={fakeLink} />;
+        }
+      }
+      if (url.includes("facebook.com/")) {
+        return (
+          <div className="rounded-2xl overflow-hidden border border-border/50 bg-card">
+            <iframe
+              src={`https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(url)}&show_text=true&width=500`}
+              width="100%" height="400" style={{ border: "none", overflow: "hidden" }}
+              scrolling="no" frameBorder="0" allowFullScreen loading="lazy"
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              title={block.title || "Facebook"} />
+            {block.title && <p className="px-4 py-2 text-sm font-semibold text-foreground">{block.title}</p>}
+          </div>
+        );
+      }
+      // Fallback - just show a link
+      return (
+        <a href={url} target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-4 p-4 rounded-2xl border border-border/50 bg-card hover:shadow-card hover:-translate-y-0.5 transition-all cursor-pointer group">
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-pink-100 dark:bg-pink-500/20">
+            <SocialIcon platform="instagram" size={24} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground truncate">{block.title || "Publication"}</p>
+            <p className="text-xs text-muted-foreground">Publication sociale</p>
+          </div>
+          <ExternalLink className="w-4 h-4 text-muted-foreground/50" />
+        </a>
+      );
+    }
+
     default:
       return null;
   }
@@ -472,7 +547,17 @@ const PublicProfile = () => {
     return () => { if (channel) supabase.removeChannel(channel); };
   }, [username]);
 
-  // Inject tracking scripts (GA, FB Pixel, TikTok, Snapchat, Pinterest, LinkedIn)
+  // Record page view
+  useEffect(() => {
+    if (!profile) return;
+    const device = /Mobi|Android/i.test(navigator.userAgent) ? "mobile" : "desktop";
+    supabase.from("page_views").insert({
+      profile_id: profile.id,
+      device,
+      referrer: document.referrer || null,
+    }).then(() => {});
+  }, [profile]);
+
   useEffect(() => {
     if (!profile) return;
     const scripts: HTMLScriptElement[] = [];
@@ -567,11 +652,17 @@ const PublicProfile = () => {
   const avatarPos = profile.avatar_position || "center";
   const btnClass = BUTTON_STYLES[profile.button_style] || BUTTON_STYLES.rounded;
   const bgColor = profile.background_color || undefined;
+  const bgImage = (profile as any).background_image_url as string | undefined;
   const isOutline = profile.button_style === "outline";
 
+  const bgStyle: React.CSSProperties = {
+    fontFamily,
+    ...(bgImage ? { backgroundImage: `url(${bgImage})`, backgroundSize: "cover", backgroundPosition: "center", backgroundAttachment: "fixed" } : { background: bgColor || undefined }),
+  };
+
   return (
-    <div className="min-h-screen" style={{ fontFamily, background: bgColor || undefined }}>
-      <div className={`min-h-screen ${!bgColor ? "bg-gradient-to-br from-background via-secondary/30 to-background" : ""}`}>
+    <div className="min-h-screen" style={bgStyle}>
+      <div className={`min-h-screen ${bgImage ? "bg-black/20 backdrop-blur-[1px]" : !bgColor ? "bg-gradient-to-br from-background via-secondary/30 to-background" : ""}`}>
         <div className="max-w-lg mx-auto pb-12">
 
           {/* ── Cover + Avatar header ── */}
@@ -642,7 +733,7 @@ const PublicProfile = () => {
 
             {/* Page Blocks */}
             {blocks.map(block => (
-              <PageBlockRenderer key={block.id} block={block} />
+              <PageBlockRenderer key={block.id} block={block} profilePlan={profile.plan} />
             ))}
 
             {/* Links — apply button_style */}

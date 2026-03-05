@@ -496,6 +496,7 @@ export type Database = {
           avatar_position: string
           avatar_url: string | null
           background_color: string | null
+          background_image_url: string | null
           bio: string | null
           button_style: string
           cover_url: string | null
@@ -528,6 +529,7 @@ export type Database = {
           avatar_position?: string
           avatar_url?: string | null
           background_color?: string | null
+          background_image_url?: string | null
           bio?: string | null
           button_style?: string
           cover_url?: string | null
@@ -560,6 +562,7 @@ export type Database = {
           avatar_position?: string
           avatar_url?: string | null
           background_color?: string | null
+          background_image_url?: string | null
           bio?: string | null
           button_style?: string
           cover_url?: string | null
