@@ -23,6 +23,9 @@ import DashboardSupport from "./dashboard/DashboardSupport";
 import DashboardTeam from "./dashboard/DashboardTeam";
 import DashboardAPI from "./dashboard/DashboardAPI";
 import DashboardHeatmap from "./dashboard/DashboardHeatmap";
+import DashboardWallet from "./dashboard/DashboardWallet";
+import DashboardStore from "./dashboard/DashboardStore";
+import DashboardSubscription from "./dashboard/DashboardSubscription";
 
 // Admin sub-pages
 import AdminOverview from "./admin/AdminOverview";
@@ -49,6 +52,9 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard/equipe": "Équipe",
   "/dashboard/api": "API & Webhooks",
   "/dashboard/heatmap": "Heatmap & A/B",
+  "/dashboard/portefeuille": "Portefeuille",
+  "/dashboard/boutique": "Boutique",
+  "/dashboard/abonnement": "Abonnement",
   "/dashboard/admin": "Administration",
   "/dashboard/admin/users": "Utilisateurs",
   "/dashboard/admin/analytics": "Analytics Admin",
@@ -221,6 +227,15 @@ const Dashboard = () => {
             } />
             <Route path="/heatmap" element={
               <AnimatedPage><DashboardHeatmap profile={profile} /></AnimatedPage>
+            } />
+            <Route path="/portefeuille" element={
+              <AnimatedPage><DashboardWallet /></AnimatedPage>
+            } />
+            <Route path="/boutique" element={
+              <AnimatedPage><DashboardStore profile={profile} /></AnimatedPage>
+            } />
+            <Route path="/abonnement" element={
+              <AnimatedPage><DashboardSubscription profile={profile} /></AnimatedPage>
             } />
             {/* Admin routes */}
             {isAdmin && (

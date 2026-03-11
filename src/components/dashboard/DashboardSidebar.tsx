@@ -2,7 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, User, Link2, Palette, BarChart3, Settings, LogOut, Eye,
   ChevronLeft, ChevronRight, Shield, LayoutTemplate, Plug, Sparkles,
-  MessageSquare, Users, Zap, Activity, FileCode,
+  MessageSquare, Users, Zap, Activity, FileCode, Wallet, ShoppingBag, Crown,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -21,11 +21,14 @@ const navItems = [
   { to: "/dashboard", label: "Vue d'ensemble", icon: LayoutDashboard, end: true },
   { to: "/dashboard/page", label: "Ma Page", icon: User },
   { to: "/dashboard/liens", label: "Liens", icon: Link2 },
+  { to: "/dashboard/boutique", label: "Boutique", icon: ShoppingBag },
   { to: "/dashboard/modeles", label: "Modèles", icon: LayoutTemplate },
   { to: "/dashboard/apparence", label: "Apparence", icon: Palette },
   { to: "/dashboard/integrations", label: "Intégrations", icon: Plug },
   { to: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/dashboard/heatmap", label: "Heatmap & A/B", icon: Activity },
+  { to: "/dashboard/portefeuille", label: "Portefeuille", icon: Wallet },
+  { to: "/dashboard/abonnement", label: "Abonnement", icon: Crown },
   { to: "/dashboard/equipe", label: "Équipe", icon: Users },
   { to: "/dashboard/api", label: "API & Webhooks", icon: Zap },
   { to: "/dashboard/support", label: "Support", icon: MessageSquare },
@@ -276,6 +279,7 @@ export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfile
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            onClick={() => navigate("/dashboard/abonnement")}
             className="w-full py-2 text-xs font-bold gradient-cta text-primary-foreground rounded-xl shadow-blue"
           >
             Voir les plans ✨
