@@ -279,6 +279,7 @@ export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfile
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            onClick={() => navigate("/dashboard/abonnement")}
             className="w-full py-2 text-xs font-bold gradient-cta text-primary-foreground rounded-xl shadow-blue"
           >
             Voir les plans ✨
