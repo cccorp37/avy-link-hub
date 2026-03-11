@@ -228,6 +228,15 @@ const Dashboard = () => {
             <Route path="/heatmap" element={
               <AnimatedPage><DashboardHeatmap profile={profile} /></AnimatedPage>
             } />
+            <Route path="/portefeuille" element={
+              <AnimatedPage><DashboardWallet /></AnimatedPage>
+            } />
+            <Route path="/boutique" element={
+              <AnimatedPage><DashboardStore profile={profile} /></AnimatedPage>
+            } />
+            <Route path="/abonnement" element={
+              <AnimatedPage><DashboardSubscription profile={profile} /></AnimatedPage>
+            } />
             {/* Admin routes */}
             {isAdmin && (
               <>
