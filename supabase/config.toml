@@ -2,3 +2,12 @@ project_id = "tpyktinsqwqggkonoovh"
 
 [functions.extract-metadata]
 verify_jwt = false
+
+[functions.mesomb-collect]
+verify_jwt = false
+
+[functions.mesomb-deposit]
+verify_jwt = false
+
+[functions.mesomb-webhook]
+verify_jwt = false
