@@ -23,6 +23,9 @@ import DashboardSupport from "./dashboard/DashboardSupport";
 import DashboardTeam from "./dashboard/DashboardTeam";
 import DashboardAPI from "./dashboard/DashboardAPI";
 import DashboardHeatmap from "./dashboard/DashboardHeatmap";
+import DashboardWallet from "./dashboard/DashboardWallet";
+import DashboardStore from "./dashboard/DashboardStore";
+import DashboardSubscription from "./dashboard/DashboardSubscription";
 
 // Admin sub-pages
 import AdminOverview from "./admin/AdminOverview";
