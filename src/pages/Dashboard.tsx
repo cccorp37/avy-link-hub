@@ -237,7 +237,13 @@ const Dashboard = () => {
           </Routes>
         </AnimatePresence>
 
-        <MobileBottomNav />
+        <MobileBottomNav
+          profiles={profiles}
+          activeProfile={profile}
+          onSwitchProfile={switchProfile}
+          onProfileCreated={handleProfileCreated}
+          onProfileDeleted={handleProfileDeleted}
+        />
       </div>
     </div>
   );
