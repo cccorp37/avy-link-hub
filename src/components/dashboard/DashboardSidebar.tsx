@@ -2,7 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, User, Link2, Palette, BarChart3, Settings, LogOut, Eye,
   ChevronLeft, ChevronRight, Shield, LayoutTemplate, Plug, Sparkles,
-  MessageSquare, Users, Zap, Activity, FileCode,
+  MessageSquare, Users, Zap, Activity, FileCode, Wallet, ShoppingBag, Crown,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
