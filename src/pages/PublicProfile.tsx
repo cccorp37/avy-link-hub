@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { ExternalLink, Loader2, AlertCircle, Globe, BadgeCheck } from "lucide-react";
+import { ExternalLink, Loader2, AlertCircle, Globe, BadgeCheck, ShoppingBag, Tag, Briefcase, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import SocialIcon, { getPlatformColor, getPlatformLabel, PLATFORM_COLORS } from "@/components/SocialIcon";
 import avylinkLogo from "@/assets/avylink-logo.jpg";
 import type { Tables } from "@/integrations/supabase/types";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { StorePaymentModal } from "@/components/StorePaymentModal";
 
 type ProfileLink = Tables<"profile_links">;
 type Profile = Tables<"profiles"> & { cover_url?: string | null; is_verified?: boolean | null };
