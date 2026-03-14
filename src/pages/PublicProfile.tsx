@@ -509,9 +509,10 @@ const PublicProfile = () => {
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     const loadData = async (pid: string) => {
-      const [linksRes, blocksRes] = await Promise.all([
+      const [linksRes, blocksRes, storeRes] = await Promise.all([
         supabase.from("profile_links").select("*").eq("profile_id", pid).eq("is_active", true).order("position"),
         supabase.from("page_blocks").select("*").eq("profile_id", pid).eq("is_active", true).order("position"),
+        supabase.from("store_items").select("*").eq("profile_id", pid).eq("is_active", true).order("created_at", { ascending: false }),
       ]);
       setLinks(linksRes.data || []);
       setBlocks(
@@ -521,6 +522,7 @@ const PublicProfile = () => {
           content: (b.content as Record<string, unknown>) || {},
         }))
       );
+      setStoreItems(storeRes.data || []);
     };
 
     const loadProfile = async () => {
