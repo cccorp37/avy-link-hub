@@ -668,12 +668,18 @@ export type Database = {
           created_at: string
           currency: string
           description: string | null
+          header_text: string | null
           id: string
           image_url: string | null
           is_active: boolean
+          item_type: string
           name: string
           price: number
           profile_id: string
+          redirect_url: string | null
+          seller_email: string | null
+          seller_name: string | null
+          seller_phone: string | null
           stock: number | null
           updated_at: string
         }
@@ -682,12 +688,18 @@ export type Database = {
           created_at?: string
           currency?: string
           description?: string | null
+          header_text?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
+          item_type?: string
           name: string
           price?: number
           profile_id: string
+          redirect_url?: string | null
+          seller_email?: string | null
+          seller_name?: string | null
+          seller_phone?: string | null
           stock?: number | null
           updated_at?: string
         }
@@ -696,12 +708,18 @@ export type Database = {
           created_at?: string
           currency?: string
           description?: string | null
+          header_text?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
+          item_type?: string
           name?: string
           price?: number
           profile_id?: string
+          redirect_url?: string | null
+          seller_email?: string | null
+          seller_name?: string | null
+          seller_phone?: string | null
           stock?: number | null
           updated_at?: string
         }
@@ -1000,6 +1018,54 @@ export type Database = {
           secret?: string | null
           url?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      withdrawal_notifications: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          display_name: string | null
+          fee_amount: number
+          id: string
+          net_amount: number
+          recipient_name: string | null
+          recipient_phone: string | null
+          recipient_service: string | null
+          status: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          display_name?: string | null
+          fee_amount: number
+          id?: string
+          net_amount: number
+          recipient_name?: string | null
+          recipient_phone?: string | null
+          recipient_service?: string | null
+          status?: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          display_name?: string | null
+          fee_amount?: number
+          id?: string
+          net_amount?: number
+          recipient_name?: string | null
+          recipient_phone?: string | null
+          recipient_service?: string | null
+          status?: string
+          user_id?: string
+          username?: string | null
         }
         Relationships: []
       }

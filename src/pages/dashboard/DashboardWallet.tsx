@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Wallet, ArrowUpRight, ArrowDownLeft, Loader2, Phone, TrendingUp, History } from "lucide-react";
+import { Wallet, ArrowUpRight, ArrowDownLeft, Loader2, Phone, TrendingUp, History, Info, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +7,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+const WITHDRAWAL_FEE_RATE = 0.065; // 6.5%
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -38,6 +40,7 @@ export default function DashboardWallet() {
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawPhone, setWithdrawPhone] = useState("");
   const [withdrawService, setWithdrawService] = useState("MTN");
+  const [withdrawRecipientName, setWithdrawRecipientName] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
 
   useEffect(() => {
@@ -69,13 +72,16 @@ export default function DashboardWallet() {
     setLoading(false);
   };
 
+  const withdrawAmountNum = parseInt(withdrawAmount) || 0;
+  const feeAmount = Math.round(withdrawAmountNum * WITHDRAWAL_FEE_RATE);
+  const netAmount = withdrawAmountNum - feeAmount;
+
   const handleWithdraw = async () => {
-    const amount = parseInt(withdrawAmount);
-    if (!amount || amount < 500) {
+    if (withdrawAmountNum < 500) {
       toast({ title: "Montant minimum : 500 XAF", variant: "destructive" });
       return;
     }
-    if (amount > balance) {
+    if (withdrawAmountNum > balance) {
       toast({ title: "Solde insuffisant", variant: "destructive" });
       return;
     }
@@ -83,20 +89,30 @@ export default function DashboardWallet() {
       toast({ title: "Numéro invalide", variant: "destructive" });
       return;
     }
+    if (!withdrawRecipientName.trim()) {
+      toast({ title: "Nom du destinataire requis", variant: "destructive" });
+      return;
+    }
 
     setWithdrawing(true);
     try {
       const { data, error } = await supabase.functions.invoke("mesomb-deposit", {
-        body: { amount, service: withdrawService, phone: withdrawPhone },
+        body: {
+          amount: withdrawAmountNum,
+          service: withdrawService,
+          phone: withdrawPhone,
+          recipient_name: withdrawRecipientName.trim(),
+        },
       });
 
       if (error) throw error;
 
       if (data?.success) {
-        toast({ title: "✅ Retrait effectué avec succès !" });
+        toast({ title: `✅ ${data.message}` });
         setWithdrawOpen(false);
         setWithdrawAmount("");
         setWithdrawPhone("");
+        setWithdrawRecipientName("");
         loadData();
       } else {
         toast({ title: "Retrait échoué", description: data?.error, variant: "destructive" });
@@ -143,50 +159,39 @@ export default function DashboardWallet() {
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-5">
       {/* Balance card */}
-      <motion.div
-        custom={0}
-        initial="hidden"
-        animate="visible"
-        variants={fadeUp}
+      <motion.div custom={0} initial="hidden" animate="visible" variants={fadeUp}
         className="relative rounded-2xl p-6 overflow-hidden shadow-card border border-border/40"
-        style={{ background: "var(--gradient-cta)" }}
-      >
+        style={{ background: "var(--gradient-cta)" }}>
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/4" />
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
             <Wallet className="w-5 h-5 text-primary-foreground/80" />
             <span className="text-sm font-medium text-primary-foreground/80">Mon portefeuille</span>
           </div>
-          <motion.p
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
+          <motion.p initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }}
             transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-            className="text-4xl font-dm font-bold text-primary-foreground"
-          >
+            className="text-4xl font-dm font-bold text-primary-foreground">
             {balance.toLocaleString("fr-FR")} <span className="text-xl">{currency}</span>
           </motion.p>
           <div className="flex gap-2 mt-4">
-            <Button
-              onClick={() => setWithdrawOpen(true)}
-              disabled={balance < 500}
-              className="bg-white/20 hover:bg-white/30 text-primary-foreground rounded-xl border-0"
-            >
-              <ArrowUpRight className="w-4 h-4 mr-1" />
-              Retirer
+            <Button onClick={() => setWithdrawOpen(true)} disabled={balance < 500}
+              className="bg-white/20 hover:bg-white/30 text-primary-foreground rounded-xl border-0">
+              <ArrowUpRight className="w-4 h-4 mr-1" /> Retirer
             </Button>
           </div>
         </div>
       </motion.div>
 
+      {/* Info */}
+      <motion.div custom={0.5} initial="hidden" animate="visible" variants={fadeUp}
+        className="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10 text-xs text-primary">
+        <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
+        <span>Les frais de retrait sont de <strong>6,5%</strong>. Ex: retrait de 5 000 XAF → vous recevez 4 675 XAF.</span>
+      </motion.div>
+
       {/* Transactions */}
-      <motion.div
-        custom={1}
-        initial="hidden"
-        animate="visible"
-        variants={fadeUp}
-        className="rounded-2xl border border-border/40 shadow-card p-5"
-        style={{ background: "hsl(var(--card))" }}
-      >
+      <motion.div custom={1} initial="hidden" animate="visible" variants={fadeUp}
+        className="rounded-2xl border border-border/40 shadow-card p-5" style={{ background: "hsl(var(--card))" }}>
         <div className="flex items-center gap-2 mb-4">
           <History className="w-4 h-4 text-primary" />
           <h3 className="font-dm font-bold text-base text-foreground">Historique des transactions</h3>
@@ -204,24 +209,16 @@ export default function DashboardWallet() {
         ) : (
           <div className="space-y-1.5">
             {transactions.map((txn, i) => (
-              <motion.div
-                key={txn.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
+              <motion.div key={txn.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.03 }}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary/30 transition-colors"
-              >
+                className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary/30 transition-colors">
                 <div className="w-9 h-9 rounded-xl bg-secondary/50 flex items-center justify-center flex-shrink-0">
                   {getTypeIcon(txn.type)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">
-                    {txn.description || txn.type}
-                  </p>
+                  <p className="text-sm font-medium text-foreground truncate">{txn.description || txn.type}</p>
                   <p className="text-[11px] text-muted-foreground">
-                    {new Date(txn.created_at).toLocaleDateString("fr-FR", {
-                      day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
-                    })}
+                    {new Date(txn.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                     {txn.payment_method && ` · ${txn.payment_method}`}
                   </p>
                 </div>
@@ -251,55 +248,68 @@ export default function DashboardWallet() {
               </p>
             </div>
 
+            {/* Recipient name */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Montant</label>
-              <Input
-                type="number"
-                value={withdrawAmount}
-                onChange={e => setWithdrawAmount(e.target.value)}
-                placeholder="Montant en XAF (min. 500)"
-                className="rounded-xl"
-              />
+              <label className="text-sm font-medium">Nom du propriétaire du compte *</label>
+              <Input value={withdrawRecipientName} onChange={e => setWithdrawRecipientName(e.target.value)}
+                placeholder="Nom complet du titulaire" className="rounded-xl" />
             </div>
 
+            {/* Operator */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Opérateur</label>
+              <label className="text-sm font-medium">Réseau Mobile Money *</label>
               <div className="grid grid-cols-2 gap-2">
                 {[
                   { id: "MTN", label: "MTN MoMo", color: "#FFCC00" },
                   { id: "ORANGE", label: "Orange Money", color: "#FF6600" },
                 ].map(op => (
-                  <button
-                    key={op.id}
-                    onClick={() => setWithdrawService(op.id)}
+                  <button key={op.id} onClick={() => setWithdrawService(op.id)}
                     className={`p-3 rounded-xl border-2 text-sm font-medium transition-all ${
                       withdrawService === op.id ? "border-primary" : "border-border/40"
-                    }`}
-                  >
+                    }`}>
                     {op.label}
                   </button>
                 ))}
               </div>
             </div>
 
+            {/* Phone */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Numéro de réception</label>
-              <Input
-                value={withdrawPhone}
-                onChange={e => setWithdrawPhone(e.target.value.replace(/\D/g, ""))}
-                placeholder="6XXXXXXXX"
-                className="rounded-xl"
-                maxLength={15}
-              />
+              <label className="text-sm font-medium">Numéro de téléphone du compte *</label>
+              <Input value={withdrawPhone} onChange={e => setWithdrawPhone(e.target.value.replace(/\D/g, ""))}
+                placeholder="6XXXXXXXX" className="rounded-xl" maxLength={15} />
             </div>
 
-            <Button
-              onClick={handleWithdraw}
-              disabled={withdrawing || !withdrawAmount || !withdrawPhone}
-              className="w-full gradient-cta text-primary-foreground rounded-xl h-11"
-            >
+            {/* Amount */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Montant à retirer *</label>
+              <Input type="number" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)}
+                placeholder="Montant en XAF (min. 500)" className="rounded-xl" />
+            </div>
+
+            {/* Fee breakdown */}
+            {withdrawAmountNum >= 500 && (
+              <div className="rounded-xl bg-secondary/30 border border-border/40 p-3 space-y-1.5">
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Montant demandé</span>
+                  <span className="font-medium text-foreground">{withdrawAmountNum.toLocaleString("fr-FR")} {currency}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Frais AVYLINK (6,5%)</span>
+                  <span className="font-medium text-red-500">-{feeAmount.toLocaleString("fr-FR")} {currency}</span>
+                </div>
+                <div className="border-t border-border/40 pt-1.5 flex justify-between text-sm">
+                  <span className="font-semibold text-foreground">Vous recevrez</span>
+                  <span className="font-bold text-green-600">{netAmount.toLocaleString("fr-FR")} {currency}</span>
+                </div>
+              </div>
+            )}
+
+            <Button onClick={handleWithdraw}
+              disabled={withdrawing || withdrawAmountNum < 500 || !withdrawPhone || !withdrawRecipientName.trim()}
+              className="w-full gradient-cta text-primary-foreground rounded-xl h-11">
               {withdrawing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ArrowUpRight className="w-4 h-4 mr-2" />}
-              Retirer {withdrawAmount ? `${parseInt(withdrawAmount).toLocaleString("fr-FR")} ${currency}` : ""}
+              Retirer {withdrawAmountNum >= 500 ? `${withdrawAmountNum.toLocaleString("fr-FR")} ${currency}` : ""}
             </Button>
           </div>
         </DialogContent>
