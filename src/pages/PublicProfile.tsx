@@ -764,12 +764,72 @@ const PublicProfile = () => {
               );
             })}
 
-            {blocks.length === 0 && links.length === 0 && (
+            {blocks.length === 0 && links.length === 0 && storeItems.length === 0 && (
               <div className="text-center py-12 text-muted-foreground">
                 <p>Aucun lien pour l'instant.</p>
               </div>
             )}
+
+            {/* Store Items */}
+            {storeItems.length > 0 && (profile.plan === "premium" || profile.plan === "business") && (
+              <div className="space-y-3 mt-4">
+                <div className="flex items-center gap-2 px-1">
+                  <ShoppingBag className="w-4 h-4 text-primary" />
+                  <h3 className="font-dm font-bold text-base text-foreground">Boutique</h3>
+                </div>
+                <div className="grid grid-cols-1 gap-3">
+                  {storeItems.map(item => {
+                    const clientPrice = Math.round(item.price * 1.07);
+                    const typeIcon = item.item_type === "service" ? <Briefcase className="w-3 h-3" /> : item.item_type === "appointment" ? <Calendar className="w-3 h-3" /> : <Tag className="w-3 h-3" />;
+                    const typeLabel = item.item_type === "service" ? "Service" : item.item_type === "appointment" ? "Rendez-vous" : "Article";
+                    return (
+                      <div key={item.id} className="rounded-2xl border border-border/50 bg-card overflow-hidden">
+                        {item.image_url && (
+                          <img src={item.image_url} alt={item.name} className="w-full h-40 object-cover"
+                            onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                        )}
+                        <div className="p-4 space-y-2">
+                          <div className="flex items-center gap-1.5">
+                            <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                              {typeIcon} {typeLabel}
+                            </span>
+                          </div>
+                          {item.header_text && <p className="text-xs font-medium text-muted-foreground">{item.header_text}</p>}
+                          <h4 className="font-dm font-bold text-foreground">{item.name}</h4>
+                          {item.description && <p className="text-sm text-muted-foreground line-clamp-3">{item.description}</p>}
+                          <div className="flex items-center justify-between pt-2">
+                            <p className="text-xl font-bold text-primary">{clientPrice.toLocaleString("fr-FR")} {item.currency}</p>
+                            <button
+                              onClick={() => setSelectedItem(item)}
+                              className="px-4 py-2 gradient-cta text-primary-foreground rounded-xl text-sm font-bold hover:opacity-90 transition-opacity"
+                            >
+                              {item.item_type === "appointment" ? "Réserver" : "Acheter"}
+                            </button>
+                          </div>
+                          {item.stock !== null && item.stock <= 5 && item.stock > 0 && (
+                            <p className="text-[11px] text-amber-600 font-medium">⚡ Plus que {item.stock} en stock</p>
+                          )}
+                          {item.stock !== null && item.stock <= 0 && (
+                            <p className="text-[11px] text-red-500 font-medium">Rupture de stock</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Store Payment Modal */}
+          {selectedItem && profile && (
+            <StorePaymentModal
+              open={!!selectedItem}
+              onClose={() => setSelectedItem(null)}
+              item={{ ...selectedItem, profile_id: profile.id }}
+              sellerProfileId={profile.id}
+            />
+          )}
 
           {/* Footer branding */}
           <div className="mt-10 text-center">
