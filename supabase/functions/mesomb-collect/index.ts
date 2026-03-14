@@ -5,6 +5,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const PLATFORM_FEE_RATE = 0.07; // 7% AVYLINK fee
+
 function generateNonce() {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
@@ -44,33 +46,31 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Auth check
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getUser(token);
-    if (claimsError || !claimsData?.user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const userId = claimsData.user.id;
-
     const body = await req.json();
     const { amount, service, phone, country = "CM", currency = "XAF", type, metadata } = body;
+
+    // Auth check - required for subscription/wallet_topup, optional for order
+    const authHeader = req.headers.get("Authorization");
+    let userId: string | null = null;
+
+    if (authHeader?.startsWith("Bearer ")) {
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } }
+      );
+      const token = authHeader.replace("Bearer ", "");
+      const { data: claimsData } = await supabase.auth.getUser(token);
+      userId = claimsData?.user?.id || null;
+    }
+
+    // For subscription and wallet_topup, user must be authenticated
+    if (["subscription", "wallet_topup"].includes(type) && !userId) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Validation
     if (!amount || amount <= 0 || amount > 5000000) {
@@ -100,35 +100,65 @@ Deno.serve(async (req) => {
 
     const externalId = `AVY-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
 
-    // Use service role for wallet/transaction operations
     const adminClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Ensure wallet exists
-    const { data: wallet } = await adminClient
-      .from("wallets")
-      .select("id")
-      .eq("user_id", userId)
-      .single();
+    // For orders, determine the seller and create the order
+    let walletId: string | null = null;
+    let txnUserId = userId;
 
-    if (!wallet) {
-      await adminClient.from("wallets").insert({ user_id: userId });
+    if (type === "order" && metadata?.seller_profile_id) {
+      // Get seller's user_id for transaction tracking
+      const { data: sellerProfile } = await adminClient
+        .from("profiles")
+        .select("user_id")
+        .eq("id", metadata.seller_profile_id)
+        .single();
+
+      if (sellerProfile) {
+        txnUserId = sellerProfile.user_id;
+        const { data: sellerWallet } = await adminClient
+          .from("wallets")
+          .select("id")
+          .eq("user_id", sellerProfile.user_id)
+          .single();
+        walletId = sellerWallet?.id || null;
+      }
+    } else if (userId) {
+      const { data: wallet } = await adminClient
+        .from("wallets")
+        .select("id")
+        .eq("user_id", userId)
+        .single();
+
+      if (!wallet) {
+        await adminClient.from("wallets").insert({ user_id: userId });
+        const { data: newWallet } = await adminClient
+          .from("wallets")
+          .select("id")
+          .eq("user_id", userId)
+          .single();
+        walletId = newWallet?.id || null;
+      } else {
+        walletId = wallet.id;
+      }
     }
 
-    const { data: walletData } = await adminClient
-      .from("wallets")
-      .select("id")
-      .eq("user_id", userId)
-      .single();
+    if (!walletId || !txnUserId) {
+      return new Response(JSON.stringify({ error: "Impossible de traiter le paiement" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Create transaction record
     const { data: txn, error: txnError } = await adminClient
       .from("transactions")
       .insert({
-        wallet_id: walletData!.id,
-        user_id: userId,
+        wallet_id: walletId,
+        user_id: txnUserId,
         type,
         amount: Math.round(amount),
         currency,
@@ -147,6 +177,29 @@ Deno.serve(async (req) => {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Create order record if type is order
+    let orderId: string | null = null;
+    if (type === "order" && metadata?.item_id && metadata?.seller_profile_id) {
+      const { data: orderData } = await adminClient
+        .from("orders")
+        .insert({
+          item_id: metadata.item_id,
+          seller_profile_id: metadata.seller_profile_id,
+          buyer_name: metadata.buyer_name || null,
+          buyer_phone: phone,
+          buyer_email: metadata.buyer_email || null,
+          total_amount: Math.round(amount),
+          currency,
+          payment_method: service,
+          payment_status: "pending",
+          quantity: metadata.quantity || 1,
+          transaction_id: externalId,
+        })
+        .select()
+        .single();
+      orderId = orderData?.id || null;
     }
 
     // Call MeSomb
@@ -174,7 +227,7 @@ Deno.serve(async (req) => {
         .eq("id", txn.id);
 
       // Handle subscription
-      if (type === "subscription" && metadata?.plan && metadata?.profile_id) {
+      if (type === "subscription" && metadata?.plan && metadata?.profile_id && userId) {
         const expiresAt = new Date();
         expiresAt.setMonth(expiresAt.getMonth() + (metadata.billing_cycle === "yearly" ? 12 : 1));
 
@@ -190,62 +243,70 @@ Deno.serve(async (req) => {
           expires_at: expiresAt.toISOString(),
         });
 
-        // Update profile plan
         await adminClient
           .from("profiles")
           .update({ plan: metadata.plan })
           .eq("id", metadata.profile_id);
       }
 
-      // Handle order
-      if (type === "order" && metadata?.order_id) {
-        await adminClient
-          .from("orders")
-          .update({
-            payment_status: "paid",
-            mesomb_transaction_id: result.data.transaction?.id || null,
-          })
-          .eq("id", metadata.order_id);
+      // Handle order - credit seller wallet with 7% fee deducted
+      if (type === "order" && metadata?.seller_profile_id) {
+        if (orderId) {
+          await adminClient
+            .from("orders")
+            .update({
+              payment_status: "paid",
+              mesomb_transaction_id: result.data.transaction?.id || null,
+            })
+            .eq("id", orderId);
+        }
 
-        // Credit seller wallet
-        const { data: order } = await adminClient
-          .from("orders")
-          .select("seller_profile_id, total_amount")
-          .eq("id", metadata.order_id)
+        const { data: sellerProfile } = await adminClient
+          .from("profiles")
+          .select("user_id")
+          .eq("id", metadata.seller_profile_id)
           .single();
 
-        if (order) {
-          const { data: sellerProfile } = await adminClient
-            .from("profiles")
-            .select("user_id")
-            .eq("id", order.seller_profile_id)
+        if (sellerProfile) {
+          // The amount collected includes 7% fee. Seller gets original price (amount / 1.07)
+          const sellerAmount = Math.round(amount / (1 + PLATFORM_FEE_RATE));
+          const { data: sellerWallet } = await adminClient
+            .from("wallets")
+            .select("id, balance")
+            .eq("user_id", sellerProfile.user_id)
             .single();
 
-          if (sellerProfile) {
-            // Platform fee: 5%
-            const netAmount = Math.round(order.total_amount * 0.95);
-            const { data: sellerWallet } = await adminClient
+          if (sellerWallet) {
+            await adminClient
               .from("wallets")
-              .select("id, balance")
-              .eq("user_id", sellerProfile.user_id)
+              .update({ balance: sellerWallet.balance + sellerAmount })
+              .eq("id", sellerWallet.id);
+
+            await adminClient.from("transactions").insert({
+              wallet_id: sellerWallet.id,
+              user_id: sellerProfile.user_id,
+              type: "sale_credit",
+              amount: sellerAmount,
+              currency,
+              status: "success",
+              description: `Vente - ${metadata.item_name || 'Article'} (frais 7% déduits)`,
+              reference: `SALE-${orderId || externalId}`,
+            });
+          }
+
+          // Decrease stock if applicable
+          if (metadata.item_id) {
+            const { data: item } = await adminClient
+              .from("store_items")
+              .select("stock")
+              .eq("id", metadata.item_id)
               .single();
 
-            if (sellerWallet) {
+            if (item && item.stock !== null && item.stock > 0) {
               await adminClient
-                .from("wallets")
-                .update({ balance: sellerWallet.balance + netAmount })
-                .eq("id", sellerWallet.id);
-
-              await adminClient.from("transactions").insert({
-                wallet_id: sellerWallet.id,
-                user_id: sellerProfile.user_id,
-                type: "sale_credit",
-                amount: netAmount,
-                currency,
-                status: "success",
-                description: `Vente article - Commission 5% déduite`,
-                reference: `SALE-${metadata.order_id}`,
-              });
+                .from("store_items")
+                .update({ stock: item.stock - (metadata.quantity || 1) })
+                .eq("id", metadata.item_id);
             }
           }
         }
@@ -255,8 +316,10 @@ Deno.serve(async (req) => {
         JSON.stringify({
           success: true,
           transaction_id: txn.id,
+          order_id: orderId,
           mesomb_id: result.data.transaction?.id || null,
           message: "Paiement effectué avec succès",
+          redirect_url: metadata?.redirect_url || null,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -266,6 +329,13 @@ Deno.serve(async (req) => {
         .from("transactions")
         .update({ status: "failed" })
         .eq("id", txn.id);
+
+      if (orderId) {
+        await adminClient
+          .from("orders")
+          .update({ payment_status: "failed" })
+          .eq("id", orderId);
+      }
 
       return new Response(
         JSON.stringify({
