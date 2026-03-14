@@ -498,8 +498,10 @@ const PublicProfile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [links, setLinks] = useState<ProfileLink[]>([]);
   const [blocks, setBlocks] = useState<PageBlock[]>([]);
+  const [storeItems, setStoreItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any | null>(null);
 
   useEffect(() => {
     if (!username) return;
