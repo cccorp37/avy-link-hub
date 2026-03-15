@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Save, Loader2, LogOut, Trash2, Shield, Bell, Globe, ChevronRight, HelpCircle, Mail, Facebook, Instagram, Settings2, Wallet, MessageSquare, ExternalLink, BadgeCheck, Lock } from "lucide-react";
+import { Save, Loader2, LogOut, Trash2, Shield, Bell, Globe, ChevronRight, HelpCircle, Mail, Facebook, Instagram, Settings2, Wallet, MessageSquare, ExternalLink, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
