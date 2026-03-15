@@ -1,7 +1,7 @@
-import badgeStar from "@/assets/badges/badge-star.jpg";
-import badgeInstagram from "@/assets/badges/badge-instagram.png";
-import badge3d from "@/assets/badges/badge-3d.jpg";
-import badgeCloud from "@/assets/badges/badge-cloud.jpg";
+import badgeStar from "@/assets/badges/badge-star.png";
+import badgeInstagram from "@/assets/badges/badge-instagram-new.png";
+import badge3d from "@/assets/badges/badge-3d.png";
+import badgeCloud from "@/assets/badges/badge-cloud.png";
 import badgeCircle from "@/assets/badges/badge-circle.png";
 
 export const BADGE_STYLES = [
