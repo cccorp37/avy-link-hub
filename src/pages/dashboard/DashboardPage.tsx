@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
-import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { VerifiedBadge, BADGE_STYLES } from "@/components/VerifiedBadge";
+import { motion } from "framer-motion";
 
 type Profile = Tables<"profiles">;
 
