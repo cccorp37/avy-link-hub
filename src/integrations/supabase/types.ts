@@ -576,6 +576,7 @@ export type Database = {
           favicon_url: string | null
           font_style: string
           google_analytics_id: string | null
+          hide_branding: boolean
           id: string
           is_verified: boolean
           linkedin_insight_tag: string | null
@@ -609,6 +610,7 @@ export type Database = {
           favicon_url?: string | null
           font_style?: string
           google_analytics_id?: string | null
+          hide_branding?: boolean
           id?: string
           is_verified?: boolean
           linkedin_insight_tag?: string | null
@@ -642,6 +644,7 @@ export type Database = {
           favicon_url?: string | null
           font_style?: string
           google_analytics_id?: string | null
+          hide_branding?: boolean
           id?: string
           is_verified?: boolean
           linkedin_insight_tag?: string | null
