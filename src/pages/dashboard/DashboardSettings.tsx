@@ -9,7 +9,6 @@ import { signOut } from "@/lib/supabase-auth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
-import { VerifiedBadge, BADGE_STYLES } from "@/components/VerifiedBadge";
 import DashboardAdvancedSettings from "./DashboardAdvancedSettings";
 import DashboardFormMessages from "./DashboardFormMessages";
 
