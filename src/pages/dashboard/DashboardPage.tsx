@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Save, Loader2, Copy, Check, Globe, Plus, X, GripVertical, ChevronDown, ChevronUp, Trash2, Edit2, Heading, Video, Music, Link2, ClipboardList, Minus, Type, Mic, Clapperboard, Instagram, Youtube, ExternalLink, BadgeCheck, Smartphone, Palette, ArrowRight } from "lucide-react";
+import { Camera, Save, Loader2, Copy, Check, Globe, Plus, X, GripVertical, ChevronDown, ChevronUp, Trash2, Edit2, Heading, Video, Music, Link2, ClipboardList, Minus, Type, Mic, Clapperboard, Instagram, Youtube, ExternalLink, BadgeCheck, Smartphone, Palette, ArrowRight, Lock, EyeOff } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import SocialIcon, { PLATFORM_COLORS } from "@/components/SocialIcon";
 import { Input } from "@/components/ui/input";
