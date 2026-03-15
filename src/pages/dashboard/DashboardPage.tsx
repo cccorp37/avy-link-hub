@@ -987,6 +987,114 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
         )}
       </div>
 
+      {/* Badge Vérifié */}
+      <div className="bg-card rounded-2xl border border-border/50 shadow-card p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+            <BadgeCheck className="w-4 h-4 text-primary" />
+          </div>
+          <h3 className="font-dm font-bold text-base text-foreground">Badge Vérifié</h3>
+          {profile?.plan === "free" && (
+            <span className="ml-auto px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 flex items-center gap-1">
+              <Lock className="w-3 h-3" /> Premium
+            </span>
+          )}
+        </div>
+        {profile?.plan !== "free" ? (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">Affiche un badge vérifié à côté de ton nom sur ta page publique.</p>
+            <div className="flex items-center justify-between py-2">
+              <div className="flex items-center gap-3">
+                <VerifiedBadge style={(profile as any)?.verified_badge_style} size="lg" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Activer le badge vérifié</p>
+                  <p className="text-xs text-muted-foreground">{profile?.is_verified ? "Visible sur votre profil" : "Masqué"}</p>
+                </div>
+              </div>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={async () => {
+                  const newVal = !profile?.is_verified;
+                  await supabase.from("profiles").update({ is_verified: newVal } as never).eq("id", profile?.id);
+                  onUpdate({ is_verified: newVal } as any);
+                }}
+                className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 ${profile?.is_verified ? "bg-primary" : "bg-muted"}`}
+              >
+                <motion.span layout transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md ${profile?.is_verified ? "left-6" : "left-1"}`} />
+              </motion.button>
+            </div>
+            {profile?.is_verified && (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground">Choisis ton style de badge</p>
+                <div className="grid grid-cols-5 gap-2">
+                  {BADGE_STYLES.map((badge) => (
+                    <motion.button key={badge.id} whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.95 }}
+                      onClick={async () => {
+                        await supabase.from("profiles").update({ verified_badge_style: badge.id } as never).eq("id", profile?.id);
+                        onUpdate({ verified_badge_style: badge.id } as any);
+                      }}
+                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
+                        (profile as any)?.verified_badge_style === badge.id || (!((profile as any)?.verified_badge_style) && badge.id === "star")
+                          ? "border-primary bg-primary/10 shadow-sm" : "border-border/50 hover:border-primary/30 bg-card/50"
+                      }`}
+                    >
+                      <img src={badge.src} alt={badge.label} className="w-8 h-8 object-contain" />
+                      <span className="text-[10px] font-medium text-foreground">{badge.label}</span>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">Le badge vérifié est réservé aux utilisateurs Premium.</p>
+            <div className="flex items-center gap-3 p-3 rounded-xl border border-border/50 bg-muted/20 opacity-60">
+              <BadgeCheck className="w-6 h-6 text-muted-foreground" strokeWidth={2.5} />
+              <p className="text-sm text-muted-foreground">Badge vérifié — indisponible</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Masquer le pied de page AvyLink */}
+      <div className="bg-card rounded-2xl border border-border/50 shadow-card p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+            <EyeOff className="w-4 h-4 text-primary" />
+          </div>
+          <h3 className="font-dm font-bold text-base text-foreground">Pied de page AvyLink</h3>
+          {profile?.plan === "free" && (
+            <span className="ml-auto px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 flex items-center gap-1">
+              <Lock className="w-3 h-3" /> Payant
+            </span>
+          )}
+        </div>
+        {profile?.plan !== "free" ? (
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <p className="text-sm font-medium text-foreground">Masquer "Créé avec AvyLink"</p>
+              <p className="text-xs text-muted-foreground">Supprime le branding AvyLink en bas de ta page publique</p>
+            </div>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={async () => {
+                const newVal = !(profile as any)?.hide_branding;
+                await supabase.from("profiles").update({ hide_branding: newVal } as never).eq("id", profile?.id);
+                onUpdate({ hide_branding: newVal } as any);
+              }}
+              className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 ${(profile as any)?.hide_branding ? "bg-primary" : "bg-muted"}`}
+            >
+              <motion.span layout transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md ${(profile as any)?.hide_branding ? "left-6" : "left-1"}`} />
+            </motion.button>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">Passe à un plan payant pour masquer le branding AvyLink sur ta page publique.</p>
+        )}
+      </div>
+
       {/* Live Preview */}
       <div className="bg-card rounded-2xl border border-border/50 shadow-card p-5">
         <div className="flex items-center justify-between mb-4">

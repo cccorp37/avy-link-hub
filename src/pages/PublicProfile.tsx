@@ -832,13 +832,15 @@ const PublicProfile = () => {
           )}
 
           {/* Footer branding */}
-          <div className="mt-10 text-center">
-            <a href="/" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
-              Créé avec
-              <img src={avylinkLogo} alt="AvyLink" className="w-4 h-4 rounded object-cover" />
-              <span className="font-bold">AvyLink</span>
-            </a>
-          </div>
+          {!(profile as any)?.hide_branding && (
+            <div className="mt-10 text-center">
+              <a href="/" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
+                Créé avec
+                <img src={avylinkLogo} alt="AvyLink" className="w-4 h-4 rounded object-cover" />
+                <span className="font-bold">AvyLink</span>
+              </a>
+            </div>
+          )}
         </div>
       </div>
     </div>
