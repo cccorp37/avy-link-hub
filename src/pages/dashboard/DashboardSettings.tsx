@@ -58,7 +58,7 @@ export default function DashboardSettings({ profile, onUpdate }: Props) {
   const generalItems = [
     { icon: Globe, label: "Gestion de domaine", desc: "Connecte ton propre domaine", onClick: () => setSubPage("domain"), gradient: "from-blue-500/20 to-cyan-500/10" },
     { icon: MessageSquare, label: "Mes messages de formulaire", desc: "Voir les soumissions reçues", onClick: () => setSubPage("messages"), gradient: "from-green-500/20 to-emerald-500/10" },
-    { icon: Wallet, label: "Mon portefeuille", desc: "Revenus et transactions", onClick: () => toast({ title: "Bientôt disponible 🔜" }), gradient: "from-amber-500/20 to-orange-500/10" },
+    { icon: Wallet, label: "Mon portefeuille", desc: "Revenus et transactions", onClick: () => navigate("/dashboard/portefeuille"), gradient: "from-amber-500/20 to-orange-500/10" },
     { icon: Settings2, label: "Réglages avancés", desc: "SEO, Analytics, Pixel", onClick: () => setSubPage("advanced"), gradient: "from-purple-500/20 to-violet-500/10" },
   ];
 
