@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Plus, ChevronDown, FileText, Check, Crown, Trash2, Loader2, Copy, Sparkles } from "lucide-react";
+import { Plus, ChevronDown, FileText, Check, Crown, Trash2, Loader2, Copy, Sparkles, Palette, Layers } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
+type DuplicateMode = "design" | "all";
 
 const PLAN_LIMITS: Record<string, number> = {
   free: 1,
@@ -31,6 +33,51 @@ interface Props {
   collapsed?: boolean;
 }
 
+function getInitials(name?: string | null) {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(s => s[0]?.toUpperCase())
+    .join("");
+}
+
+function PagePreviewCard({ profile, isActive }: { profile: Profile; isActive: boolean }) {
+  const bg = profile.background_color || "hsl(var(--secondary))";
+  const cover = profile.cover_url;
+  return (
+    <div
+      className={`relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 ring-1 ${
+        isActive ? "ring-primary/60" : "ring-border/60"
+      }`}
+      style={{ background: cover ? undefined : bg }}
+    >
+      {cover && (
+        <img src={cover} alt="" className="absolute inset-0 w-full h-full object-cover" />
+      )}
+      {/* mini layout hint */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
+      {profile.avatar_url ? (
+        <img
+          src={profile.avatar_url}
+          alt=""
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full object-cover ring-1 ring-white/70"
+        />
+      ) : (
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-white/90 flex items-center justify-center text-[8px] font-bold text-primary">
+          {getInitials(profile.display_name)}
+        </div>
+      )}
+      {/* fake links */}
+      <div className="absolute left-1 right-1 bottom-1 space-y-0.5">
+        <div className="h-1 rounded-sm bg-white/70" />
+        <div className="h-1 rounded-sm bg-white/50 w-3/4" />
+      </div>
+    </div>
+  );
+}
+
 export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onDeleted, collapsed }: Props) {
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -39,6 +86,7 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [duplicating, setDuplicating] = useState<string | null>(null);
+  const [duplicateTarget, setDuplicateTarget] = useState<Profile | null>(null);
   const { toast } = useToast();
 
   const currentPlan = activeProfile?.plan || "free";
@@ -100,15 +148,15 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
     setLoading(false);
   };
 
-  const handleDuplicate = async (source: Profile) => {
+  const performDuplicate = async (source: Profile, mode: DuplicateMode) => {
     if (!canCreate) {
       toast({ title: `Limite de ${limit} pages atteinte`, variant: "destructive" });
       return;
     }
     setDuplicating(source.id);
+    setDuplicateTarget(null);
 
-    // Find unique username
-    const base = (source.username || "page").replace(/-copy-\d+$/, "");
+    const base = (source.username || "page").replace(/-copy(-\d+)?$/, "");
     let candidate = `${base}-copy`;
     let i = 1;
     while (!(await checkUsername(candidate))) {
@@ -120,18 +168,50 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setDuplicating(null); return; }
 
-    // Clone profile (omit identifiers + computed fields)
     const { id: _id, created_at: _c, updated_at: _u, username: _un, is_verified: _v, custom_domain: _cd, ...clone } = source as any;
+
+    // For "design only" we keep visual fields but drop bio/links data
+    const baseInsert: Record<string, any> = {
+      user_id: user.id,
+      username: candidate,
+      display_name: `${source.display_name || "Ma page"} (copie)`,
+      is_verified: false,
+      custom_domain: null,
+      plan: source.plan,
+      // visual / design
+      theme: clone.theme,
+      button_style: clone.button_style,
+      font_style: clone.font_style,
+      background_color: clone.background_color,
+      background_image_url: clone.background_image_url,
+      cover_url: clone.cover_url,
+      avatar_position: clone.avatar_position,
+      avatar_url: clone.avatar_url,
+      favicon_url: clone.favicon_url,
+      verified_badge_style: clone.verified_badge_style,
+      hide_branding: clone.hide_branding,
+    };
+
+    if (mode === "all") {
+      // also copy bio, seo, social, pixels, etc.
+      Object.assign(baseInsert, {
+        bio: clone.bio,
+        website: clone.website,
+        social_links: clone.social_links,
+        seo_title: clone.seo_title,
+        seo_description: clone.seo_description,
+        google_analytics_id: clone.google_analytics_id,
+        facebook_pixel_id: clone.facebook_pixel_id,
+        tiktok_pixel_id: clone.tiktok_pixel_id,
+        snapchat_pixel_id: clone.snapchat_pixel_id,
+        pinterest_tag_id: clone.pinterest_tag_id,
+        linkedin_insight_tag: clone.linkedin_insight_tag,
+      });
+    }
+
     const { data: newProfile, error } = await supabase
       .from("profiles")
-      .insert({
-        ...clone,
-        user_id: user.id,
-        username: candidate,
-        display_name: `${source.display_name || "Ma page"} (copie)`,
-        is_verified: false,
-        custom_domain: null,
-      })
+      .insert(baseInsert as any)
       .select()
       .single();
 
@@ -141,30 +221,33 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
       return;
     }
 
-    // Clone blocks
-    const { data: blocks } = await supabase
-      .from("page_blocks")
-      .select("type,title,content,position,is_active")
-      .eq("profile_id", source.id);
-    if (blocks?.length) {
-      await supabase.from("page_blocks").insert(
-        blocks.map(b => ({ ...b, profile_id: newProfile.id }))
-      );
-    }
+    if (mode === "all") {
+      const { data: blocks } = await supabase
+        .from("page_blocks")
+        .select("type,title,content,position,is_active")
+        .eq("profile_id", source.id);
+      if (blocks?.length) {
+        await supabase.from("page_blocks").insert(
+          blocks.map(b => ({ ...b, profile_id: newProfile.id }))
+        );
+      }
 
-    // Clone links
-    const { data: links } = await supabase
-      .from("profile_links")
-      .select("title,url,icon,position,is_active")
-      .eq("profile_id", source.id);
-    if (links?.length) {
-      await supabase.from("profile_links").insert(
-        links.map(l => ({ ...l, profile_id: newProfile.id }))
-      );
+      const { data: links } = await supabase
+        .from("profile_links")
+        .select("title,url,icon,position,is_active")
+        .eq("profile_id", source.id);
+      if (links?.length) {
+        await supabase.from("profile_links").insert(
+          links.map(l => ({ ...l, profile_id: newProfile.id }))
+        );
+      }
     }
 
     onCreated(newProfile);
-    toast({ title: "Page dupliquée ✨", description: `Nouvelle page : /${candidate}` });
+    toast({
+      title: mode === "design" ? "Design dupliqué ✨" : "Page dupliquée ✨",
+      description: `Nouvelle page : /${candidate}`,
+    });
     setDuplicating(null);
   };
 
@@ -209,19 +292,17 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
         onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-all text-left group"
       >
-        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0 ring-1 ring-primary/10">
-          <FileText className="w-4 h-4 text-primary" />
-        </div>
+        {activeProfile && <PagePreviewCard profile={activeProfile} isActive />}
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-foreground truncate flex items-center gap-1.5">
+          <p className="text-xs font-semibold text-foreground truncate">
             {activeProfile?.display_name || "Ma page"}
           </p>
-          <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-secondary/70 font-medium">
+          <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-secondary/70 font-medium">
               {planLabel}
             </span>
             <span>·</span>
-            <span>{profiles.length}/{limit === 999 ? "∞" : limit} pages</span>
+            <span>{profiles.length}/{limit === 999 ? "∞" : limit}</span>
           </p>
         </div>
         <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
@@ -238,7 +319,7 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
           >
             <div className="mt-2 space-y-2 py-1">
               {/* Pages list */}
-              <div className="space-y-0.5 rounded-xl border border-border/40 bg-secondary/20 p-1.5">
+              <div className="space-y-1 rounded-xl border border-border/40 bg-secondary/20 p-1.5">
                 <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Mes pages
                 </p>
@@ -247,17 +328,17 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
                   return (
                     <div
                       key={p.id}
-                      className={`flex items-center gap-1 group/item rounded-lg transition-all ${
+                      className={`flex items-center gap-1.5 group/item rounded-lg transition-all p-1 ${
                         isActive ? "bg-primary/10" : "hover:bg-secondary/80"
                       }`}
                     >
                       <button
                         onClick={() => { onSwitch(p); setOpen(false); }}
-                        className="flex-1 flex items-center gap-2 px-2.5 py-2 text-xs text-left min-w-0"
+                        className="flex-1 flex items-center gap-2 text-xs text-left min-w-0"
                       >
-                        <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? "bg-primary" : "bg-muted-foreground/30"}`} />
+                        <PagePreviewCard profile={p} isActive={isActive} />
                         <div className="flex-1 min-w-0">
-                          <p className={`truncate font-medium ${isActive ? "text-primary" : "text-foreground"}`}>
+                          <p className={`truncate font-semibold ${isActive ? "text-primary" : "text-foreground"}`}>
                             {p.display_name || "Sans nom"}
                           </p>
                           {p.username && (
@@ -271,7 +352,7 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
                       <div className="flex items-center pr-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
                         {isPaidPlan && canCreate && (
                           <button
-                            onClick={() => handleDuplicate(p)}
+                            onClick={() => setDuplicateTarget(p)}
                             disabled={duplicating === p.id}
                             title="Dupliquer cette page"
                             className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10"
@@ -376,6 +457,48 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Duplicate mode dialog */}
+      <Dialog open={!!duplicateTarget} onOpenChange={(o) => !o && setDuplicateTarget(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Dupliquer la page</DialogTitle>
+            <DialogDescription>
+              Que veux-tu copier depuis <b>{duplicateTarget?.display_name || duplicateTarget?.username}</b> ?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 mt-2">
+            <button
+              onClick={() => duplicateTarget && performDuplicate(duplicateTarget, "design")}
+              className="w-full flex items-start gap-3 p-3 rounded-xl border border-border hover:border-primary/40 hover:bg-primary/5 transition text-left"
+            >
+              <div className="w-9 h-9 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                <Palette className="w-4 h-4 text-purple-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold">Copier seulement le design</p>
+                <p className="text-xs text-muted-foreground leading-snug mt-0.5">
+                  Thème, couleurs, polices, bannière et avatar. Blocs et liens vides.
+                </p>
+              </div>
+            </button>
+            <button
+              onClick={() => duplicateTarget && performDuplicate(duplicateTarget, "all")}
+              className="w-full flex items-start gap-3 p-3 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 transition text-left"
+            >
+              <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
+                <Layers className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold">Copier tout</p>
+                <p className="text-xs text-muted-foreground leading-snug mt-0.5">
+                  Design + bio, blocs, liens, intégrations et SEO.
+                </p>
+              </div>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
