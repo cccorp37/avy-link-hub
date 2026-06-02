@@ -211,7 +211,7 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
 
     const { data: newProfile, error } = await supabase
       .from("profiles")
-      .insert(baseInsert)
+      .insert(baseInsert as any)
       .select()
       .single();
 
