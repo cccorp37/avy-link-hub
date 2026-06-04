@@ -250,6 +250,12 @@
   }
 }
 
+/* Modern lucide icons — lighter stroke for cleaner Apple-like look */
+.lucide {
+  stroke-width: 1.75;
+}
+
+
 /* Better touch targets on mobile */
 @media (max-width: 768px) {
   button, a, [role="button"] {
