@@ -3,6 +3,7 @@ import {
   LayoutDashboard, User, Link2, Palette, BarChart3, Settings, LogOut, Eye,
   ChevronLeft, ChevronRight, Shield, LayoutTemplate, Plug, Sparkles,
   MessageSquare, Users, Zap, Activity, FileCode, Wallet, ShoppingBag, Crown,
+  BookOpen,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -32,6 +33,7 @@ const navItems = [
   { to: "/dashboard/equipe", label: "Équipe", icon: Users },
   { to: "/dashboard/api", label: "API & Webhooks", icon: Zap },
   { to: "/dashboard/support", label: "Support", icon: MessageSquare },
+  { to: "/dashboard/aide", label: "Comment utiliser AvyLink", icon: BookOpen },
   { to: "/dashboard/parametres", label: "Paramètres", icon: Settings },
 ];
 
