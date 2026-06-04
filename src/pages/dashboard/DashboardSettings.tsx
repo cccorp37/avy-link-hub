@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Save, Loader2, LogOut, Trash2, Shield, Bell, Globe, ChevronRight, HelpCircle, Mail, Facebook, Instagram, Settings2, Wallet, MessageSquare, ExternalLink, Lock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Save, Loader2, LogOut, Trash2, Shield, Bell, Globe, ChevronRight, HelpCircle, Mail, Facebook, Instagram, Settings2, Wallet, MessageSquare, ExternalLink, Lock, Sun, Moon, Lightbulb, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { signOut } from "@/lib/supabase-auth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useTheme } from "next-themes";
+import { useLanguage } from "@/hooks/useLanguage";
 import type { Tables } from "@/integrations/supabase/types";
 import DashboardAdvancedSettings from "./DashboardAdvancedSettings";
 import DashboardFormMessages from "./DashboardFormMessages";
@@ -33,10 +35,20 @@ export default function DashboardSettings({ profile, onUpdate }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
+  const { lang, setLang } = useLanguage();
   const [saving, setSaving] = useState(false);
-  const [notifs, setNotifs] = useState({ newVisitor: true, weeklyReport: true, tips: false });
-  const [lang, setLang] = useState("fr");
+  const [notifs, setNotifs] = useState(() => {
+    try {
+      const saved = localStorage.getItem("avylink_notifs");
+      return saved ? JSON.parse(saved) : { newVisitor: true, weeklyReport: true, tips: true };
+    } catch { return { newVisitor: true, weeklyReport: true, tips: true }; }
+  });
   const [subPage, setSubPage] = useState<SubPage>(null);
+
+  useEffect(() => {
+    localStorage.setItem("avylink_notifs", JSON.stringify(notifs));
+  }, [notifs]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -62,7 +74,9 @@ export default function DashboardSettings({ profile, onUpdate }: Props) {
   ];
 
   const contactItems = [
-    { icon: HelpCircle, label: "Centre d'aide", href: "#" },
+    { icon: BookOpen, label: "Comment utiliser AvyLink", onClick: () => navigate("/dashboard/aide") },
+    { icon: HelpCircle, label: "Centre d'aide", onClick: () => navigate("/dashboard/aide") },
+    { icon: MessageSquare, label: "Contacter le support", onClick: () => navigate("/dashboard/support") },
     { icon: Mail, label: "Envoyez-nous un email", href: "mailto:avydigitalbusiness@gmail.com" },
     { icon: Facebook, label: "Suis nous sur Facebook", href: "https://facebook.com" },
     { icon: Instagram, label: "Suis nous sur Instagram", href: "https://instagram.com" },
@@ -199,8 +213,36 @@ export default function DashboardSettings({ profile, onUpdate }: Props) {
         </Button>
       </motion.div>
 
-      {/* Language */}
+      {/* Theme */}
       <motion.div custom={4} variants={fadeUp} initial="hidden" animate="visible"
+        className="bg-card/80 backdrop-blur-xl rounded-2xl border border-border/50 shadow-sm p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+            {theme === "dark" ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-primary" />}
+          </div>
+          <h3 className="font-dm font-bold text-base text-foreground">Apparence (mode clair / sombre)</h3>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { id: "light", label: "Mode clair", icon: Sun },
+            { id: "dark", label: "Mode sombre", icon: Moon },
+          ].map(t => (
+            <motion.button
+              key={t.id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => { setTheme(t.id); toast({ title: `${t.label} activé` }); }}
+              className={`py-3 px-3 rounded-xl border text-sm font-medium transition-all flex items-center justify-center gap-2 ${theme === t.id ? "border-primary bg-primary/5 text-primary shadow-sm" : "border-border/50 text-muted-foreground hover:border-primary/40"}`}
+            >
+              <t.icon className="w-4 h-4" />
+              {t.label}
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Language */}
+      <motion.div custom={5} variants={fadeUp} initial="hidden" animate="visible"
         className="bg-card/80 backdrop-blur-xl rounded-2xl border border-border/50 shadow-sm p-5">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -208,13 +250,13 @@ export default function DashboardSettings({ profile, onUpdate }: Props) {
           </div>
           <h3 className="font-dm font-bold text-base text-foreground">Langue</h3>
         </div>
-        <div className="grid grid-cols-3 gap-2">
-          {[{ id: "fr", label: "🇫🇷 Français" }, { id: "en", label: "🇬🇧 English" }, { id: "ar", label: "🇲🇦 العربية" }].map(l => (
+        <div className="grid grid-cols-2 gap-2">
+          {([{ id: "fr", label: "🇫🇷 Français" }, { id: "en", label: "🇬🇧 English" }] as const).map(l => (
             <motion.button
               key={l.id}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => setLang(l.id)}
+              onClick={() => { setLang(l.id); toast({ title: l.id === "fr" ? "Langue : Français" : "Language: English" }); }}
               className={`py-2.5 px-3 rounded-xl border text-sm font-medium transition-all ${lang === l.id ? "border-primary bg-primary/5 text-primary shadow-sm" : "border-border/50 text-muted-foreground hover:border-primary/40"}`}
             >
               {l.label}
@@ -223,27 +265,63 @@ export default function DashboardSettings({ profile, onUpdate }: Props) {
         </div>
       </motion.div>
 
-      {/* Contact */}
-      <motion.div custom={5} variants={fadeUp} initial="hidden" animate="visible"
+      {/* Astuce du jour */}
+      <motion.div custom={6} variants={fadeUp} initial="hidden" animate="visible"
+        className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-orange-500/5 p-4 flex items-start gap-3">
+        <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+          <Lightbulb className="w-4 h-4 text-amber-600" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 mb-1">Astuce du jour</p>
+          <p className="text-sm text-foreground leading-snug">
+            {["Mets ton lien le plus important en premier.","Une bannière 1200×400 booste le taux de clic.","Active le badge Verified pour gagner en crédibilité.","Crée plusieurs pages pour séparer projets perso et pro.","Partage ta page AvyLink en bio Instagram & TikTok."][new Date().getDate() % 5]}
+          </p>
+        </div>
+      </motion.div>
+
+      {/* Contact / Aide */}
+      <motion.div custom={7} variants={fadeUp} initial="hidden" animate="visible"
         className="bg-card/80 backdrop-blur-xl rounded-2xl border border-border/50 shadow-sm overflow-hidden">
         <div className="px-5 py-3 border-b border-border/50">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Nous contacter</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Aide & contact</p>
         </div>
-        {contactItems.map(item => (
-          <a
-            key={item.label}
-            href={item.href}
-            target={item.href.startsWith("http") ? "_blank" : undefined}
-            rel="noopener noreferrer"
-            className="w-full flex items-center gap-4 px-5 py-4 hover:bg-secondary/60 transition-colors border-b border-border/30 last:border-0"
-          >
-            <div className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center flex-shrink-0">
-              <item.icon className="w-4 h-4 text-muted-foreground" />
-            </div>
-            <span className="flex-1 text-sm font-medium text-foreground text-left">{item.label}</span>
-            <ExternalLink className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-          </a>
-        ))}
+        {contactItems.map((item: any) => {
+          const content = (
+            <>
+              <div className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center flex-shrink-0">
+                <item.icon className="w-4 h-4 text-muted-foreground" />
+              </div>
+              <span className="flex-1 text-sm font-medium text-foreground text-left">{item.label}</span>
+              {item.href?.startsWith("http") || item.href?.startsWith("mailto") ? (
+                <ExternalLink className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+              ) : (
+                <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              )}
+            </>
+          );
+          if (item.onClick) {
+            return (
+              <button
+                key={item.label}
+                onClick={item.onClick}
+                className="w-full flex items-center gap-4 px-5 py-4 hover:bg-secondary/60 transition-colors border-b border-border/30 last:border-0 text-left"
+              >
+                {content}
+              </button>
+            );
+          }
+          return (
+            <a
+              key={item.label}
+              href={item.href}
+              target={item.href?.startsWith("http") ? "_blank" : undefined}
+              rel="noopener noreferrer"
+              className="w-full flex items-center gap-4 px-5 py-4 hover:bg-secondary/60 transition-colors border-b border-border/30 last:border-0"
+            >
+              {content}
+            </a>
+          );
+        })}
       </motion.div>
 
       {/* Déconnexion */}
