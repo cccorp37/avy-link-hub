@@ -79,7 +79,9 @@ function PagePreviewCard({ profile, isActive }: { profile: Profile; isActive: bo
 }
 
 export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onDeleted, collapsed }: Props) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(() => {
+    try { return localStorage.getItem("avylink_pageswitcher_seen") !== "1"; } catch { return true; }
+  });
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [newUsername, setNewUsername] = useState("");
