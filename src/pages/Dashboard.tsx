@@ -26,6 +26,7 @@ import DashboardHeatmap from "./dashboard/DashboardHeatmap";
 import DashboardWallet from "./dashboard/DashboardWallet";
 import DashboardStore from "./dashboard/DashboardStore";
 import DashboardSubscription from "./dashboard/DashboardSubscription";
+import DashboardHelp from "./dashboard/DashboardHelp";
 
 // Admin sub-pages
 import AdminOverview from "./admin/AdminOverview";
@@ -49,6 +50,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard/modeles": "Modèles",
   "/dashboard/integrations": "Intégrations",
   "/dashboard/support": "Support",
+  "/dashboard/aide": "Comment utiliser AvyLink",
   "/dashboard/equipe": "Équipe",
   "/dashboard/api": "API & Webhooks",
   "/dashboard/heatmap": "Heatmap & A/B",
@@ -218,6 +220,9 @@ const Dashboard = () => {
             } />
             <Route path="/support" element={
               <AnimatedPage><DashboardSupport /></AnimatedPage>
+            } />
+            <Route path="/aide" element={
+              <AnimatedPage><DashboardHelp /></AnimatedPage>
             } />
             <Route path="/equipe" element={
               <AnimatedPage><DashboardTeam profile={profile} /></AnimatedPage>
