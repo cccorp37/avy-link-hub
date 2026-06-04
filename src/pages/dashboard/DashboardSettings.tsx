@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Save, Loader2, LogOut, Trash2, Shield, Bell, Globe, ChevronRight, HelpCircle, Mail, Facebook, Instagram, Settings2, Wallet, MessageSquare, ExternalLink, Lock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Save, Loader2, LogOut, Trash2, Shield, Bell, Globe, ChevronRight, HelpCircle, Mail, Facebook, Instagram, Settings2, Wallet, MessageSquare, ExternalLink, Lock, Sun, Moon, Lightbulb, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { signOut } from "@/lib/supabase-auth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useTheme } from "next-themes";
+import { useLanguage } from "@/hooks/useLanguage";
 import type { Tables } from "@/integrations/supabase/types";
 import DashboardAdvancedSettings from "./DashboardAdvancedSettings";
 import DashboardFormMessages from "./DashboardFormMessages";
@@ -33,10 +35,20 @@ export default function DashboardSettings({ profile, onUpdate }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
+  const { lang, setLang } = useLanguage();
   const [saving, setSaving] = useState(false);
-  const [notifs, setNotifs] = useState({ newVisitor: true, weeklyReport: true, tips: false });
-  const [lang, setLang] = useState("fr");
+  const [notifs, setNotifs] = useState(() => {
+    try {
+      const saved = localStorage.getItem("avylink_notifs");
+      return saved ? JSON.parse(saved) : { newVisitor: true, weeklyReport: true, tips: true };
+    } catch { return { newVisitor: true, weeklyReport: true, tips: true }; }
+  });
   const [subPage, setSubPage] = useState<SubPage>(null);
+
+  useEffect(() => {
+    localStorage.setItem("avylink_notifs", JSON.stringify(notifs));
+  }, [notifs]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -62,7 +74,9 @@ export default function DashboardSettings({ profile, onUpdate }: Props) {
   ];
 
   const contactItems = [
-    { icon: HelpCircle, label: "Centre d'aide", href: "#" },
+    { icon: BookOpen, label: "Comment utiliser AvyLink", onClick: () => navigate("/dashboard/aide") },
+    { icon: HelpCircle, label: "Centre d'aide", onClick: () => navigate("/dashboard/aide") },
+    { icon: MessageSquare, label: "Contacter le support", onClick: () => navigate("/dashboard/support") },
     { icon: Mail, label: "Envoyez-nous un email", href: "mailto:avydigitalbusiness@gmail.com" },
     { icon: Facebook, label: "Suis nous sur Facebook", href: "https://facebook.com" },
     { icon: Instagram, label: "Suis nous sur Instagram", href: "https://instagram.com" },
