@@ -80,6 +80,24 @@ export function MobileBottomNav({ profiles, activeProfile, onSwitchProfile }: Pr
                   </button>
                 ))}
               </div>
+              {/* CTA: créer / gérer pages */}
+              <div className="p-2 border-t border-border/40 bg-secondary/30">
+                {isPaid ? (
+                  <button
+                    onClick={() => { setShowSwitcher(false); navigate("/dashboard/page"); }}
+                    className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold text-primary border border-dashed border-primary/40 hover:bg-primary/5"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Créer une nouvelle page
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { setShowSwitcher(false); navigate("/dashboard/abonnement"); }}
+                    className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold gradient-cta text-primary-foreground"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Débloquer le mode multipage
+                  </button>
+                )}
+              </div>
             </motion.div>
           </>
         )}
@@ -93,17 +111,16 @@ export function MobileBottomNav({ profiles, activeProfile, onSwitchProfile }: Pr
           borderTop: "1px solid hsl(210 20% 91% / 0.6)",
         }}
       >
-        {/* Page switcher pill */}
-        {hasMultipleProfiles && (
-          <button
-            onClick={() => setShowSwitcher(!showSwitcher)}
-            className="absolute -top-5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full border border-border/60 shadow-md text-[10px] font-medium text-primary bg-white/95 backdrop-blur-sm"
-          >
-            <FileText className="w-3 h-3" />
-            <span className="truncate max-w-20">{activeProfile?.display_name || "Page"}</span>
-            <ChevronUp className={`w-3 h-3 transition-transform ${showSwitcher ? "rotate-180" : ""}`} />
-          </button>
-        )}
+        {/* Page switcher pill — always visible for discoverability */}
+        <button
+          onClick={() => setShowSwitcher(!showSwitcher)}
+          className="absolute -top-5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary/30 shadow-md text-[10px] font-bold text-primary bg-white/95 backdrop-blur-sm"
+        >
+          <Layers className="w-3 h-3" />
+          <span className="truncate max-w-24">{activeProfile?.display_name || "Mes pages"}</span>
+          <span className="px-1 py-px rounded bg-primary/10 text-[9px]">{profiles.length}</span>
+          <ChevronUp className={`w-3 h-3 transition-transform ${showSwitcher ? "rotate-180" : ""}`} />
+        </button>
 
         <div className="flex items-stretch">
           {mobileNav.map((item) => {
