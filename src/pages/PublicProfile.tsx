@@ -250,7 +250,7 @@ interface PageBlock {
   profile_id: string;
 }
 
-function PageBlockRenderer({ block, profilePlan }: { block: PageBlock; profilePlan?: string }) {
+function PageBlockRenderer({ block, profilePlan, onBuy }: { block: PageBlock; profilePlan?: string; onBuy?: (item: any) => void }) {
   if (!block.is_active) return null;
   const c = block.content;
 
