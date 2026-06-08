@@ -64,6 +64,19 @@ export function DashboardTopbar({ profile, title, onMobileMenuOpen, profiles, on
         </div>
       </div>
 
+      {/* Center: page switcher */}
+      {profiles && profiles.length > 0 && onSwitchProfile && onProfileCreated && onProfileDeleted && (
+        <div className="hidden sm:block flex-1 max-w-xs mx-4">
+          <PageSwitcher
+            profiles={profiles}
+            activeProfile={profile}
+            onSwitch={onSwitchProfile}
+            onCreated={onProfileCreated}
+            onDeleted={onProfileDeleted}
+          />
+        </div>
+      )}
+
       {/* Right */}
       <div className="flex items-center gap-2">
         {/* Language toggle */}
