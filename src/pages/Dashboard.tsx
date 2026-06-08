@@ -9,6 +9,7 @@ import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
+import { useLanguage } from "@/hooks/useLanguage";
 
 // Sub-pages
 import DashboardOverview from "./dashboard/DashboardOverview";
@@ -40,23 +41,23 @@ import { useAdmin } from "@/hooks/useAdmin";
 
 type Profile = Tables<"profiles">;
 
-const PAGE_TITLES: Record<string, string> = {
-  "/dashboard": "Vue d'ensemble",
-  "/dashboard/page": "Ma Page",
-  "/dashboard/liens": "Liens",
-  "/dashboard/apparence": "Apparence",
-  "/dashboard/analytics": "Analytics",
-  "/dashboard/parametres": "Paramètres",
-  "/dashboard/modeles": "Modèles",
-  "/dashboard/integrations": "Intégrations",
-  "/dashboard/support": "Support",
-  "/dashboard/aide": "Comment utiliser AvyLink",
-  "/dashboard/equipe": "Équipe",
-  "/dashboard/api": "API & Webhooks",
-  "/dashboard/heatmap": "Heatmap & A/B",
-  "/dashboard/portefeuille": "Portefeuille",
-  "/dashboard/boutique": "Boutique",
-  "/dashboard/abonnement": "Abonnement",
+const getPageTitles = (t: (k: string) => string): Record<string, string> => ({
+  "/dashboard": t("overview"),
+  "/dashboard/page": t("my_page"),
+  "/dashboard/liens": t("links"),
+  "/dashboard/apparence": t("appearance"),
+  "/dashboard/analytics": t("analytics"),
+  "/dashboard/parametres": t("settings"),
+  "/dashboard/modeles": t("templates"),
+  "/dashboard/integrations": t("integrations"),
+  "/dashboard/support": t("support"),
+  "/dashboard/aide": t("help"),
+  "/dashboard/equipe": t("team"),
+  "/dashboard/api": t("api"),
+  "/dashboard/heatmap": t("heatmap"),
+  "/dashboard/portefeuille": t("wallet"),
+  "/dashboard/boutique": t("shop"),
+  "/dashboard/abonnement": t("subscription"),
   "/dashboard/admin": "Administration",
   "/dashboard/admin/users": "Utilisateurs",
   "/dashboard/admin/analytics": "Analytics Admin",
@@ -64,7 +65,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard/admin/maintenance": "Maintenance",
   "/dashboard/admin/tickets": "Tickets Support",
   "/dashboard/admin/source-code": "Code Source",
-};
+});
 
 const ease = [0.22, 1, 0.36, 1] as const;
 const pageVariants = {
@@ -99,7 +100,8 @@ const Dashboard = () => {
   const [profileLoading, setProfileLoading] = useState(true);
 
   const profile = profiles.find(p => p.id === activeProfileId) || profiles[0] || null;
-  const currentTitle = PAGE_TITLES[location.pathname] || "Dashboard";
+  const { t } = useLanguage();
+  const currentTitle = getPageTitles(t)[location.pathname] || "Dashboard";
 
   useEffect(() => {
     if (!loading && !user) {
@@ -189,7 +191,14 @@ const Dashboard = () => {
       />
 
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
-        <DashboardTopbar profile={profile} title={currentTitle} />
+        <DashboardTopbar
+          profile={profile}
+          title={currentTitle}
+          profiles={profiles}
+          onSwitchProfile={switchProfile}
+          onProfileCreated={handleProfileCreated}
+          onProfileDeleted={handleProfileDeleted}
+        />
         <NotificationBanner />
 
         <AnimatePresence mode="wait">

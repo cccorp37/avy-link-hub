@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Save, Loader2, Copy, Check, Globe, Plus, X, GripVertical, ChevronDown, ChevronUp, Trash2, Edit2, Heading, Video, Music, Link2, ClipboardList, Minus, Type, Mic, Clapperboard, Instagram, Youtube, ExternalLink, BadgeCheck, Smartphone, Palette, ArrowRight, Lock, EyeOff } from "lucide-react";
+import { Camera, Save, Loader2, Copy, Check, Globe, Plus, X, GripVertical, ChevronDown, ChevronUp, Trash2, Edit2, Heading, Video, Music, Link2, ClipboardList, Minus, Type, Mic, Clapperboard, Instagram, Youtube, ExternalLink, BadgeCheck, Smartphone, Palette, ArrowRight, Lock, EyeOff, ShoppingBag, Briefcase, Calendar, Tag } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import SocialIcon, { PLATFORM_COLORS } from "@/components/SocialIcon";
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,13 @@ const BLOCK_TYPES: { type: string; label: string; Icon: LucideIcon; iconColor: s
   { type: "tiktok", label: "TikTok", Icon: Video, iconColor: "text-gray-700 dark:text-gray-300", iconBg: "bg-gray-200 dark:bg-gray-500/20", desc: "Intégrer ta page TikTok", preview: "bg-gray-900/5 border-gray-300" },
   { type: "instagram", label: "Instagram", Icon: Instagram, iconColor: "text-fuchsia-500", iconBg: "bg-fuchsia-100 dark:bg-fuchsia-500/20", desc: "Grille de photos Instagram", preview: "bg-pink-50 border-pink-200" },
   { type: "youtube_sub", label: "YouTube abonné", Icon: Youtube, iconColor: "text-red-500", iconBg: "bg-red-100 dark:bg-red-500/20", desc: "Bouton d'abonnement YouTube", preview: "bg-red-50 border-red-200" },
+  { type: "shop_item", label: "Article / Service", Icon: ShoppingBag, iconColor: "text-emerald-600", iconBg: "bg-emerald-100 dark:bg-emerald-500/20", desc: "Vente d'article, service ou rendez-vous payant", preview: "bg-emerald-50 border-emerald-200", premium: true },
+];
+
+const SHOP_ITEM_TYPES = [
+  { id: "article", label: "Article", Icon: Tag },
+  { id: "service", label: "Service", Icon: Briefcase },
+  { id: "appointment", label: "Rendez-vous", Icon: Calendar },
 ];
 
 function BlockPreviewIcon({ type }: { type: string }) {
@@ -382,6 +389,63 @@ function BlockEditor({ block, onSave, onClose }: { block: Partial<PageBlock>; on
               </div>
             </div>
           )}
+
+          {block.type === "shop_item" && (
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">Type d'élément</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {SHOP_ITEM_TYPES.map(t => {
+                    const active = ((form.content?.item_type as string) || "article") === t.id;
+                    return (
+                      <button key={t.id} type="button" onClick={() => updateContent("item_type", t.id)}
+                        className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all ${active ? "border-primary bg-primary/5" : "border-border/40"}`}>
+                        <t.Icon className={`w-4 h-4 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                        <span className="text-[11px] font-medium">{t.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">En-tête</label>
+                <Input value={(form.content?.header_text as string) || ""} onChange={e => updateContent("header_text", e.target.value)} placeholder="🔥 Offre limitée" className="rounded-xl" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">Nom *</label>
+                <Input value={(form.content?.name as string) || ""} onChange={e => updateContent("name", e.target.value)} placeholder="Ex: Consultation Marketing" className="rounded-xl" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">Description</label>
+                <textarea value={(form.content?.description as string) || ""} onChange={e => updateContent("description", e.target.value)} rows={3} placeholder="Description détaillée..."
+                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/20" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">Créative / Image (URL)</label>
+                <Input value={(form.content?.image_url as string) || ""} onChange={e => updateContent("image_url", e.target.value)} placeholder="https://..." className="rounded-xl" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">Prix (FCFA) *</label>
+                <Input type="number" value={(form.content?.price as number) || ""} onChange={e => updateContent("price", parseInt(e.target.value) || 0)} placeholder="5000" className="rounded-xl" />
+                {!!form.content?.price && (
+                  <p className="text-[10px] text-muted-foreground mt-1">Le client paiera {Math.round((form.content.price as number) * 1.07).toLocaleString("fr-FR")} XAF (frais 7% inclus)</p>
+                )}
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">Lien de redirection après paiement</label>
+                <Input value={(form.content?.redirect_url as string) || ""} onChange={e => updateContent("redirect_url", e.target.value)} placeholder="https://mon-site.com/merci" className="rounded-xl" />
+              </div>
+              <div className="rounded-xl border border-border/40 p-3 space-y-2">
+                <p className="text-xs font-semibold text-foreground">Coordonnées du vendeur</p>
+                <Input value={(form.content?.seller_name as string) || ""} onChange={e => updateContent("seller_name", e.target.value)} placeholder="Nom" className="rounded-xl h-9 text-sm" />
+                <div className="grid grid-cols-2 gap-2">
+                  <Input value={(form.content?.seller_phone as string) || ""} onChange={e => updateContent("seller_phone", e.target.value)} placeholder="Téléphone" className="rounded-xl h-9 text-sm" />
+                  <Input value={(form.content?.seller_email as string) || ""} onChange={e => updateContent("seller_email", e.target.value)} placeholder="Email" className="rounded-xl h-9 text-sm" />
+                </div>
+              </div>
+              <p className="text-[10px] text-muted-foreground">💳 Les paiements seront crédités automatiquement dans ton portefeuille AvyLink.</p>
+            </div>
+          )}
         </div>
         <div className="p-5 border-t border-border flex gap-3">
           <Button onClick={() => onSave(form)} className="flex-1 gradient-cta text-primary-foreground rounded-xl">
@@ -448,6 +512,24 @@ function BlockPreview({ block }: { block: PageBlock }) {
         <div>
           <p className="text-xs font-medium text-foreground">{block.title || def?.label}</p>
           <p className="text-xs text-muted-foreground truncate max-w-[180px]">{(c.url as string) || "URL non configurée"}</p>
+        </div>
+      </div>
+    );
+  }
+  if (block.type === "shop_item") {
+    const clientPrice = c.price ? Math.round((c.price as number) * 1.07) : 0;
+    return (
+      <div className="flex items-center gap-3 py-1">
+        {c.image_url ? (
+          <img src={c.image_url as string} alt="" className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
+        ) : (
+          <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+            <ShoppingBag className="w-5 h-5 text-emerald-600" />
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold text-foreground truncate">{(c.name as string) || "Article"}</p>
+          <p className="text-[10px] text-primary font-bold">{clientPrice.toLocaleString("fr-FR")} XAF</p>
         </div>
       </div>
     );
@@ -587,6 +669,32 @@ function LivePreviewBlock({ block }: { block: PageBlock }) {
     );
   }
 
+  if (block.type === "shop_item") {
+    const clientPrice = c.price ? Math.round((c.price as number) * 1.07) : 0;
+    const TypeIcon = (c.item_type === "service" ? Briefcase : c.item_type === "appointment" ? Calendar : Tag);
+    return (
+      <div className="rounded-xl overflow-hidden border border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20">
+        {c.image_url ? (
+          <img src={c.image_url as string} alt="" className="w-full h-16 object-cover" />
+        ) : null}
+        <div className="p-2 space-y-1">
+          <div className="flex items-center gap-1">
+            <TypeIcon className="w-2.5 h-2.5 text-emerald-600" />
+            <span className="text-[8px] font-semibold text-emerald-700 uppercase">{(c.item_type as string) || "article"}</span>
+          </div>
+          {c.header_text && <p className="text-[8px] text-muted-foreground truncate">{c.header_text as string}</p>}
+          <p className="text-[10px] font-bold text-foreground truncate">{(c.name as string) || "Article"}</p>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-primary">{clientPrice.toLocaleString("fr-FR")} XAF</span>
+            <span className="px-2 py-0.5 rounded-md gradient-cta text-primary-foreground text-[8px] font-bold">
+              {c.item_type === "appointment" ? "Réserver" : "Acheter"}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Fallback
   return (
     <div className="flex items-center gap-2 p-2 rounded-xl border border-border/40 bg-secondary/20">
@@ -707,13 +815,42 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
     setShowBlockModal(false);
   };
 
+  const syncShopItem = async (content: Record<string, unknown>, existingId?: string | null) => {
+    if (!profile) return content;
+    const payload: any = {
+      profile_id: profile.id,
+      name: (content.name as string) || "Article",
+      description: (content.description as string) || null,
+      price: (content.price as number) || 0,
+      currency: "XAF",
+      image_url: (content.image_url as string) || null,
+      item_type: (content.item_type as string) || "article",
+      redirect_url: (content.redirect_url as string) || null,
+      seller_name: (content.seller_name as string) || profile.display_name || null,
+      seller_phone: (content.seller_phone as string) || null,
+      seller_email: (content.seller_email as string) || null,
+      header_text: (content.header_text as string) || null,
+      is_active: true,
+    };
+    if (existingId) {
+      const { data } = await supabase.from("store_items").update(payload).eq("id", existingId).select().single();
+      return { ...content, store_item_id: data?.id || existingId };
+    }
+    const { data } = await supabase.from("store_items").insert(payload).select().single();
+    return { ...content, store_item_id: data?.id };
+  };
+
   const saveBlock = async (data: Partial<PageBlock>) => {
     if (!profile) return;
+    let content = (data.content || {}) as Record<string, unknown>;
+    if (data.type === "shop_item") {
+      content = await syncShopItem(content, content.store_item_id as string | undefined);
+    }
     if (data.id) {
       // Update existing
       const { data: updated } = await supabase.from("page_blocks").update({
         title: data.title,
-        content: (data.content || {}) as Record<string, string | number | boolean | null>,
+        content: content as Record<string, string | number | boolean | null>,
         is_active: data.is_active,
       }).eq("id", data.id).select().single();
       if (updated) setBlocks(prev => prev.map(b => b.id === data.id ? updated as PageBlock : b));
@@ -721,7 +858,7 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
       // Insert new
       const { data: created } = await supabase.from("page_blocks").insert([{
         profile_id: profile.id, type: data.type!, title: data.title || null,
-        content: (data.content || {}) as Record<string, string | number | boolean | null>,
+        content: content as Record<string, string | number | boolean | null>,
         position: blocks.length, is_active: true,
       }]).select().single();
       if (created) setBlocks(prev => [...prev, created as PageBlock]);
@@ -732,7 +869,12 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
 
   const deleteBlock = async (id: string) => {
     setDeletingBlockId(id);
+    const blk = blocks.find(b => b.id === id);
+    const storeItemId = (blk?.content as Record<string, unknown> | undefined)?.store_item_id as string | undefined;
     await supabase.from("page_blocks").delete().eq("id", id);
+    if (storeItemId) {
+      await supabase.from("store_items").delete().eq("id", storeItemId);
+    }
     setBlocks(prev => prev.filter(b => b.id !== id));
     setDeletingBlockId(null);
   };
@@ -944,41 +1086,34 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
             </Button>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1.5 max-h-[280px] overflow-y-auto pr-1 rounded-xl">
             {blocks.map((block, idx) => {
               const def = BLOCK_TYPES.find(b => b.type === block.type);
               return (
-                <div key={block.id} className={`rounded-2xl border transition-all ${block.is_active ? "bg-secondary/30 border-border/50" : "bg-muted/20 border-border/30 opacity-60"}`}>
-                  <div className="flex items-center gap-3 p-3">
-                    <GripVertical className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
-                    <div className="w-8 h-8 rounded-xl bg-card border border-border flex items-center justify-center flex-shrink-0">
-                      <BlockPreviewIcon type={block.type} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate">{block.title || def?.label}</p>
-                      <p className="text-xs text-muted-foreground">{def?.desc}</p>
-                    </div>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      <button onClick={() => moveBlock(block.id, "up")} disabled={idx === 0} className="p-1 rounded hover:bg-secondary text-muted-foreground disabled:opacity-30">
-                        <ChevronUp className="w-3.5 h-3.5" />
-                      </button>
-                      <button onClick={() => moveBlock(block.id, "down")} disabled={idx === blocks.length - 1} className="p-1 rounded hover:bg-secondary text-muted-foreground disabled:opacity-30">
-                        <ChevronDown className="w-3.5 h-3.5" />
-                      </button>
-                      <button onClick={() => toggleBlock(block)} className={`w-8 h-4.5 rounded-full transition-colors relative ${block.is_active ? "bg-primary" : "bg-muted"}`} style={{ width: 32, height: 18 }}>
-                        <span className={`absolute top-0.5 w-3.5 h-3.5 bg-white rounded-full shadow transition-all ${block.is_active ? "left-3.5" : "left-0.5"}`} style={{ left: block.is_active ? 13 : 2 }} />
-                      </button>
-                      <button onClick={() => setEditingBlock(block)} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary transition-colors">
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button onClick={() => deleteBlock(block.id)} disabled={deletingBlockId === block.id} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
-                        {deletingBlockId === block.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
+                <div key={block.id} className={`flex items-center gap-2 px-2 py-1.5 rounded-xl border transition-all ${block.is_active ? "bg-secondary/30 border-border/50" : "bg-muted/20 border-border/30 opacity-60"}`}>
+                  <GripVertical className="w-3.5 h-3.5 text-muted-foreground/40 flex-shrink-0" />
+                  <div className="w-7 h-7 rounded-lg bg-card border border-border flex items-center justify-center flex-shrink-0">
+                    <BlockPreviewIcon type={block.type} />
                   </div>
-                  {/* Block preview */}
-                  <div className="px-4 pb-3 border-t border-border/30 pt-2">
-                    <BlockPreview block={block} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-foreground truncate">{block.title || def?.label}</p>
+                  </div>
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                    <button onClick={() => moveBlock(block.id, "up")} disabled={idx === 0} className="p-1 rounded hover:bg-secondary text-muted-foreground disabled:opacity-30">
+                      <ChevronUp className="w-3 h-3" />
+                    </button>
+                    <button onClick={() => moveBlock(block.id, "down")} disabled={idx === blocks.length - 1} className="p-1 rounded hover:bg-secondary text-muted-foreground disabled:opacity-30">
+                      <ChevronDown className="w-3 h-3" />
+                    </button>
+                    <button onClick={() => toggleBlock(block)} className={`relative rounded-full transition-colors ${block.is_active ? "bg-primary" : "bg-muted"}`} style={{ width: 26, height: 14 }}>
+                      <span className="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-all" style={{ left: block.is_active ? 11 : 2 }} />
+                    </button>
+                    <button onClick={() => setEditingBlock(block)} className="p-1 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary transition-colors">
+                      <Edit2 className="w-3 h-3" />
+                    </button>
+                    <button onClick={() => deleteBlock(block.id)} disabled={deletingBlockId === block.id} className="p-1 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                      {deletingBlockId === block.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                    </button>
                   </div>
                 </div>
               );

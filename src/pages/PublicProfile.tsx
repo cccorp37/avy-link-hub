@@ -250,7 +250,7 @@ interface PageBlock {
   profile_id: string;
 }
 
-function PageBlockRenderer({ block, profilePlan }: { block: PageBlock; profilePlan?: string }) {
+function PageBlockRenderer({ block, profilePlan, onBuy }: { block: PageBlock; profilePlan?: string; onBuy?: (item: any) => void }) {
   if (!block.is_active) return null;
   const c = block.content;
 
@@ -464,6 +464,53 @@ function PageBlockRenderer({ block, profilePlan }: { block: PageBlock; profilePl
       );
     }
 
+    case "shop_item": {
+      const c = block.content as Record<string, unknown>;
+      const itemType = (c.item_type as string) || "article";
+      const price = (c.price as number) || 0;
+      const clientPrice = Math.round(price * 1.07);
+      const TypeIcon = itemType === "service" ? Briefcase : itemType === "appointment" ? Calendar : Tag;
+      const typeLabel = itemType === "service" ? "Service" : itemType === "appointment" ? "Rendez-vous" : "Article";
+      const ctaLabel = itemType === "appointment" ? "Réserver" : "Acheter";
+      return (
+        <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
+          {c.image_url ? (
+            <img src={c.image_url as string} alt="" className="w-full h-40 object-cover" onError={e => ((e.target as HTMLImageElement).style.display = "none")} />
+          ) : null}
+          <div className="p-4 space-y-2">
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+              <TypeIcon className="w-3 h-3" /> {typeLabel}
+            </span>
+            {c.header_text ? <p className="text-xs font-medium text-muted-foreground">{c.header_text as string}</p> : null}
+            <h4 className="font-dm font-bold text-foreground">{(c.name as string) || block.title || "Article"}</h4>
+            {c.description ? <p className="text-sm text-muted-foreground line-clamp-3">{c.description as string}</p> : null}
+            <div className="flex items-center justify-between pt-1">
+              <p className="text-xl font-bold text-primary">{clientPrice.toLocaleString("fr-FR")} XAF</p>
+              <button
+                onClick={() => onBuy?.({
+                  id: c.store_item_id || block.id,
+                  name: (c.name as string) || "Article",
+                  description: (c.description as string) || null,
+                  price,
+                  currency: "XAF",
+                  image_url: (c.image_url as string) || null,
+                  item_type: itemType,
+                  redirect_url: (c.redirect_url as string) || null,
+                  seller_name: (c.seller_name as string) || null,
+                  seller_phone: (c.seller_phone as string) || null,
+                  seller_email: (c.seller_email as string) || null,
+                  header_text: (c.header_text as string) || null,
+                })}
+                className="px-4 py-2 gradient-cta text-primary-foreground rounded-xl text-sm font-bold hover:opacity-90 transition-opacity"
+              >
+                {ctaLabel}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     default:
       return null;
   }
@@ -502,6 +549,7 @@ const PublicProfile = () => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
+  const [selectedBlockItem, setSelectedBlockItem] = useState<any | null>(null);
 
   useEffect(() => {
     if (!username) return;
@@ -738,7 +786,7 @@ const PublicProfile = () => {
 
             {/* Page Blocks */}
             {blocks.map(block => (
-              <PageBlockRenderer key={block.id} block={block} profilePlan={profile.plan} />
+              <PageBlockRenderer key={block.id} block={block} profilePlan={profile.plan} onBuy={setSelectedBlockItem} />
             ))}
 
             {/* Links — apply button_style */}
@@ -827,6 +875,16 @@ const PublicProfile = () => {
               open={!!selectedItem}
               onClose={() => setSelectedItem(null)}
               item={{ ...selectedItem, profile_id: profile.id }}
+              sellerProfileId={profile.id}
+            />
+          )}
+
+          {/* Shop Block Item Payment Modal */}
+          {selectedBlockItem && profile && (
+            <StorePaymentModal
+              open={!!selectedBlockItem}
+              onClose={() => setSelectedBlockItem(null)}
+              item={{ ...selectedBlockItem, profile_id: profile.id }}
               sellerProfileId={profile.id}
             />
           )}

@@ -15,26 +15,27 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { PageSwitcher } from "./PageSwitcher";
+import { useLanguage } from "@/hooks/useLanguage";
 
 type Profile = Tables<"profiles"> & { is_verified?: boolean | null };
 
-const navItems = [
-  { to: "/dashboard", label: "Vue d'ensemble", icon: LayoutDashboard, end: true },
-  { to: "/dashboard/page", label: "Ma Page", icon: User },
-  { to: "/dashboard/liens", label: "Liens", icon: Link2 },
-  { to: "/dashboard/boutique", label: "Boutique", icon: ShoppingBag },
-  { to: "/dashboard/modeles", label: "Modèles", icon: LayoutTemplate },
-  { to: "/dashboard/apparence", label: "Apparence", icon: Palette },
-  { to: "/dashboard/integrations", label: "Intégrations", icon: Plug },
-  { to: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
-  { to: "/dashboard/heatmap", label: "Heatmap & A/B", icon: Activity },
-  { to: "/dashboard/portefeuille", label: "Portefeuille", icon: Wallet },
-  { to: "/dashboard/abonnement", label: "Abonnement", icon: Crown },
-  { to: "/dashboard/equipe", label: "Équipe", icon: Users },
-  { to: "/dashboard/api", label: "API & Webhooks", icon: Zap },
-  { to: "/dashboard/support", label: "Support", icon: MessageSquare },
-  { to: "/dashboard/aide", label: "Comment utiliser AvyLink", icon: BookOpen },
-  { to: "/dashboard/parametres", label: "Paramètres", icon: Settings },
+const navItemsRaw = [
+  { to: "/dashboard", key: "overview", icon: LayoutDashboard, end: true },
+  { to: "/dashboard/page", key: "my_page", icon: User },
+  { to: "/dashboard/liens", key: "links", icon: Link2 },
+  { to: "/dashboard/boutique", key: "shop", icon: ShoppingBag },
+  { to: "/dashboard/modeles", key: "templates", icon: LayoutTemplate },
+  { to: "/dashboard/apparence", key: "appearance", icon: Palette },
+  { to: "/dashboard/integrations", key: "integrations", icon: Plug },
+  { to: "/dashboard/analytics", key: "analytics", icon: BarChart3 },
+  { to: "/dashboard/heatmap", key: "heatmap", icon: Activity },
+  { to: "/dashboard/portefeuille", key: "wallet", icon: Wallet },
+  { to: "/dashboard/abonnement", key: "subscription", icon: Crown },
+  { to: "/dashboard/equipe", key: "team", icon: Users },
+  { to: "/dashboard/api", key: "api", icon: Zap },
+  { to: "/dashboard/support", key: "support", icon: MessageSquare },
+  { to: "/dashboard/aide", key: "help", icon: BookOpen },
+  { to: "/dashboard/parametres", key: "settings", icon: Settings },
 ];
 
 interface Props {
@@ -51,6 +52,8 @@ export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfile
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const { t } = useLanguage();
+  const navItems = navItemsRaw.map(n => ({ ...n, label: t(n.key) }));
 
   const profileUrl = profile?.username
     ? `${window.location.origin}/u/${profile.username}`
@@ -101,15 +104,7 @@ export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfile
         </AnimatePresence>
       </div>
 
-      {/* Page Switcher */}
-      <PageSwitcher
-        profiles={profiles}
-        activeProfile={profile}
-        onSwitch={onSwitchProfile}
-        onCreated={onProfileCreated}
-        onDeleted={onProfileDeleted}
-        collapsed={collapsed}
-      />
+      {/* Page Switcher moved to topbar for better visibility */}
 
       <div className="mx-3 h-px bg-border/40" />
 
