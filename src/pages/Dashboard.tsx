@@ -9,6 +9,7 @@ import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
+import { useLanguage } from "@/hooks/useLanguage";
 
 // Sub-pages
 import DashboardOverview from "./dashboard/DashboardOverview";
