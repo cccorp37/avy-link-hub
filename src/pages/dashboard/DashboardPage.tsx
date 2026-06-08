@@ -815,13 +815,42 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
     setShowBlockModal(false);
   };
 
+  const syncShopItem = async (content: Record<string, unknown>, existingId?: string | null) => {
+    if (!profile) return content;
+    const payload: any = {
+      profile_id: profile.id,
+      name: (content.name as string) || "Article",
+      description: (content.description as string) || null,
+      price: (content.price as number) || 0,
+      currency: "XAF",
+      image_url: (content.image_url as string) || null,
+      item_type: (content.item_type as string) || "article",
+      redirect_url: (content.redirect_url as string) || null,
+      seller_name: (content.seller_name as string) || profile.display_name || null,
+      seller_phone: (content.seller_phone as string) || null,
+      seller_email: (content.seller_email as string) || null,
+      header_text: (content.header_text as string) || null,
+      is_active: true,
+    };
+    if (existingId) {
+      const { data } = await supabase.from("store_items").update(payload).eq("id", existingId).select().single();
+      return { ...content, store_item_id: data?.id || existingId };
+    }
+    const { data } = await supabase.from("store_items").insert(payload).select().single();
+    return { ...content, store_item_id: data?.id };
+  };
+
   const saveBlock = async (data: Partial<PageBlock>) => {
     if (!profile) return;
+    let content = (data.content || {}) as Record<string, unknown>;
+    if (data.type === "shop_item") {
+      content = await syncShopItem(content, content.store_item_id as string | undefined);
+    }
     if (data.id) {
       // Update existing
       const { data: updated } = await supabase.from("page_blocks").update({
         title: data.title,
-        content: (data.content || {}) as Record<string, string | number | boolean | null>,
+        content: content as Record<string, string | number | boolean | null>,
         is_active: data.is_active,
       }).eq("id", data.id).select().single();
       if (updated) setBlocks(prev => prev.map(b => b.id === data.id ? updated as PageBlock : b));
@@ -829,7 +858,7 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
       // Insert new
       const { data: created } = await supabase.from("page_blocks").insert([{
         profile_id: profile.id, type: data.type!, title: data.title || null,
-        content: (data.content || {}) as Record<string, string | number | boolean | null>,
+        content: content as Record<string, string | number | boolean | null>,
         position: blocks.length, is_active: true,
       }]).select().single();
       if (created) setBlocks(prev => [...prev, created as PageBlock]);
@@ -840,7 +869,12 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
 
   const deleteBlock = async (id: string) => {
     setDeletingBlockId(id);
+    const blk = blocks.find(b => b.id === id);
+    const storeItemId = (blk?.content as Record<string, unknown> | undefined)?.store_item_id as string | undefined;
     await supabase.from("page_blocks").delete().eq("id", id);
+    if (storeItemId) {
+      await supabase.from("store_items").delete().eq("id", storeItemId);
+    }
     setBlocks(prev => prev.filter(b => b.id !== id));
     setDeletingBlockId(null);
   };
