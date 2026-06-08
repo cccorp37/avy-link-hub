@@ -669,6 +669,32 @@ function LivePreviewBlock({ block }: { block: PageBlock }) {
     );
   }
 
+  if (block.type === "shop_item") {
+    const clientPrice = c.price ? Math.round((c.price as number) * 1.07) : 0;
+    const TypeIcon = (c.item_type === "service" ? Briefcase : c.item_type === "appointment" ? Calendar : Tag);
+    return (
+      <div className="rounded-xl overflow-hidden border border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20">
+        {c.image_url ? (
+          <img src={c.image_url as string} alt="" className="w-full h-16 object-cover" />
+        ) : null}
+        <div className="p-2 space-y-1">
+          <div className="flex items-center gap-1">
+            <TypeIcon className="w-2.5 h-2.5 text-emerald-600" />
+            <span className="text-[8px] font-semibold text-emerald-700 uppercase">{(c.item_type as string) || "article"}</span>
+          </div>
+          {c.header_text && <p className="text-[8px] text-muted-foreground truncate">{c.header_text as string}</p>}
+          <p className="text-[10px] font-bold text-foreground truncate">{(c.name as string) || "Article"}</p>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-primary">{clientPrice.toLocaleString("fr-FR")} XAF</span>
+            <span className="px-2 py-0.5 rounded-md gradient-cta text-primary-foreground text-[8px] font-bold">
+              {c.item_type === "appointment" ? "Réserver" : "Acheter"}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Fallback
   return (
     <div className="flex items-center gap-2 p-2 rounded-xl border border-border/40 bg-secondary/20">
