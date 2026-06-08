@@ -786,7 +786,7 @@ const PublicProfile = () => {
 
             {/* Page Blocks */}
             {blocks.map(block => (
-              <PageBlockRenderer key={block.id} block={block} profilePlan={profile.plan} />
+              <PageBlockRenderer key={block.id} block={block} profilePlan={profile.plan} onBuy={setSelectedBlockItem} />
             ))}
 
             {/* Links — apply button_style */}
