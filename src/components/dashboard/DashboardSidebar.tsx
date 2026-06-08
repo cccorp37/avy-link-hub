@@ -52,6 +52,8 @@ export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfile
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const { t } = useLanguage();
+  const navItems = navItemsRaw.map(n => ({ ...n, label: t(n.key) }));
 
   const profileUrl = profile?.username
     ? `${window.location.origin}/u/${profile.username}`
