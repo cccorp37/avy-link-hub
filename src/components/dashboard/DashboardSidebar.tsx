@@ -101,15 +101,7 @@ export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfile
         </AnimatePresence>
       </div>
 
-      {/* Page Switcher */}
-      <PageSwitcher
-        profiles={profiles}
-        activeProfile={profile}
-        onSwitch={onSwitchProfile}
-        onCreated={onProfileCreated}
-        onDeleted={onProfileDeleted}
-        collapsed={collapsed}
-      />
+      {/* Page Switcher moved to topbar for better visibility */}
 
       <div className="mx-3 h-px bg-border/40" />
 
