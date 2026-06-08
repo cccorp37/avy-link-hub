@@ -1052,41 +1052,34 @@ export default function DashboardPage({ profile, onUpdate }: Props) {
             </Button>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1.5 max-h-[280px] overflow-y-auto pr-1 rounded-xl">
             {blocks.map((block, idx) => {
               const def = BLOCK_TYPES.find(b => b.type === block.type);
               return (
-                <div key={block.id} className={`rounded-2xl border transition-all ${block.is_active ? "bg-secondary/30 border-border/50" : "bg-muted/20 border-border/30 opacity-60"}`}>
-                  <div className="flex items-center gap-3 p-3">
-                    <GripVertical className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
-                    <div className="w-8 h-8 rounded-xl bg-card border border-border flex items-center justify-center flex-shrink-0">
-                      <BlockPreviewIcon type={block.type} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate">{block.title || def?.label}</p>
-                      <p className="text-xs text-muted-foreground">{def?.desc}</p>
-                    </div>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      <button onClick={() => moveBlock(block.id, "up")} disabled={idx === 0} className="p-1 rounded hover:bg-secondary text-muted-foreground disabled:opacity-30">
-                        <ChevronUp className="w-3.5 h-3.5" />
-                      </button>
-                      <button onClick={() => moveBlock(block.id, "down")} disabled={idx === blocks.length - 1} className="p-1 rounded hover:bg-secondary text-muted-foreground disabled:opacity-30">
-                        <ChevronDown className="w-3.5 h-3.5" />
-                      </button>
-                      <button onClick={() => toggleBlock(block)} className={`w-8 h-4.5 rounded-full transition-colors relative ${block.is_active ? "bg-primary" : "bg-muted"}`} style={{ width: 32, height: 18 }}>
-                        <span className={`absolute top-0.5 w-3.5 h-3.5 bg-white rounded-full shadow transition-all ${block.is_active ? "left-3.5" : "left-0.5"}`} style={{ left: block.is_active ? 13 : 2 }} />
-                      </button>
-                      <button onClick={() => setEditingBlock(block)} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary transition-colors">
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button onClick={() => deleteBlock(block.id)} disabled={deletingBlockId === block.id} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
-                        {deletingBlockId === block.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
+                <div key={block.id} className={`flex items-center gap-2 px-2 py-1.5 rounded-xl border transition-all ${block.is_active ? "bg-secondary/30 border-border/50" : "bg-muted/20 border-border/30 opacity-60"}`}>
+                  <GripVertical className="w-3.5 h-3.5 text-muted-foreground/40 flex-shrink-0" />
+                  <div className="w-7 h-7 rounded-lg bg-card border border-border flex items-center justify-center flex-shrink-0">
+                    <BlockPreviewIcon type={block.type} />
                   </div>
-                  {/* Block preview */}
-                  <div className="px-4 pb-3 border-t border-border/30 pt-2">
-                    <BlockPreview block={block} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-foreground truncate">{block.title || def?.label}</p>
+                  </div>
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                    <button onClick={() => moveBlock(block.id, "up")} disabled={idx === 0} className="p-1 rounded hover:bg-secondary text-muted-foreground disabled:opacity-30">
+                      <ChevronUp className="w-3 h-3" />
+                    </button>
+                    <button onClick={() => moveBlock(block.id, "down")} disabled={idx === blocks.length - 1} className="p-1 rounded hover:bg-secondary text-muted-foreground disabled:opacity-30">
+                      <ChevronDown className="w-3 h-3" />
+                    </button>
+                    <button onClick={() => toggleBlock(block)} className={`relative rounded-full transition-colors ${block.is_active ? "bg-primary" : "bg-muted"}`} style={{ width: 26, height: 14 }}>
+                      <span className="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-all" style={{ left: block.is_active ? 11 : 2 }} />
+                    </button>
+                    <button onClick={() => setEditingBlock(block)} className="p-1 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary transition-colors">
+                      <Edit2 className="w-3 h-3" />
+                    </button>
+                    <button onClick={() => deleteBlock(block.id)} disabled={deletingBlockId === block.id} className="p-1 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                      {deletingBlockId === block.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                    </button>
                   </div>
                 </div>
               );
