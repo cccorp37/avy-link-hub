@@ -502,6 +502,7 @@ const PublicProfile = () => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
+  const [selectedBlockItem, setSelectedBlockItem] = useState<any | null>(null);
 
   useEffect(() => {
     if (!username) return;
