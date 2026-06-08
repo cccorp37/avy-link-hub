@@ -21,7 +21,7 @@ interface Props {
   onProfileDeleted?: (id: string) => void;
 }
 
-export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
+export function DashboardTopbar({ profile, title, onMobileMenuOpen, profiles, onSwitchProfile, onProfileCreated, onProfileDeleted }: Props) {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
   const { lang, setLang, t } = useLanguage();
