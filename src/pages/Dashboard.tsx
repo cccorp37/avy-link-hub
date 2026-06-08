@@ -189,7 +189,14 @@ const Dashboard = () => {
       />
 
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
-        <DashboardTopbar profile={profile} title={currentTitle} />
+        <DashboardTopbar
+          profile={profile}
+          title={currentTitle}
+          profiles={profiles}
+          onSwitchProfile={switchProfile}
+          onProfileCreated={handleProfileCreated}
+          onProfileDeleted={handleProfileDeleted}
+        />
         <NotificationBanner />
 
         <AnimatePresence mode="wait">
