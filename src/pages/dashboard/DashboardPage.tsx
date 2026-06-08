@@ -389,6 +389,63 @@ function BlockEditor({ block, onSave, onClose }: { block: Partial<PageBlock>; on
               </div>
             </div>
           )}
+
+          {block.type === "shop_item" && (
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">Type d'élément</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {SHOP_ITEM_TYPES.map(t => {
+                    const active = ((form.content?.item_type as string) || "article") === t.id;
+                    return (
+                      <button key={t.id} type="button" onClick={() => updateContent("item_type", t.id)}
+                        className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all ${active ? "border-primary bg-primary/5" : "border-border/40"}`}>
+                        <t.Icon className={`w-4 h-4 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                        <span className="text-[11px] font-medium">{t.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">En-tête</label>
+                <Input value={(form.content?.header_text as string) || ""} onChange={e => updateContent("header_text", e.target.value)} placeholder="🔥 Offre limitée" className="rounded-xl" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">Nom *</label>
+                <Input value={(form.content?.name as string) || ""} onChange={e => updateContent("name", e.target.value)} placeholder="Ex: Consultation Marketing" className="rounded-xl" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">Description</label>
+                <textarea value={(form.content?.description as string) || ""} onChange={e => updateContent("description", e.target.value)} rows={3} placeholder="Description détaillée..."
+                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/20" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">Créative / Image (URL)</label>
+                <Input value={(form.content?.image_url as string) || ""} onChange={e => updateContent("image_url", e.target.value)} placeholder="https://..." className="rounded-xl" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">Prix (FCFA) *</label>
+                <Input type="number" value={(form.content?.price as number) || ""} onChange={e => updateContent("price", parseInt(e.target.value) || 0)} placeholder="5000" className="rounded-xl" />
+                {!!form.content?.price && (
+                  <p className="text-[10px] text-muted-foreground mt-1">Le client paiera {Math.round((form.content.price as number) * 1.07).toLocaleString("fr-FR")} XAF (frais 7% inclus)</p>
+                )}
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">Lien de redirection après paiement</label>
+                <Input value={(form.content?.redirect_url as string) || ""} onChange={e => updateContent("redirect_url", e.target.value)} placeholder="https://mon-site.com/merci" className="rounded-xl" />
+              </div>
+              <div className="rounded-xl border border-border/40 p-3 space-y-2">
+                <p className="text-xs font-semibold text-foreground">Coordonnées du vendeur</p>
+                <Input value={(form.content?.seller_name as string) || ""} onChange={e => updateContent("seller_name", e.target.value)} placeholder="Nom" className="rounded-xl h-9 text-sm" />
+                <div className="grid grid-cols-2 gap-2">
+                  <Input value={(form.content?.seller_phone as string) || ""} onChange={e => updateContent("seller_phone", e.target.value)} placeholder="Téléphone" className="rounded-xl h-9 text-sm" />
+                  <Input value={(form.content?.seller_email as string) || ""} onChange={e => updateContent("seller_email", e.target.value)} placeholder="Email" className="rounded-xl h-9 text-sm" />
+                </div>
+              </div>
+              <p className="text-[10px] text-muted-foreground">💳 Les paiements seront crédités automatiquement dans ton portefeuille AvyLink.</p>
+            </div>
+          )}
         </div>
         <div className="p-5 border-t border-border flex gap-3">
           <Button onClick={() => onSave(form)} className="flex-1 gradient-cta text-primary-foreground rounded-xl">
