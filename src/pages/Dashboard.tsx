@@ -100,7 +100,8 @@ const Dashboard = () => {
   const [profileLoading, setProfileLoading] = useState(true);
 
   const profile = profiles.find(p => p.id === activeProfileId) || profiles[0] || null;
-  const currentTitle = PAGE_TITLES[location.pathname] || "Dashboard";
+  const { t } = useLanguage();
+  const currentTitle = getPageTitles(t)[location.pathname] || "Dashboard";
 
   useEffect(() => {
     if (!loading && !user) {
