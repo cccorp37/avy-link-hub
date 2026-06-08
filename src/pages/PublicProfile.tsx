@@ -879,6 +879,16 @@ const PublicProfile = () => {
             />
           )}
 
+          {/* Shop Block Item Payment Modal */}
+          {selectedBlockItem && profile && (
+            <StorePaymentModal
+              open={!!selectedBlockItem}
+              onClose={() => setSelectedBlockItem(null)}
+              item={{ ...selectedBlockItem, profile_id: profile.id }}
+              sellerProfileId={profile.id}
+            />
+          )}
+
           {/* Footer branding */}
           {!(profile as any)?.hide_branding && (
             <div className="mt-10 text-center">
