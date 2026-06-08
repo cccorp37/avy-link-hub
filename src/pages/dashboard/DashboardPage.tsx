@@ -41,6 +41,13 @@ const BLOCK_TYPES: { type: string; label: string; Icon: LucideIcon; iconColor: s
   { type: "tiktok", label: "TikTok", Icon: Video, iconColor: "text-gray-700 dark:text-gray-300", iconBg: "bg-gray-200 dark:bg-gray-500/20", desc: "Intégrer ta page TikTok", preview: "bg-gray-900/5 border-gray-300" },
   { type: "instagram", label: "Instagram", Icon: Instagram, iconColor: "text-fuchsia-500", iconBg: "bg-fuchsia-100 dark:bg-fuchsia-500/20", desc: "Grille de photos Instagram", preview: "bg-pink-50 border-pink-200" },
   { type: "youtube_sub", label: "YouTube abonné", Icon: Youtube, iconColor: "text-red-500", iconBg: "bg-red-100 dark:bg-red-500/20", desc: "Bouton d'abonnement YouTube", preview: "bg-red-50 border-red-200" },
+  { type: "shop_item", label: "Article / Service", Icon: ShoppingBag, iconColor: "text-emerald-600", iconBg: "bg-emerald-100 dark:bg-emerald-500/20", desc: "Vente d'article, service ou rendez-vous payant", preview: "bg-emerald-50 border-emerald-200", premium: true },
+];
+
+const SHOP_ITEM_TYPES = [
+  { id: "article", label: "Article", Icon: Tag },
+  { id: "service", label: "Service", Icon: Briefcase },
+  { id: "appointment", label: "Rendez-vous", Icon: Calendar },
 ];
 
 function BlockPreviewIcon({ type }: { type: string }) {
