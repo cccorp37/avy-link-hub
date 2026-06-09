@@ -4,6 +4,8 @@ import { LayoutDashboard, User, LayoutTemplate, Plug, Settings, ChevronUp, Check
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 type Profile = Tables<"profiles">;
 
@@ -23,12 +25,53 @@ interface Props {
   onProfileDeleted: (profileId: string) => void;
 }
 
-export function MobileBottomNav({ profiles, activeProfile, onSwitchProfile }: Props) {
+export function MobileBottomNav({ profiles, activeProfile, onSwitchProfile, onProfileCreated }: Props) {
   const location = useLocation();
   const navigate = useNavigate();
   const [showSwitcher, setShowSwitcher] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const { toast } = useToast();
   const currentPlan = activeProfile?.plan || "free";
   const isPaid = currentPlan !== "free";
+  const limit = currentPlan === "starter" ? 3 : isPaid ? 999 : 1;
+  const canCreate = profiles.length < limit;
+
+  const createPage = async () => {
+    if (!isPaid) {
+      setShowSwitcher(false);
+      navigate("/dashboard/abonnement");
+      return;
+    }
+    if (!canCreate) {
+      toast({ title: `Limite de ${limit} pages atteinte`, variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setCreating(false); return; }
+    const base = `${activeProfile?.username || "page"}-${profiles.length + 1}`.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    let username = base.length >= 3 ? base : `page-${Date.now().toString(36)}`;
+    for (let i = 2; i < 50; i += 1) {
+      const { data } = await supabase.from("profiles").select("id").eq("username", username).maybeSingle();
+      if (!data) break;
+      username = `${base}-${i}`;
+    }
+    const { data, error } = await supabase.from("profiles").insert({
+      user_id: user.id,
+      display_name: `Nouvelle page ${profiles.length + 1}`,
+      username,
+      plan: currentPlan,
+    }).select().single();
+    if (error) {
+      toast({ title: "Impossible d'ajouter la page", description: error.message, variant: "destructive" });
+    } else if (data) {
+      onProfileCreated(data);
+      setShowSwitcher(false);
+      navigate("/dashboard/page");
+      toast({ title: "Nouvelle page créée ✨", description: `/${username}` });
+    }
+    setCreating(false);
+  };
 
   return (
     <>
@@ -84,10 +127,11 @@ export function MobileBottomNav({ profiles, activeProfile, onSwitchProfile }: Pr
               <div className="p-2 border-t border-border/40 bg-secondary/30">
                 {isPaid ? (
                   <button
-                    onClick={() => { setShowSwitcher(false); navigate("/dashboard/page"); }}
+                    onClick={createPage}
+                    disabled={creating || !canCreate}
                     className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold text-primary border border-dashed border-primary/40 hover:bg-primary/5"
                   >
-                    <Plus className="w-3.5 h-3.5" /> Créer une nouvelle page
+                    <Plus className="w-3.5 h-3.5" /> {canCreate ? "Ajouter une page" : `Limite ${limit} pages atteinte`}
                   </button>
                 ) : (
                   <button
@@ -111,18 +155,15 @@ export function MobileBottomNav({ profiles, activeProfile, onSwitchProfile }: Pr
           borderTop: "1px solid hsl(210 20% 91% / 0.6)",
         }}
       >
-        {/* Page switcher pill — always visible for discoverability */}
-        <button
-          onClick={() => setShowSwitcher(!showSwitcher)}
-          className="absolute -top-5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary/30 shadow-md text-[10px] font-bold text-primary bg-white/95 backdrop-blur-sm"
-        >
-          <Layers className="w-3 h-3" />
-          <span className="truncate max-w-24">{activeProfile?.display_name || "Mes pages"}</span>
-          <span className="px-1 py-px rounded bg-primary/10 text-[9px]">{profiles.length}</span>
-          <ChevronUp className={`w-3 h-3 transition-transform ${showSwitcher ? "rotate-180" : ""}`} />
-        </button>
-
         <div className="flex items-stretch">
+          <button
+            onClick={() => setShowSwitcher(!showSwitcher)}
+            className="flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 relative text-primary"
+          >
+            <Layers className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Pages</span>
+            <span className="absolute top-1 right-1/2 translate-x-5 min-w-4 h-4 px-1 rounded-full bg-primary/10 text-[9px] font-bold flex items-center justify-center">{profiles.length}</span>
+          </button>
           {mobileNav.map((item) => {
             const isActive = item.end
               ? location.pathname === item.to
