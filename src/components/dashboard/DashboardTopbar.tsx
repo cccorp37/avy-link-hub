@@ -7,7 +7,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { PageSwitcher } from "./PageSwitcher";
 
 type Profile = Tables<"profiles">;
 
@@ -15,13 +14,9 @@ interface Props {
   profile: Profile | null;
   title: string;
   onMobileMenuOpen?: () => void;
-  profiles?: Profile[];
-  onSwitchProfile?: (p: Profile) => void;
-  onProfileCreated?: (p: Profile) => void;
-  onProfileDeleted?: (id: string) => void;
 }
 
-export function DashboardTopbar({ profile, title, onMobileMenuOpen, profiles, onSwitchProfile, onProfileCreated, onProfileDeleted }: Props) {
+export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
   const { lang, setLang, t } = useLanguage();
@@ -63,19 +58,6 @@ export function DashboardTopbar({ profile, title, onMobileMenuOpen, profiles, on
           <p className="text-xs text-muted-foreground -mt-0.5">Dashboard</p>
         </div>
       </div>
-
-      {/* Center: page switcher */}
-      {profiles && profiles.length > 0 && onSwitchProfile && onProfileCreated && onProfileDeleted && (
-        <div className="hidden sm:block flex-1 max-w-xs mx-4">
-          <PageSwitcher
-            profiles={profiles}
-            activeProfile={profile}
-            onSwitch={onSwitchProfile}
-            onCreated={onProfileCreated}
-            onDeleted={onProfileDeleted}
-          />
-        </div>
-      )}
 
       {/* Right */}
       <div className="flex items-center gap-2">
