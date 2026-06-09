@@ -406,11 +406,12 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
               {/* Create CTA */}
               {isPaidPlan && canCreate && !creating && (
                 <button
-                  onClick={() => setCreating(true)}
-                  className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold text-primary border border-dashed border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition"
+                  onClick={() => handleCreate(true)}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-primary border border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 transition disabled:opacity-60"
                 >
-                  <Plus className="w-3.5 h-3.5" />
-                  Créer une nouvelle page
+                  {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+                  Ajouter une page
                 </button>
               )}
 
