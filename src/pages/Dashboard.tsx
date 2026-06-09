@@ -267,7 +267,6 @@ const Dashboard = () => {
           activeProfile={profile}
           onSwitchProfile={switchProfile}
           onProfileCreated={handleProfileCreated}
-          onProfileDeleted={handleProfileDeleted}
         />
       </div>
     </div>
