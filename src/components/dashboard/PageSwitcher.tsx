@@ -459,7 +459,7 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
                       />
                       <div className="flex gap-1.5">
                         <button
-                          onClick={handleCreate}
+                          onClick={() => handleCreate()}
                           disabled={loading}
                           className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-medium gradient-cta text-primary-foreground"
                         >
