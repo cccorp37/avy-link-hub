@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, User, LayoutTemplate, Plug, Settings, ChevronUp, Check, FileText, Layers, Plus } from "lucide-react";
+import { LayoutDashboard, User, LayoutTemplate, Plug, Settings, Check, FileText, Layers, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
@@ -22,7 +22,6 @@ interface Props {
   activeProfile: Profile | null;
   onSwitchProfile: (profile: Profile) => void;
   onProfileCreated: (profile: Profile) => void;
-  onProfileDeleted: (profileId: string) => void;
 }
 
 export function MobileBottomNav({ profiles, activeProfile, onSwitchProfile, onProfileCreated }: Props) {
