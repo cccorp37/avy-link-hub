@@ -79,9 +79,7 @@ function PagePreviewCard({ profile, isActive }: { profile: Profile; isActive: bo
 }
 
 export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onDeleted, collapsed }: Props) {
-  const [open, setOpen] = useState(() => {
-    try { return localStorage.getItem("avylink_pageswitcher_seen") !== "1"; } catch { return true; }
-  });
+  const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [newUsername, setNewUsername] = useState("");
@@ -96,6 +94,8 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
   const canCreate = profiles.length < limit;
   const isPaidPlan = currentPlan !== "free";
 
+  const normalizeSlug = (value: string) => value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
+
   const checkUsername = async (slug: string) => {
     const { data } = await supabase
       .from("profiles")
@@ -105,12 +105,32 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
     return !data;
   };
 
-  const handleCreate = async () => {
-    if (!newName.trim() || !newUsername.trim()) {
+  const getAvailableSlug = async (baseValue: string) => {
+    const base = normalizeSlug(baseValue) || `page-${Date.now().toString(36)}`;
+    let candidate = base.length >= 3 ? base : `${base}-page`;
+    let i = 2;
+    while (!(await checkUsername(candidate))) {
+      candidate = `${base}-${i}`;
+      i += 1;
+      if (i > 80) candidate = `${base}-${Date.now().toString(36)}`;
+    }
+    return candidate;
+  };
+
+  const handleCreate = async (quick = false) => {
+    if (!canCreate) {
+      toast({ title: `Limite de ${limit} pages atteinte`, variant: "destructive" });
+      return;
+    }
+
+    const name = quick ? `Nouvelle page ${profiles.length + 1}` : newName.trim();
+    if (!name || (!quick && !newUsername.trim())) {
       toast({ title: "Remplis le nom et le nom d'utilisateur", variant: "destructive" });
       return;
     }
-    const slug = newUsername.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    const slug = quick
+      ? await getAvailableSlug(`${activeProfile?.username || "page"}-${profiles.length + 1}`)
+      : normalizeSlug(newUsername);
     if (slug.length < 3) {
       toast({ title: "Le nom d'utilisateur doit faire au moins 3 caractères", variant: "destructive" });
       return;
@@ -131,7 +151,7 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
       .from("profiles")
       .insert({
         user_id: user.id,
-        display_name: newName.trim(),
+        display_name: name,
         username: slug,
         plan: currentPlan,
       })
@@ -143,9 +163,10 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
     } else if (data) {
       onCreated(data);
       setCreating(false);
+      setOpen(false);
       setNewName("");
       setNewUsername("");
-      toast({ title: "Nouvelle page créée ✨" });
+      toast({ title: "Nouvelle page ajoutée ✨", description: `/${slug}` });
     }
     setLoading(false);
   };
@@ -385,11 +406,12 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
               {/* Create CTA */}
               {isPaidPlan && canCreate && !creating && (
                 <button
-                  onClick={() => setCreating(true)}
-                  className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold text-primary border border-dashed border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition"
+                  onClick={() => handleCreate(true)}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-primary border border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 transition disabled:opacity-60"
                 >
-                  <Plus className="w-3.5 h-3.5" />
-                  Créer une nouvelle page
+                  {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+                  Ajouter une page
                 </button>
               )}
 
@@ -438,7 +460,7 @@ export function PageSwitcher({ profiles, activeProfile, onSwitch, onCreated, onD
                       />
                       <div className="flex gap-1.5">
                         <button
-                          onClick={handleCreate}
+                          onClick={() => handleCreate()}
                           disabled={loading}
                           className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-medium gradient-cta text-primary-foreground"
                         >

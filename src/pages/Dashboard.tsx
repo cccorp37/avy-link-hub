@@ -194,10 +194,6 @@ const Dashboard = () => {
         <DashboardTopbar
           profile={profile}
           title={currentTitle}
-          profiles={profiles}
-          onSwitchProfile={switchProfile}
-          onProfileCreated={handleProfileCreated}
-          onProfileDeleted={handleProfileDeleted}
         />
         <NotificationBanner />
 
@@ -271,7 +267,6 @@ const Dashboard = () => {
           activeProfile={profile}
           onSwitchProfile={switchProfile}
           onProfileCreated={handleProfileCreated}
-          onProfileDeleted={handleProfileDeleted}
         />
       </div>
     </div>
