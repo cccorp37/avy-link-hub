@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
-const PLATFORM_FEE_RATE = 0.07;
+const PLATFORM_FEE_RATE = 0.03;
 
 interface StoreItem {
   id: string;
@@ -145,7 +145,7 @@ export function StorePaymentModal({ open, onClose, item, sellerProfileId }: Stor
                 <p className="text-3xl font-dm font-bold text-foreground">
                   {clientAmount.toLocaleString("fr-FR")} <span className="text-lg">{item.currency}</span>
                 </p>
-                <p className="text-[10px] text-muted-foreground mt-1">Inclut les frais de transaction de 7%</p>
+                <p className="text-[10px] text-muted-foreground mt-1">Inclut les frais de service AvyLink de 3%</p>
               </div>
 
               {/* Buyer info */}
