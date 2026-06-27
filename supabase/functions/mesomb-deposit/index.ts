@@ -5,7 +5,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const WITHDRAWAL_FEE_RATE = 0.065; // 6.5% AVYLINK withdrawal fee
+const AVYLINK_FEE_RATE = 0.03; // 3% AvyLink commission on withdrawal
+const MESOMB_FEE_RATE = 0.02; // ~2% estimated MeSomb processing fee (varies per operator)
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -92,8 +93,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Calculate fees
-    const feeAmount = Math.round(amount * WITHDRAWAL_FEE_RATE);
+    // Calculate fees: AvyLink (3%) + MeSomb (~2%)
+    const avylinkFee = Math.round(amount * AVYLINK_FEE_RATE);
+    const mesombFee = Math.round(amount * MESOMB_FEE_RATE);
+    const feeAmount = avylinkFee + mesombFee;
     const netAmount = amount - feeAmount;
 
     const externalId = `WD-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
@@ -117,7 +120,7 @@ Deno.serve(async (req) => {
         reference: externalId,
         payment_method: service,
         phone_number: phone,
-        description: `Retrait ${amount.toLocaleString()} ${currency} vers ${service} ${phone} (frais 6,5%: ${feeAmount} ${currency}, net: ${netAmount} ${currency})`,
+        description: `Retrait ${amount.toLocaleString()} ${currency} vers ${service} ${phone} (AvyLink 3%: ${avylinkFee}, MeSomb 2%: ${mesombFee}, net: ${netAmount} ${currency})`,
       })
       .select()
       .single();
@@ -191,7 +194,7 @@ Deno.serve(async (req) => {
           <table style="border-collapse:collapse;width:100%;max-width:500px;font-family:sans-serif;">
             <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Utilisateur</td><td style="padding:8px;border:1px solid #ddd;">${userProfile?.display_name || 'N/A'} (@${userProfile?.username || 'N/A'})</td></tr>
             <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Montant retrait</td><td style="padding:8px;border:1px solid #ddd;">${amount.toLocaleString()} ${currency}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Frais AVYLINK (6,5%)</td><td style="padding:8px;border:1px solid #ddd;">${feeAmount.toLocaleString()} ${currency}</td></tr>
+            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Frais AvyLink (3%) + MeSomb (~2%)</td><td style="padding:8px;border:1px solid #ddd;">${feeAmount.toLocaleString()} ${currency} (AvyLink: ${avylinkFee.toLocaleString()}, MeSomb: ${mesombFee.toLocaleString()})</td></tr>
             <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Montant reçu</td><td style="padding:8px;border:1px solid #ddd;color:green;font-weight:bold;">${netAmount.toLocaleString()} ${currency}</td></tr>
             <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Destinataire</td><td style="padding:8px;border:1px solid #ddd;">${recipient_name}</td></tr>
             <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Réseau</td><td style="padding:8px;border:1px solid #ddd;">${service}</td></tr>
