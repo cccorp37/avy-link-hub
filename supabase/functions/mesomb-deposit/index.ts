@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
       .update({ balance: wallet.balance - amount })
       .eq("id", wallet.id);
 
-    // Create withdrawal transaction
+    // Create withdrawal transaction (status=pending → processing → success/failed via webhook)
     const { data: txn } = await adminClient
       .from("transactions")
       .insert({
@@ -120,10 +120,14 @@ Deno.serve(async (req) => {
         reference: externalId,
         payment_method: service,
         phone_number: phone,
-        description: `Retrait ${amount.toLocaleString()} ${currency} vers ${service} ${phone} (AvyLink 3%: ${avylinkFee}, MeSomb 2%: ${mesombFee}, net: ${netAmount} ${currency})`,
+        recipient_name,
+        fee_amount: feeAmount,
+        net_amount: netAmount,
+        description: `Retrait ${amount.toLocaleString()} ${currency} vers ${service} ${phone} — frais AvyLink 3% (${avylinkFee}) + MeSomb ~2% (${mesombFee}), net: ${netAmount} ${currency}`,
       })
       .select()
       .single();
+
 
     // Get user profile info for notifications
     const { data: userProfile } = await adminClient

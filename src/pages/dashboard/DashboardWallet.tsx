@@ -131,11 +131,15 @@ export default function DashboardWallet() {
     const styles: Record<string, string> = {
       success: "bg-green-50 text-green-700 border-green-200",
       pending: "bg-amber-50 text-amber-700 border-amber-200",
+      processing: "bg-blue-50 text-blue-700 border-blue-200",
+      refunded: "bg-purple-50 text-purple-700 border-purple-200",
       failed: "bg-red-50 text-red-700 border-red-200",
     };
     const labels: Record<string, string> = {
-      success: "Réussi",
-      pending: "En cours",
+      success: "Terminé",
+      pending: "En attente",
+      processing: "En cours",
+      refunded: "Remboursé",
       failed: "Échoué",
     };
     return (
@@ -144,6 +148,7 @@ export default function DashboardWallet() {
       </span>
     );
   };
+
 
   const getTypeIcon = (type: string) => {
     if (type === "withdrawal") return <ArrowUpRight className="w-4 h-4 text-red-500" />;

@@ -375,12 +375,15 @@ export type Database = {
           buyer_phone: string
           created_at: string
           currency: string
+          failure_reason: string | null
           id: string
           item_id: string
           mesomb_transaction_id: string | null
           payment_method: string
           payment_status: string
           quantity: number
+          refund_status: string | null
+          refunded_at: string | null
           seller_profile_id: string
           total_amount: number
           transaction_id: string | null
@@ -392,12 +395,15 @@ export type Database = {
           buyer_phone: string
           created_at?: string
           currency?: string
+          failure_reason?: string | null
           id?: string
           item_id: string
           mesomb_transaction_id?: string | null
           payment_method: string
           payment_status?: string
           quantity?: number
+          refund_status?: string | null
+          refunded_at?: string | null
           seller_profile_id: string
           total_amount: number
           transaction_id?: string | null
@@ -409,12 +415,15 @@ export type Database = {
           buyer_phone?: string
           created_at?: string
           currency?: string
+          failure_reason?: string | null
           id?: string
           item_id?: string
           mesomb_transaction_id?: string | null
           payment_method?: string
           payment_status?: string
           quantity?: number
+          refund_status?: string | null
+          refunded_at?: string | null
           seller_profile_id?: string
           total_amount?: number
           transaction_id?: string | null
@@ -899,10 +908,16 @@ export type Database = {
           created_at: string
           currency: string
           description: string | null
+          failure_reason: string | null
+          fee_amount: number | null
           id: string
           mesomb_transaction_id: string | null
+          net_amount: number | null
           payment_method: string | null
           phone_number: string | null
+          processed_at: string | null
+          provider_event_id: string | null
+          recipient_name: string | null
           reference: string | null
           status: string
           type: string
@@ -914,10 +929,16 @@ export type Database = {
           created_at?: string
           currency?: string
           description?: string | null
+          failure_reason?: string | null
+          fee_amount?: number | null
           id?: string
           mesomb_transaction_id?: string | null
+          net_amount?: number | null
           payment_method?: string | null
           phone_number?: string | null
+          processed_at?: string | null
+          provider_event_id?: string | null
+          recipient_name?: string | null
           reference?: string | null
           status?: string
           type: string
@@ -929,10 +950,16 @@ export type Database = {
           created_at?: string
           currency?: string
           description?: string | null
+          failure_reason?: string | null
+          fee_amount?: number | null
           id?: string
           mesomb_transaction_id?: string | null
+          net_amount?: number | null
           payment_method?: string | null
           phone_number?: string | null
+          processed_at?: string | null
+          provider_event_id?: string | null
+          recipient_name?: string | null
           reference?: string | null
           status?: string
           type?: string
@@ -991,6 +1018,42 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      webhook_events: {
+        Row: {
+          created_at: string
+          event_id: string
+          event_type: string | null
+          id: string
+          payload: Json | null
+          processed_at: string
+          provider: string
+          reference: string | null
+          result: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          event_type?: string | null
+          id?: string
+          payload?: Json | null
+          processed_at?: string
+          provider?: string
+          reference?: string | null
+          result?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          event_type?: string | null
+          id?: string
+          payload?: Json | null
+          processed_at?: string
+          provider?: string
+          reference?: string | null
+          result?: string | null
         }
         Relationships: []
       }
