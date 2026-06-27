@@ -8,7 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-const WITHDRAWAL_FEE_RATE = 0.065; // 6.5%
+const AVYLINK_FEE_RATE = 0.03; // 3%
+const MESOMB_FEE_RATE = 0.02; // ~2% estimated
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -73,7 +74,9 @@ export default function DashboardWallet() {
   };
 
   const withdrawAmountNum = parseInt(withdrawAmount) || 0;
-  const feeAmount = Math.round(withdrawAmountNum * WITHDRAWAL_FEE_RATE);
+  const avylinkFee = Math.round(withdrawAmountNum * AVYLINK_FEE_RATE);
+  const mesombFee = Math.round(withdrawAmountNum * MESOMB_FEE_RATE);
+  const feeAmount = avylinkFee + mesombFee;
   const netAmount = withdrawAmountNum - feeAmount;
 
   const handleWithdraw = async () => {
@@ -186,7 +189,7 @@ export default function DashboardWallet() {
       <motion.div custom={0.5} initial="hidden" animate="visible" variants={fadeUp}
         className="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10 text-xs text-primary">
         <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
-        <span>Les frais de retrait sont de <strong>6,5%</strong>. Ex: retrait de 5 000 XAF → vous recevez 4 675 XAF.</span>
+        <span>Commission AvyLink sur les ventes : <strong>3%</strong>. Frais de retrait : <strong>3% AvyLink + ~2% MeSomb</strong>. Ex : retrait de 5 000 XAF → vous recevez ~4 750 XAF.</span>
       </motion.div>
 
       {/* Transactions */}
@@ -295,8 +298,12 @@ export default function DashboardWallet() {
                   <span className="font-medium text-foreground">{withdrawAmountNum.toLocaleString("fr-FR")} {currency}</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">Frais AVYLINK (6,5%)</span>
-                  <span className="font-medium text-red-500">-{feeAmount.toLocaleString("fr-FR")} {currency}</span>
+                  <span className="text-muted-foreground">Frais AvyLink (3%)</span>
+                  <span className="font-medium text-red-500">-{avylinkFee.toLocaleString("fr-FR")} {currency}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Frais MeSomb (~2%)</span>
+                  <span className="font-medium text-red-500">-{mesombFee.toLocaleString("fr-FR")} {currency}</span>
                 </div>
                 <div className="border-t border-border/40 pt-1.5 flex justify-between text-sm">
                   <span className="font-semibold text-foreground">Vous recevrez</span>
