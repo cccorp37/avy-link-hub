@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const PLATFORM_FEE_RATE = 0.07; // 7% AVYLINK fee
+const PLATFORM_FEE_RATE = 0.03; // 3% AVYLINK commission on each sale
 
 function generateNonce() {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -289,7 +289,7 @@ Deno.serve(async (req) => {
               amount: sellerAmount,
               currency,
               status: "success",
-              description: `Vente - ${metadata.item_name || 'Article'} (frais 7% déduits)`,
+              description: `Vente - ${metadata.item_name || 'Article'} (commission AvyLink 3% déduite)`,
               reference: `SALE-${orderId || externalId}`,
             });
           }
