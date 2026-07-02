@@ -1,8 +1,10 @@
-import { useState, useMemo } from "react";
-import { Download, FileCode, Loader2, Search } from "lucide-react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { Download, FileCode, Loader2, Search, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+
+const PAGE_SIZE = 40;
 
 // Include every source file we can statically resolve at build time.
 const modules = import.meta.glob(
