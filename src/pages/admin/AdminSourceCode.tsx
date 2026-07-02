@@ -1,8 +1,10 @@
-import { useState, useMemo } from "react";
-import { Download, FileCode, Loader2, Search } from "lucide-react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { Download, FileCode, Loader2, Search, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+
+const PAGE_SIZE = 40;
 
 // Include every source file we can statically resolve at build time.
 const modules = import.meta.glob(
@@ -249,46 +251,100 @@ export default function AdminSourceCode() {
         </Button>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border/50 shadow-card overflow-hidden">
-        <div className="px-5 py-3 border-b border-border bg-muted/30 flex items-center gap-3">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex-1">
-            Contenu inclus ({filtered.length}/{totalFiles})
-          </p>
-          <div className="relative w-56">
-            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Rechercher un fichier…"
-              className="h-8 pl-8 text-xs"
-            />
-          </div>
+      <FileList files={filtered} totalFiles={totalFiles} search={search} setSearch={setSearch} />
+    </div>
+  );
+}
+
+function FileList({
+  files,
+  totalFiles,
+  search,
+  setSearch,
+}: {
+  files: { path: string; lines: number; bytes: number; category: string }[];
+  totalFiles: number;
+  search: string;
+  setSearch: (v: string) => void;
+}) {
+  const [visible, setVisible] = useState(PAGE_SIZE);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  // Reset pagination when the filter changes.
+  useEffect(() => { setVisible(PAGE_SIZE); }, [search]);
+
+  // Progressive rendering — auto-load next page when sentinel is in view.
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setVisible((v) => Math.min(v + PAGE_SIZE, files.length));
+      }
+    }, { rootMargin: "200px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [files.length]);
+
+  const shown = files.slice(0, visible);
+  const hasMore = visible < files.length;
+
+  return (
+    <div className="bg-card rounded-2xl border border-border/50 shadow-card overflow-hidden">
+      <div className="px-5 py-3 border-b border-border bg-muted/30 flex items-center gap-3">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex-1">
+          Contenu inclus ({shown.length} affichés / {files.length} filtrés · {totalFiles} au total)
+        </p>
+        <div className="relative w-56">
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Rechercher un fichier…"
+            className="h-8 pl-8 text-xs"
+          />
         </div>
-        <div className="max-h-[55vh] overflow-y-auto divide-y divide-border/20">
-          {filtered.map(f => {
-            const ext = f.path.split(".").pop();
-            const extColor =
-              ext === "tsx" ? "text-primary"
-              : ext === "ts" ? "text-emerald-500"
-              : ext === "sql" ? "text-orange-500"
-              : ext === "css" ? "text-violet-500"
-              : ext === "json" ? "text-yellow-600"
-              : ext === "toml" ? "text-pink-500"
-              : ext === "html" ? "text-orange-500"
-              : "text-muted-foreground";
-            return (
-              <div key={f.path} className="flex items-center gap-3 px-5 py-2 hover:bg-secondary/20 transition-colors">
-                <FileCode className={"w-4 h-4 flex-shrink-0 " + extColor} />
-                <span className="text-sm font-mono text-foreground flex-1 truncate">{f.path.replace(/^\//, "")}</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground flex-shrink-0">{f.category}</span>
-                <span className="text-xs text-muted-foreground flex-shrink-0 tabular-nums w-14 text-right">{f.lines} l.</span>
-              </div>
-            );
-          })}
-          {!filtered.length && (
-            <div className="p-8 text-center text-sm text-muted-foreground">Aucun fichier ne correspond à votre recherche.</div>
-          )}
-        </div>
+      </div>
+      <div className="max-h-[55vh] overflow-y-auto divide-y divide-border/20">
+        {shown.map(f => {
+          const ext = f.path.split(".").pop();
+          const extColor =
+            ext === "tsx" ? "text-primary"
+            : ext === "ts" ? "text-emerald-500"
+            : ext === "sql" ? "text-orange-500"
+            : ext === "css" ? "text-violet-500"
+            : ext === "json" ? "text-yellow-600"
+            : ext === "toml" ? "text-pink-500"
+            : ext === "html" ? "text-orange-500"
+            : "text-muted-foreground";
+          return (
+            <div key={f.path} className="flex items-center gap-3 px-5 py-2 hover:bg-secondary/20 transition-colors">
+              <FileCode className={"w-4 h-4 flex-shrink-0 " + extColor} />
+              <span className="text-sm font-mono text-foreground flex-1 truncate">{f.path.replace(/^\//, "")}</span>
+              <span className="hidden md:inline text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground flex-shrink-0">{f.category}</span>
+              <span className="text-xs text-muted-foreground flex-shrink-0 tabular-nums w-14 text-right">{f.lines} l.</span>
+            </div>
+          );
+        })}
+        {!files.length && (
+          <div className="p-8 text-center text-sm text-muted-foreground">Aucun fichier ne correspond à votre recherche.</div>
+        )}
+        {hasMore && (
+          <>
+            <div ref={sentinelRef} className="h-1" aria-hidden />
+            <div className="p-3 flex justify-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setVisible(v => Math.min(v + PAGE_SIZE, files.length))}
+                className="text-xs gap-1"
+              >
+                <ChevronDown className="w-3.5 h-3.5" />
+                Charger {Math.min(PAGE_SIZE, files.length - visible)} de plus
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
