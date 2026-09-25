@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { firestoreDB as supabase } from "@/lib/db";
 import { useAuth } from "@/hooks/useAuth";
 import { X, Info, AlertTriangle, CheckCircle, AlertCircle } from "lucide-react";
 
@@ -27,17 +27,23 @@ export function NotificationBanner() {
         .from("notification_dismissals")
         .select("notification_id")
         .eq("user_id", user.id);
-      const dismissedIds = new Set((dismissed || []).map(d => d.notification_id));
-      setNotifications((notifs as Notification[]).filter(n => !dismissedIds.has(n.id)));
+      const dismissedIds = new Set(
+        (dismissed || []).map((d) => d.notification_id),
+      );
+      setNotifications(
+        (notifs as Notification[]).filter((n) => !dismissedIds.has(n.id)),
+      );
     };
     load();
   }, [user]);
 
   const dismiss = async (id: string) => {
     if (user) {
-      await supabase.from("notification_dismissals").insert({ user_id: user.id, notification_id: id } as never);
+      await supabase
+        .from("notification_dismissals")
+        .insert({ user_id: user.id, notification_id: id } as never);
     }
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
   if (!notifications.length) return null;
@@ -58,14 +64,22 @@ export function NotificationBanner() {
 
   return (
     <div className="space-y-2 px-4 pt-3">
-      {notifications.map(n => (
-        <div key={n.id} className={`flex items-start gap-3 p-3 rounded-xl border ${colorMap[n.type] || colorMap.info}`}>
-          <div className="mt-0.5 flex-shrink-0">{iconMap[n.type] || iconMap.info}</div>
+      {notifications.map((n) => (
+        <div
+          key={n.id}
+          className={`flex items-start gap-3 p-3 rounded-xl border ${colorMap[n.type] || colorMap.info}`}
+        >
+          <div className="mt-0.5 flex-shrink-0">
+            {iconMap[n.type] || iconMap.info}
+          </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold">{n.title}</p>
             <p className="text-xs opacity-80 mt-0.5">{n.message}</p>
           </div>
-          <button onClick={() => dismiss(n.id)} className="flex-shrink-0 p-1 rounded-lg hover:bg-black/10 transition-colors">
+          <button
+            onClick={() => dismiss(n.id)}
+            className="flex-shrink-0 p-1 rounded-lg hover:bg-black/10 transition-colors"
+          >
             <X className="w-3.5 h-3.5" />
           </button>
         </div>

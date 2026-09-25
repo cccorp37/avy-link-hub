@@ -1,10 +1,20 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, User, LayoutTemplate, Plug, Settings, Check, FileText, Layers, Plus } from "lucide-react";
+import {
+  LayoutDashboard,
+  User,
+  LayoutTemplate,
+  Plug,
+  Settings,
+  Check,
+  FileText,
+  Layers,
+  Plus,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Tables } from "@/integrations/supabase/types";
-import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/lib/types";
+import { firestoreDB as supabase } from "@/lib/db";
 import { useToast } from "@/hooks/use-toast";
 
 type Profile = Tables<"profiles">;
@@ -24,7 +34,12 @@ interface Props {
   onProfileCreated: (profile: Profile) => void;
 }
 
-export function MobileBottomNav({ profiles, activeProfile, onSwitchProfile, onProfileCreated }: Props) {
+export function MobileBottomNav({
+  profiles,
+  activeProfile,
+  onSwitchProfile,
+  onProfileCreated,
+}: Props) {
   const location = useLocation();
   const navigate = useNavigate();
   const [showSwitcher, setShowSwitcher] = useState(false);
@@ -42,27 +57,49 @@ export function MobileBottomNav({ profiles, activeProfile, onSwitchProfile, onPr
       return;
     }
     if (!canCreate) {
-      toast({ title: `Limite de ${limit} pages atteinte`, variant: "destructive" });
+      toast({
+        title: `Limite de ${limit} pages atteinte`,
+        variant: "destructive",
+      });
       return;
     }
     setCreating(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setCreating(false); return; }
-    const base = `${activeProfile?.username || "page"}-${profiles.length + 1}`.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      setCreating(false);
+      return;
+    }
+    const base = `${activeProfile?.username || "page"}-${profiles.length + 1}`
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, "");
     let username = base.length >= 3 ? base : `page-${Date.now().toString(36)}`;
     for (let i = 2; i < 50; i += 1) {
-      const { data } = await supabase.from("profiles").select("id").eq("username", username).maybeSingle();
+      const { data } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("username", username)
+        .maybeSingle();
       if (!data) break;
       username = `${base}-${i}`;
     }
-    const { data, error } = await supabase.from("profiles").insert({
-      user_id: user.id,
-      display_name: `Nouvelle page ${profiles.length + 1}`,
-      username,
-      plan: currentPlan,
-    }).select().single();
+    const { data, error } = await supabase
+      .from("profiles")
+      .insert({
+        user_id: user.id,
+        display_name: `Nouvelle page ${profiles.length + 1}`,
+        username,
+        plan: currentPlan,
+      })
+      .select()
+      .single();
     if (error) {
-      toast({ title: "Impossible d'ajouter la page", description: error.message, variant: "destructive" });
+      toast({
+        title: "Impossible d'ajouter la page",
+        description: error.message,
+        variant: "destructive",
+      });
     } else if (data) {
       onProfileCreated(data);
       setShowSwitcher(false);
@@ -97,14 +134,21 @@ export function MobileBottomNav({ profiles, activeProfile, onSwitchProfile, onPr
               }}
             >
               <div className="px-4 py-3 border-b border-border/40">
-                <p className="text-xs font-semibold text-foreground">Mes pages</p>
-                <p className="text-[10px] text-muted-foreground">{profiles.length} page{profiles.length > 1 ? "s" : ""}</p>
+                <p className="text-xs font-semibold text-foreground">
+                  Mes pages
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  {profiles.length} page{profiles.length > 1 ? "s" : ""}
+                </p>
               </div>
               <div className="py-1.5 max-h-48 overflow-y-auto">
                 {profiles.map((p) => (
                   <button
                     key={p.id}
-                    onClick={() => { onSwitchProfile(p); setShowSwitcher(false); }}
+                    onClick={() => {
+                      onSwitchProfile(p);
+                      setShowSwitcher(false);
+                    }}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
                       p.id === activeProfile?.id
                         ? "bg-primary/8 text-primary"
@@ -115,10 +159,18 @@ export function MobileBottomNav({ profiles, activeProfile, onSwitchProfile, onPr
                       <FileText className="w-3.5 h-3.5 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium truncate">{p.display_name || p.username || "Sans nom"}</p>
-                      {p.username && <p className="text-[10px] text-muted-foreground">/{p.username}</p>}
+                      <p className="text-xs font-medium truncate">
+                        {p.display_name || p.username || "Sans nom"}
+                      </p>
+                      {p.username && (
+                        <p className="text-[10px] text-muted-foreground">
+                          /{p.username}
+                        </p>
+                      )}
                     </div>
-                    {p.id === activeProfile?.id && <Check className="w-4 h-4 text-primary flex-shrink-0" />}
+                    {p.id === activeProfile?.id && (
+                      <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                    )}
                   </button>
                 ))}
               </div>
@@ -130,11 +182,17 @@ export function MobileBottomNav({ profiles, activeProfile, onSwitchProfile, onPr
                     disabled={creating || !canCreate}
                     className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold text-primary border border-dashed border-primary/40 hover:bg-primary/5"
                   >
-                    <Plus className="w-3.5 h-3.5" /> {canCreate ? "Ajouter une page" : `Limite ${limit} pages atteinte`}
+                    <Plus className="w-3.5 h-3.5" />{" "}
+                    {canCreate
+                      ? "Ajouter une page"
+                      : `Limite ${limit} pages atteinte`}
                   </button>
                 ) : (
                   <button
-                    onClick={() => { setShowSwitcher(false); navigate("/dashboard/abonnement"); }}
+                    onClick={() => {
+                      setShowSwitcher(false);
+                      navigate("/dashboard/abonnement");
+                    }}
                     className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold gradient-cta text-primary-foreground"
                   >
                     <Plus className="w-3.5 h-3.5" /> Débloquer le mode multipage
@@ -147,7 +205,8 @@ export function MobileBottomNav({ profiles, activeProfile, onSwitchProfile, onPr
       </AnimatePresence>
 
       {/* Bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-area-inset-bottom"
+      <nav
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-area-inset-bottom"
         style={{
           background: "rgba(255,255,255,0.85)",
           backdropFilter: "blur(20px) saturate(180%)",
@@ -161,7 +220,9 @@ export function MobileBottomNav({ profiles, activeProfile, onSwitchProfile, onPr
           >
             <Layers className="w-5 h-5" />
             <span className="text-[10px] font-medium">Pages</span>
-            <span className="absolute top-1 right-1/2 translate-x-5 min-w-4 h-4 px-1 rounded-full bg-primary/10 text-[9px] font-bold flex items-center justify-center">{profiles.length}</span>
+            <span className="absolute top-1 right-1/2 translate-x-5 min-w-4 h-4 px-1 rounded-full bg-primary/10 text-[9px] font-bold flex items-center justify-center">
+              {profiles.length}
+            </span>
           </button>
           {mobileNav.map((item) => {
             const isActive = item.end
@@ -182,12 +243,18 @@ export function MobileBottomNav({ profiles, activeProfile, onSwitchProfile, onPr
                   />
                 )}
                 <motion.div
-                  animate={isActive ? { scale: 1.15, y: -1 } : { scale: 1, y: 0 }}
+                  animate={
+                    isActive ? { scale: 1.15, y: -1 } : { scale: 1, y: 0 }
+                  }
                   transition={{ type: "spring", stiffness: 400, damping: 20 }}
                 >
-                  <item.icon className={`w-5 h-5 transition-colors ${isActive ? "text-primary" : "text-muted-foreground"}`} />
+                  <item.icon
+                    className={`w-5 h-5 transition-colors ${isActive ? "text-primary" : "text-muted-foreground"}`}
+                  />
                 </motion.div>
-                <span className={`text-[10px] font-medium transition-colors ${isActive ? "text-primary" : "text-muted-foreground"}`}>
+                <span
+                  className={`text-[10px] font-medium transition-colors ${isActive ? "text-primary" : "text-muted-foreground"}`}
+                >
                   {item.label}
                 </span>
               </NavLink>

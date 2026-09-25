@@ -1,23 +1,83 @@
 import {
-  Instagram, Youtube, Twitter, Music, ShoppingBag, Globe,
-  Heart, ExternalLink, Play, MapPin
+  Instagram,
+  Youtube,
+  Twitter,
+  Music,
+  ShoppingBag,
+  Globe,
+  Heart,
+  ExternalLink,
+  Play,
+  MapPin,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
 const profileLinks = [
-  { icon: Instagram, label: "Instagram", handle: "@kofi.creates", color: "bg-gradient-to-br from-purple-500 to-pink-500", url: "#" },
-  { icon: Youtube, label: "YouTube", handle: "Kofi Creates TV", color: "bg-red-500", url: "#" },
-  { icon: Twitter, label: "Twitter / X", handle: "@kofi_creates", color: "bg-sky-500", url: "#" },
-  { icon: Music, label: "Spotify", handle: "Écouter ma musique", color: "bg-green-500", url: "#" },
-  { icon: ShoppingBag, label: "Ma Boutique", handle: "shop.kofi.avylink.com", color: "bg-gradient-cta", url: "#" },
-  { icon: Globe, label: "Mon Portfolio", handle: "kofi.design", color: "bg-primary", url: "#" },
+  {
+    icon: Instagram,
+    label: "Instagram",
+    handle: "@kofi.creates",
+    color: "bg-gradient-to-br from-purple-500 to-pink-500",
+    url: "#",
+  },
+  {
+    icon: Youtube,
+    label: "YouTube",
+    handle: "Kofi Creates TV",
+    color: "bg-red-500",
+    url: "#",
+  },
+  {
+    icon: Twitter,
+    label: "Twitter / X",
+    handle: "@kofi_creates",
+    color: "bg-sky-500",
+    url: "#",
+  },
+  {
+    icon: Music,
+    label: "Spotify",
+    handle: "Écouter ma musique",
+    color: "bg-green-500",
+    url: "#",
+  },
+  {
+    icon: ShoppingBag,
+    label: "Ma Boutique",
+    handle: "shop.kofi.avylink.com",
+    color: "bg-gradient-cta",
+    url: "#",
+  },
+  {
+    icon: Globe,
+    label: "Mon Portfolio",
+    handle: "kofi.design",
+    color: "bg-primary",
+    url: "#",
+  },
 ];
 
 const steps = [
-  { step: "01", title: "Crée ton compte", desc: "Email, Google ou téléphone — c'est toi qui choisis" },
-  { step: "02", title: "Personnalise ta page", desc: "Ajoute tes liens, choisis ton thème, upload ta photo" },
-  { step: "03", title: "Partage ton lien", desc: "avylink.com/tonnom — mets-le partout !" },
-  { step: "04", title: "Suis tes stats", desc: "Analytics en temps réel, sources de trafic, clics" },
+  {
+    step: "01",
+    title: "Crée ton compte",
+    desc: "Email, Google ou téléphone — c'est toi qui choisis",
+  },
+  {
+    step: "02",
+    title: "Personnalise ta page",
+    desc: "Ajoute tes liens, choisis ton thème, upload ta photo",
+  },
+  {
+    step: "03",
+    title: "Partage ton lien",
+    desc: "avylink.com/tonnom — mets-le partout !",
+  },
+  {
+    step: "04",
+    title: "Suis tes stats",
+    desc: "Analytics en temps réel, sources de trafic, clics",
+  },
 ];
 
 const ProfileDemo = () => {
@@ -38,7 +98,9 @@ const ProfileDemo = () => {
           <h2 className="font-dm font-black text-4xl md:text-6xl text-foreground tracking-tight">
             Voilà à quoi ressemble
             <br />
-            <span className="bg-gradient-to-r from-primary to-[hsl(338,85%,65%)] bg-clip-text text-transparent">ta page AVYLINK</span>
+            <span className="bg-gradient-to-r from-primary to-[hsl(338,85%,65%)] bg-clip-text text-transparent">
+              ta page AVYLINK
+            </span>
           </h2>
           <p className="text-muted-foreground text-lg">
             Simple, beau, professionnel. En moins de 5 minutes.
@@ -59,7 +121,10 @@ const ProfileDemo = () => {
 
             {/* Phone frame */}
             <div className="relative w-80 bg-foreground rounded-[3rem] p-3 shadow-2xl">
-              <div className="w-full bg-white rounded-[2.4rem] overflow-hidden" style={{ minHeight: 640 }}>
+              <div
+                className="w-full bg-white rounded-[2.4rem] overflow-hidden"
+                style={{ minHeight: 640 }}
+              >
                 {/* Notch */}
                 <div className="bg-primary/5 px-6 pt-4 pb-2 flex justify-between items-center text-xs text-muted-foreground">
                   <span>9:41</span>
@@ -76,11 +141,15 @@ const ProfileDemo = () => {
                         👨🏿‍💻
                       </div>
                       <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center">
-                        <span className="text-white text-[10px] font-bold">✓</span>
+                        <span className="text-white text-[10px] font-bold">
+                          ✓
+                        </span>
                       </div>
                     </div>
                     <div>
-                      <h3 className="font-dm font-bold text-base text-foreground">Kofi Asante</h3>
+                      <h3 className="font-dm font-bold text-base text-foreground">
+                        Kofi Asante
+                      </h3>
                       <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
                         <MapPin className="w-3 h-3" /> Accra, Ghana 🇬🇭
                       </p>
@@ -89,9 +158,12 @@ const ProfileDemo = () => {
                       </p>
                     </div>
                     <div className="flex justify-center gap-3 text-xs">
-                      <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">✓ Certified</span>
+                      <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">
+                        ✓ Certified
+                      </span>
                       <span className="text-muted-foreground flex items-center gap-1">
-                        <Heart className="w-3 h-3 text-[hsl(338,85%,65%)]" /> 24.5K
+                        <Heart className="w-3 h-3 text-[hsl(338,85%,65%)]" />{" "}
+                        24.5K
                       </span>
                     </div>
                   </div>
@@ -105,12 +177,18 @@ const ProfileDemo = () => {
                           key={link.label}
                           className="flex items-center gap-3 bg-white rounded-2xl px-3 py-2.5 shadow-sm border border-border/30 cursor-pointer hover:shadow-md transition-all hover:-translate-y-0.5 group"
                         >
-                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${link.color}`}>
+                          <div
+                            className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${link.color}`}
+                          >
                             <Icon className="w-4 h-4 text-white" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-xs text-foreground">{link.label}</div>
-                            <div className="text-xs text-muted-foreground truncate">{link.handle}</div>
+                            <div className="font-semibold text-xs text-foreground">
+                              {link.label}
+                            </div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              {link.handle}
+                            </div>
                           </div>
                           <ExternalLink className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
@@ -126,14 +204,21 @@ const ProfileDemo = () => {
                       </div>
                     </div>
                     <div className="px-3 py-2">
-                      <p className="text-xs font-semibold text-foreground">Comment j'ai gagné 1M FCFA en 30 jours</p>
-                      <p className="text-xs text-muted-foreground">142K vues · il y a 3 jours</p>
+                      <p className="text-xs font-semibold text-foreground">
+                        Comment j'ai gagné 1M FCFA en 30 jours
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        142K vues · il y a 3 jours
+                      </p>
                     </div>
                   </div>
 
                   <div className="text-center">
                     <p className="text-xs text-muted-foreground">
-                      Powered by <span className="text-gradient font-semibold">AvyLink</span>
+                      Powered by{" "}
+                      <span className="text-gradient font-semibold">
+                        AvyLink
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -176,10 +261,13 @@ const ProfileDemo = () => {
             <div>
               <h3 className="font-dm font-black text-3xl text-foreground mb-3">
                 Crée ta page en{" "}
-                <span className="bg-gradient-to-r from-primary to-[hsl(338,85%,65%)] bg-clip-text text-transparent">5 minutes</span>
+                <span className="bg-gradient-to-r from-primary to-[hsl(338,85%,65%)] bg-clip-text text-transparent">
+                  5 minutes
+                </span>
               </h3>
               <p className="text-muted-foreground text-lg">
-                Pas besoin de coder. Notre éditeur drag-and-drop te permet de tout personnaliser.
+                Pas besoin de coder. Notre éditeur drag-and-drop te permet de
+                tout personnaliser.
               </p>
             </div>
 
@@ -197,8 +285,12 @@ const ProfileDemo = () => {
                     {s.step}
                   </div>
                   <div>
-                    <h4 className="font-dm font-bold text-foreground text-base">{s.title}</h4>
-                    <p className="text-muted-foreground text-sm mt-0.5">{s.desc}</p>
+                    <h4 className="font-dm font-bold text-foreground text-base">
+                      {s.title}
+                    </h4>
+                    <p className="text-muted-foreground text-sm mt-0.5">
+                      {s.desc}
+                    </p>
                   </div>
                 </motion.div>
               ))}
@@ -211,10 +303,14 @@ const ProfileDemo = () => {
               transition={{ delay: 0.6 }}
               className="bg-primary/[0.04] border border-primary/10 rounded-2xl p-6"
             >
-              <p className="text-primary font-bold text-sm mb-1">💡 Le saviez-vous ?</p>
+              <p className="text-primary font-bold text-sm mb-1">
+                💡 Le saviez-vous ?
+              </p>
               <p className="text-foreground/70 text-sm leading-relaxed">
-                Les créateurs AvyLink génèrent en moyenne <strong className="text-foreground">3x plus de clics</strong> qu'avec Linktree,
-                grâce à nos pages optimisées pour le marché africain.
+                Les créateurs AvyLink génèrent en moyenne{" "}
+                <strong className="text-foreground">3x plus de clics</strong>{" "}
+                qu'avec Linktree, grâce à nos pages optimisées pour le marché
+                africain.
               </p>
             </motion.div>
           </motion.div>

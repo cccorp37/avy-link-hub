@@ -1,9 +1,15 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Phone, CheckCircle2, XCircle, Shield } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { firestoreDB as supabase } from "@/lib/db";
+import { auth } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -22,8 +28,20 @@ interface PaymentModalProps {
 type Step = "form" | "processing" | "success" | "error";
 
 const OPERATORS = [
-  { id: "MTN", label: "MTN MoMo", color: "#FFCC00", textColor: "#000", icon: "📱" },
-  { id: "ORANGE", label: "Orange Money", color: "#FF6600", textColor: "#fff", icon: "📱" },
+  {
+    id: "MTN",
+    label: "MTN MoMo",
+    color: "#FFCC00",
+    textColor: "#000",
+    icon: "📱",
+  },
+  {
+    id: "ORANGE",
+    label: "Orange Money",
+    color: "#FF6600",
+    textColor: "#fff",
+    icon: "📱",
+  },
 ];
 
 const COUNTRIES = [
@@ -33,8 +51,15 @@ const COUNTRIES = [
 ];
 
 export function PaymentModal({
-  open, onClose, onSuccess, amount, currency = "XAF",
-  type, metadata, title, description,
+  open,
+  onClose,
+  onSuccess,
+  amount,
+  currency = "XAF",
+  type,
+  metadata,
+  title,
+  description,
 }: PaymentModalProps) {
   const { toast } = useToast();
   const [step, setStep] = useState<Step>("form");
@@ -45,15 +70,31 @@ export function PaymentModal({
 
   const handlePay = async () => {
     if (!phone || phone.length < 9) {
-      toast({ title: "Numéro invalide", description: "Entrez un numéro valide", variant: "destructive" });
+      toast({
+        title: "Numéro invalide",
+        description: "Entrez un numéro valide",
+        variant: "destructive",
+      });
       return;
     }
 
     setStep("processing");
     try {
-      const { data, error } = await supabase.functions.invoke("mesomb-collect", {
-        body: { amount, service, phone, country, currency, type, metadata },
-      });
+      const { data, error } = await supabase.functions.invoke(
+        "mesomb-collect",
+        {
+          body: { 
+            amount, 
+            service, 
+            phone, 
+            country, 
+            currency, 
+            type, 
+            metadata,
+            userId: auth.currentUser?.uid 
+          },
+        },
+      );
 
       if (error) throw error;
 
@@ -81,22 +122,34 @@ export function PaymentModal({
     setErrorMsg("");
   };
 
-  const selectedCountry = COUNTRIES.find(c => c.code === country);
+  const selectedCountry = COUNTRIES.find((c) => c.code === country);
 
   return (
-    <Dialog open={open} onOpenChange={() => { if (step !== "processing") { onClose(); setStep("form"); } }}>
+    <Dialog
+      open={open}
+      onOpenChange={() => {
+        if (step !== "processing") {
+          onClose();
+          setStep("form");
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-md rounded-2xl">
         <DialogHeader>
           <DialogTitle className="font-dm text-lg">
             {title || "Paiement Mobile Money"}
           </DialogTitle>
-          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          {description && (
+            <p className="text-sm text-muted-foreground">{description}</p>
+          )}
         </DialogHeader>
 
         {/* Security badge */}
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-green-50 border border-green-200 text-green-700 text-xs">
           <Shield className="w-4 h-4" />
-          <span className="font-medium">Paiement sécurisé — Fonds débités en temps réel</span>
+          <span className="font-medium">
+            Paiement sécurisé — Fonds débités en temps réel
+          </span>
         </div>
 
         <AnimatePresence mode="wait">
@@ -112,15 +165,18 @@ export function PaymentModal({
               <div className="text-center py-3 rounded-xl bg-secondary/50 border border-border/40">
                 <p className="text-xs text-muted-foreground">Montant à payer</p>
                 <p className="text-3xl font-dm font-bold text-foreground">
-                  {amount.toLocaleString("fr-FR")} <span className="text-lg">{currency}</span>
+                  {amount.toLocaleString("fr-FR")}{" "}
+                  <span className="text-lg">{currency}</span>
                 </p>
               </div>
 
               {/* Operator selection */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Opérateur</label>
+                <label className="text-sm font-medium text-foreground">
+                  Opérateur
+                </label>
                 <div className="grid grid-cols-2 gap-2">
-                  {OPERATORS.map(op => (
+                  {OPERATORS.map((op) => (
                     <button
                       key={op.id}
                       onClick={() => setService(op.id)}
@@ -132,11 +188,16 @@ export function PaymentModal({
                     >
                       <div
                         className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
-                        style={{ backgroundColor: op.color, color: op.textColor }}
+                        style={{
+                          backgroundColor: op.color,
+                          color: op.textColor,
+                        }}
                       >
                         {op.id[0]}
                       </div>
-                      <span className="text-sm font-medium text-foreground">{op.label}</span>
+                      <span className="text-sm font-medium text-foreground">
+                        {op.label}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -144,9 +205,11 @@ export function PaymentModal({
 
               {/* Country */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Pays</label>
+                <label className="text-sm font-medium text-foreground">
+                  Pays
+                </label>
                 <div className="grid grid-cols-3 gap-2">
-                  {COUNTRIES.map(c => (
+                  {COUNTRIES.map((c) => (
                     <button
                       key={c.code}
                       onClick={() => setCountry(c.code)}
@@ -164,14 +227,18 @@ export function PaymentModal({
 
               {/* Phone */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Numéro Mobile Money</label>
+                <label className="text-sm font-medium text-foreground">
+                  Numéro Mobile Money
+                </label>
                 <div className="flex gap-2">
                   <div className="flex items-center gap-1 px-3 rounded-xl border border-border/40 bg-secondary/30 text-sm font-medium text-muted-foreground">
                     {selectedCountry?.prefix}
                   </div>
                   <Input
                     value={phone}
-                    onChange={e => setPhone(e.target.value.replace(/\D/g, ""))}
+                    onChange={(e) =>
+                      setPhone(e.target.value.replace(/\D/g, ""))
+                    }
                     placeholder="6XXXXXXXX"
                     className="flex-1 rounded-xl"
                     maxLength={15}
@@ -189,7 +256,8 @@ export function PaymentModal({
               </Button>
 
               <p className="text-[11px] text-center text-muted-foreground">
-                Une notification USSD sera envoyée sur votre téléphone. Confirmez avec votre code PIN.
+                Une notification USSD sera envoyée sur votre téléphone.
+                Confirmez avec votre code PIN.
               </p>
             </motion.div>
           )}
@@ -204,9 +272,12 @@ export function PaymentModal({
             >
               <Loader2 className="w-12 h-12 animate-spin text-primary" />
               <div className="text-center">
-                <p className="font-dm font-bold text-foreground">Traitement en cours...</p>
+                <p className="font-dm font-bold text-foreground">
+                  Traitement en cours...
+                </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Confirmez le paiement sur votre téléphone avec votre code PIN Mobile Money.
+                  Confirmez le paiement sur votre téléphone avec votre code PIN
+                  Mobile Money.
                 </p>
               </div>
             </motion.div>
@@ -227,9 +298,12 @@ export function PaymentModal({
                 <CheckCircle2 className="w-16 h-16 text-green-500" />
               </motion.div>
               <div className="text-center">
-                <p className="font-dm font-bold text-lg text-foreground">Paiement réussi ! 🎉</p>
+                <p className="font-dm font-bold text-lg text-foreground">
+                  Paiement réussi ! 🎉
+                </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {amount.toLocaleString("fr-FR")} {currency} débités avec succès.
+                  {amount.toLocaleString("fr-FR")} {currency} débités avec
+                  succès.
                 </p>
               </div>
             </motion.div>
@@ -244,7 +318,9 @@ export function PaymentModal({
             >
               <XCircle className="w-14 h-14 text-destructive" />
               <div className="text-center">
-                <p className="font-dm font-bold text-foreground">Paiement échoué</p>
+                <p className="font-dm font-bold text-foreground">
+                  Paiement échoué
+                </p>
                 <p className="text-sm text-destructive mt-1">{errorMsg}</p>
               </div>
               <Button onClick={reset} variant="outline" className="rounded-xl">

@@ -1,4 +1,12 @@
-import { ArrowRight, Sparkles, Star, Users, TrendingUp, Zap } from "lucide-react";
+import {
+  ArrowRight,
+  Sparkles,
+  Star,
+  Users,
+  TrendingUp,
+  Zap,
+  Download,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -17,7 +25,11 @@ const fadeUp = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.12, duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
+    transition: {
+      delay: i * 0.12,
+      duration: 0.7,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
   }),
 };
 
@@ -35,10 +47,13 @@ const Hero = () => {
         </div>
 
         {/* Dot matrix pattern */}
-        <div className="absolute inset-0 opacity-[0.025]" style={{
-          backgroundImage: `radial-gradient(circle, hsl(204,94%,52%) 1px, transparent 1px)`,
-          backgroundSize: '32px 32px'
-        }} />
+        <div
+          className="absolute inset-0 opacity-[0.025]"
+          style={{
+            backgroundImage: `radial-gradient(circle, hsl(204,94%,52%) 1px, transparent 1px)`,
+            backgroundSize: "32px 32px",
+          }}
+        />
 
         {/* Diagonal accent line */}
         <div className="absolute top-0 right-[20%] w-px h-full bg-gradient-to-b from-transparent via-primary/10 to-transparent rotate-12 origin-top" />
@@ -82,7 +97,11 @@ const Hero = () => {
                   <motion.div
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
-                    transition={{ delay: 0.8, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{
+                      delay: 0.8,
+                      duration: 0.6,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
                     className="absolute -bottom-2 left-0 right-0 h-3 bg-primary/10 rounded-full origin-left"
                   />
                 </span>
@@ -96,7 +115,10 @@ const Hero = () => {
                 className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-xl"
               >
                 Centralise tes réseaux sociaux, produits et contenus.{" "}
-                <span className="text-foreground font-semibold">Monétise ta présence en ligne</span> avec une page unique et personnalisable.
+                <span className="text-foreground font-semibold">
+                  Monétise ta présence en ligne
+                </span>{" "}
+                avec une page unique et personnalisable.
               </motion.p>
 
               {/* CTA */}
@@ -127,6 +149,15 @@ const Hero = () => {
                   <Sparkles className="w-5 h-5 mr-2 text-primary" />
                   Voir la démo
                 </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => (window.location.href = "/install")}
+                  className="rounded-2xl border-primary/20 text-primary font-semibold text-base px-8 py-7 hover:bg-primary/10 transition-all gap-2"
+                >
+                  <Download className="w-5 h-5" />
+                  Installer AVYlink
+                </Button>
               </motion.div>
 
               {/* Social proof — horizontal */}
@@ -153,12 +184,19 @@ const Hero = () => {
                 <div className="border-l border-border/50 pl-5">
                   <div className="flex items-center gap-1 mb-0.5">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 fill-warning text-warning" />
+                      <Star
+                        key={i}
+                        className="w-3.5 h-3.5 fill-warning text-warning"
+                      />
                     ))}
-                    <span className="text-sm font-bold text-foreground ml-1">4.9</span>
+                    <span className="text-sm font-bold text-foreground ml-1">
+                      4.9
+                    </span>
                   </div>
                   <span className="text-sm text-muted-foreground">
-                    Rejoint par <strong className="text-foreground">+10 000</strong> créateurs
+                    Rejoint par{" "}
+                    <strong className="text-foreground">+10 000</strong>{" "}
+                    créateurs
                   </span>
                 </div>
               </motion.div>
@@ -168,13 +206,17 @@ const Hero = () => {
             <motion.div
               initial={{ opacity: 0, x: 60, rotateY: -5 }}
               animate={{ opacity: 1, x: 0, rotateY: 0 }}
-              transition={{ delay: 0.4, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+              transition={{
+                delay: 0.4,
+                duration: 0.9,
+                ease: [0.22, 1, 0.36, 1],
+              }}
               className="lg:col-span-5 relative flex justify-center"
             >
               <div className="relative">
                 {/* Glow behind image */}
                 <div className="absolute -inset-8 bg-gradient-to-br from-primary/15 via-transparent to-[hsl(338,85%,65%)]/10 rounded-[3rem] blur-2xl" />
-                
+
                 {/* Main image */}
                 <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border border-white/20">
                   <img
@@ -197,8 +239,12 @@ const Hero = () => {
                       <TrendingUp className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <div className="text-[11px] text-muted-foreground font-medium">Clics aujourd'hui</div>
-                      <div className="font-dm font-black text-xl text-foreground leading-tight">+2 847</div>
+                      <div className="text-[11px] text-muted-foreground font-medium">
+                        Clics aujourd'hui
+                      </div>
+                      <div className="font-dm font-black text-xl text-foreground leading-tight">
+                        +2 847
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -214,8 +260,12 @@ const Hero = () => {
                       <Users className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <div className="text-[11px] text-muted-foreground font-medium">Nouveaux abonnés</div>
-                      <div className="font-dm font-black text-xl text-foreground leading-tight">+142</div>
+                      <div className="text-[11px] text-muted-foreground font-medium">
+                        Nouveaux abonnés
+                      </div>
+                      <div className="font-dm font-black text-xl text-foreground leading-tight">
+                        +142
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -242,8 +292,12 @@ const Hero = () => {
                       <Icon className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <div className="font-dm font-black text-xl text-foreground leading-tight">{stat.value}</div>
-                      <div className="text-xs text-muted-foreground">{stat.label}</div>
+                      <div className="font-dm font-black text-xl text-foreground leading-tight">
+                        {stat.value}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {stat.label}
+                      </div>
                     </div>
                   </div>
                 );
@@ -253,7 +307,9 @@ const Hero = () => {
         </div>
       </section>
 
-      {showAuth && <AuthModal defaultMode="signup" onClose={() => setShowAuth(false)} />}
+      {showAuth && (
+        <AuthModal defaultMode="signup" onClose={() => setShowAuth(false)} />
+      )}
     </>
   );
 };

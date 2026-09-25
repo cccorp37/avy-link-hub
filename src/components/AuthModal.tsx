@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { lovable } from "@/integrations/lovable";
+import { useToast } from "@/hooks/use-toast";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signIn, signUp, resetPassword } from "@/lib/supabase-auth";
-import { useToast } from "@/hooks/use-toast";
-import avylinkLogo from "@/assets/avylink-logo.jpg";
+import { signIn, signUp, resetPassword } from "@/lib/auth";
 
 type Mode = "login" | "signup" | "forgot";
 
@@ -17,7 +16,11 @@ interface AuthModalProps {
   onSuccess?: () => void;
 }
 
-const AuthModal = ({ defaultMode = "login", onClose, onSuccess }: AuthModalProps) => {
+const AuthModal = ({
+  defaultMode = "login",
+  onClose,
+  onSuccess,
+}: AuthModalProps) => {
   const [mode, setMode] = useState<Mode>(defaultMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,9 +37,17 @@ const AuthModal = ({ defaultMode = "login", onClose, onSuccess }: AuthModalProps
       const { error } = await resetPassword(email);
       setLoading(false);
       if (error) {
-        toast({ title: "Erreur", description: error.message, variant: "destructive" });
+        toast({
+          title: "Erreur",
+          description: error.message,
+          variant: "destructive",
+        });
       } else {
-        toast({ title: "Email envoyé ✉️", description: "Vérifiez votre boîte mail pour réinitialiser votre mot de passe." });
+        toast({
+          title: "Email envoyé ✉️",
+          description:
+            "Vérifiez votre boîte mail pour réinitialiser votre mot de passe.",
+        });
         setMode("login");
       }
       return;
@@ -46,9 +57,16 @@ const AuthModal = ({ defaultMode = "login", onClose, onSuccess }: AuthModalProps
       const { error } = await signUp(email, password, fullName);
       setLoading(false);
       if (error) {
-        toast({ title: "Erreur d'inscription", description: error.message, variant: "destructive" });
+        toast({
+          title: "Erreur d'inscription",
+          description: error.message,
+          variant: "destructive",
+        });
       } else {
-        toast({ title: "Compte créé ! 🎉", description: "Vérifiez votre email pour confirmer votre compte." });
+        toast({
+          title: "Compte créé ! 🎉",
+          description: "Vérifiez votre email pour confirmer votre compte.",
+        });
         onSuccess?.();
         onClose();
       }
@@ -59,16 +77,26 @@ const AuthModal = ({ defaultMode = "login", onClose, onSuccess }: AuthModalProps
     const { error } = await signIn(email, password);
     setLoading(false);
     if (error) {
-      toast({ title: "Erreur de connexion", description: error.message, variant: "destructive" });
+      toast({
+        title: "Erreur de connexion",
+        description: error.message,
+        variant: "destructive",
+      });
     } else {
-      toast({ title: "Bienvenue ! 👋", description: "Vous êtes connecté avec succès." });
+      toast({
+        title: "Bienvenue ! 👋",
+        description: "Vous êtes connecté avec succès.",
+      });
       onSuccess?.();
       onClose();
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
       <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
       <div
         className="relative bg-card rounded-3xl shadow-blue-lg w-full max-w-md p-8 border border-border/50"
@@ -77,7 +105,7 @@ const AuthModal = ({ defaultMode = "login", onClose, onSuccess }: AuthModalProps
         {/* Logo */}
         <div className="flex items-center gap-2 mb-8">
           <img
-            src={avylinkLogo}
+            src="/icon-192.jpg"
             alt="AvyLink Logo"
             className="w-9 h-9 rounded-xl object-cover shadow-blue"
           />
@@ -96,14 +124,20 @@ const AuthModal = ({ defaultMode = "login", onClose, onSuccess }: AuthModalProps
           <p className="text-muted-foreground text-sm mt-1">
             {mode === "login" && "Bon retour sur AvyLink 👋"}
             {mode === "signup" && "Rejoins +10 000 créateurs africains 🌍"}
-            {mode === "forgot" && "Entrez votre email pour recevoir un lien de réinitialisation"}
+            {mode === "forgot" &&
+              "Entrez votre email pour recevoir un lien de réinitialisation"}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === "signup" && (
             <div>
-              <Label htmlFor="fullName" className="text-sm font-medium text-foreground">Nom complet</Label>
+              <Label
+                htmlFor="fullName"
+                className="text-sm font-medium text-foreground"
+              >
+                Nom complet
+              </Label>
               <div className="relative mt-1">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -119,7 +153,12 @@ const AuthModal = ({ defaultMode = "login", onClose, onSuccess }: AuthModalProps
           )}
 
           <div>
-            <Label htmlFor="email" className="text-sm font-medium text-foreground">Email</Label>
+            <Label
+              htmlFor="email"
+              className="text-sm font-medium text-foreground"
+            >
+              Email
+            </Label>
             <div className="relative mt-1">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -136,7 +175,12 @@ const AuthModal = ({ defaultMode = "login", onClose, onSuccess }: AuthModalProps
 
           {mode !== "forgot" && (
             <div>
-              <Label htmlFor="password" className="text-sm font-medium text-foreground">Mot de passe</Label>
+              <Label
+                htmlFor="password"
+                className="text-sm font-medium text-foreground"
+              >
+                Mot de passe
+              </Label>
               <div className="relative mt-1">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -153,7 +197,11 @@ const AuthModal = ({ defaultMode = "login", onClose, onSuccess }: AuthModalProps
                   onClick={() => setShowPwd(!showPwd)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPwd ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -177,7 +225,10 @@ const AuthModal = ({ defaultMode = "login", onClose, onSuccess }: AuthModalProps
             className="w-full gradient-cta text-primary-foreground rounded-xl font-semibold shadow-blue hover:shadow-blue-lg transition-all"
           >
             {loading ? (
-              <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Chargement...</span>
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />{" "}
+                Chargement...
+              </span>
             ) : (
               <span className="flex items-center gap-2">
                 {mode === "login" && "Se connecter"}
@@ -202,27 +253,44 @@ const AuthModal = ({ defaultMode = "login", onClose, onSuccess }: AuthModalProps
               <GoogleSignInButton onSuccess={onSuccess} onClose={onClose} />
               <AppleSignInButton onSuccess={onSuccess} onClose={onClose} />
             </div>
+
+            {typeof window !== "undefined" && window.self !== window.top && (
+              <p className="text-[11px] text-muted-foreground text-center mt-2 leading-relaxed">
+                💡 Dans l&apos;aperçu intégré, l&apos;email/mot de passe fonctionne sans restriction. Pour Google, ouvrez l&apos;app dans un nouvel onglet si votre navigateur bloque la popup.
+              </p>
+            )}
           </>
         )}
 
         {/* Switch mode */}
         <div className="mt-6 text-center text-sm text-muted-foreground">
           {mode === "login" && (
-            <>Pas encore de compte ?{" "}
-              <button onClick={() => setMode("signup")} className="text-primary font-semibold hover:underline">
+            <>
+              Pas encore de compte ?{" "}
+              <button
+                onClick={() => setMode("signup")}
+                className="text-primary font-semibold hover:underline"
+              >
                 Créer un compte
               </button>
             </>
           )}
           {mode === "signup" && (
-            <>Déjà un compte ?{" "}
-              <button onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">
+            <>
+              Déjà un compte ?{" "}
+              <button
+                onClick={() => setMode("login")}
+                className="text-primary font-semibold hover:underline"
+              >
                 Se connecter
               </button>
             </>
           )}
           {mode === "forgot" && (
-            <button onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">
+            <button
+              onClick={() => setMode("login")}
+              className="text-primary font-semibold hover:underline"
+            >
               Retour à la connexion
             </button>
           )}
@@ -232,28 +300,45 @@ const AuthModal = ({ defaultMode = "login", onClose, onSuccess }: AuthModalProps
   );
 };
 
-// ─── Google Sign-In Button ────────────────────────────────────────────────────
-function GoogleSignInButton({ onSuccess, onClose }: { onSuccess?: () => void; onClose: () => void }) {
+function GoogleSignInButton({
+  onSuccess,
+  onClose,
+}: {
+  onSuccess?: () => void;
+  onClose: () => void;
+}) {
   const [loading, setLoading] = useState(false);
+  const { loginWithGoogle } = useFirebaseAuth();
   const { toast } = useToast();
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google");
-      if (result.error) {
-        toast({
-          title: "Erreur Google Sign In",
-          description: (result.error as Error).message || "Une erreur est survenue",
-          variant: "destructive",
-        });
-      } else if (!result.redirected) {
-        toast({ title: "Bienvenue ! 👋", description: "Connecté avec Google." });
-        onSuccess?.();
-        onClose();
-      }
-    } catch (_) {
-      toast({ title: "Erreur", description: "Impossible de se connecter avec Google.", variant: "destructive" });
+      await loginWithGoogle();
+      toast({
+        title: "Bienvenue ! 👋",
+        description: "Connecté avec Google.",
+      });
+      onSuccess?.();
+      onClose();
+    } catch (error: any) {
+      const isIframe =
+        typeof window !== "undefined" && window.self !== window.top;
+      const isNetworkError =
+        error?.code === "auth/network-request-failed" ||
+        error?.message?.includes("network-request-failed");
+
+      const description =
+        error?.customMessage ||
+        (isNetworkError && isIframe
+          ? "La popup de connexion a été restreinte par l'environnement d'aperçu ou les cookies tiers. Vous pouvez ouvrir l'application dans un nouvel onglet ou vous connecter par email."
+          : error?.message || "Impossible de se connecter avec Google.");
+
+      toast({
+        title: isNetworkError ? "Connexion restreinte" : "Erreur Google Sign In",
+        description,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -270,10 +355,22 @@ function GoogleSignInButton({ onSuccess, onClose }: { onSuccess?: () => void; on
         <span className="w-4 h-4 border-2 border-muted border-t-primary rounded-full animate-spin" />
       ) : (
         <svg className="w-5 h-5" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          <path
+            fill="#4285F4"
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+          />
+          <path
+            fill="#34A853"
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+          />
+          <path
+            fill="#FBBC05"
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+          />
+          <path
+            fill="#EA4335"
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+          />
         </svg>
       )}
       Continuer avec Google
@@ -281,28 +378,30 @@ function GoogleSignInButton({ onSuccess, onClose }: { onSuccess?: () => void; on
   );
 }
 
-// ─── Apple Sign-In Button ─────────────────────────────────────────────────────
-function AppleSignInButton({ onSuccess, onClose }: { onSuccess?: () => void; onClose: () => void }) {
+function AppleSignInButton({
+  onSuccess,
+  onClose,
+}: {
+  onSuccess?: () => void;
+  onClose: () => void;
+}) {
   const [loading, setLoading] = useState(false);
+  const { loginWithApple } = useFirebaseAuth();
   const { toast } = useToast();
 
   const handleAppleSignIn = async () => {
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("apple");
-      if (result.error) {
-        toast({
-          title: "Erreur Apple Sign In",
-          description: (result.error as Error).message || "Une erreur est survenue",
-          variant: "destructive",
-        });
-      } else if (!result.redirected) {
-        toast({ title: "Bienvenue ! 👋", description: "Connecté avec Apple." });
-        onSuccess?.();
-        onClose();
-      }
-    } catch (_) {
-      toast({ title: "Erreur", description: "Impossible de se connecter avec Apple.", variant: "destructive" });
+      await loginWithApple();
+      toast({ title: "Bienvenue ! 👋", description: "Connecté avec Apple." });
+      onSuccess?.();
+      onClose();
+    } catch (error: any) {
+      toast({
+        title: "Erreur Apple Sign In",
+        description: error.message || "Impossible de se connecter avec Apple.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -328,4 +427,3 @@ function AppleSignInButton({ onSuccess, onClose }: { onSuccess?: () => void; onC
 }
 
 export default AuthModal;
-

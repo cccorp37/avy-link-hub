@@ -22,7 +22,11 @@ interface Props {
 
 const sizeMap = { sm: "w-4 h-4", md: "w-5 h-5", lg: "w-7 h-7" };
 
-export function VerifiedBadge({ style = "star", size = "sm", className = "" }: Props) {
+export function VerifiedBadge({
+  style = "star",
+  size = "sm",
+  className = "",
+}: Props) {
   const badge = BADGE_STYLES.find((b) => b.id === style) || BADGE_STYLES[0];
   return (
     <img

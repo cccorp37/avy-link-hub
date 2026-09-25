@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { firestoreDB as supabase } from "@/lib/db";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { NotificationBanner } from "@/components/NotificationBanner";
 import { DashboardTopbar } from "@/components/dashboard/DashboardTopbar";
 import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Tables } from "@/lib/types";
 import { useLanguage } from "@/hooks/useLanguage";
 
 // Sub-pages
@@ -28,6 +28,7 @@ import DashboardWallet from "./dashboard/DashboardWallet";
 import DashboardStore from "./dashboard/DashboardStore";
 import DashboardSubscription from "./dashboard/DashboardSubscription";
 import DashboardHelp from "./dashboard/DashboardHelp";
+
 
 // Admin sub-pages
 import AdminOverview from "./admin/AdminOverview";
@@ -70,8 +71,18 @@ const getPageTitles = (t: (k: string) => string): Record<string, string> => ({
 const ease = [0.22, 1, 0.36, 1] as const;
 const pageVariants = {
   initial: { opacity: 0, x: 20, filter: "blur(4px)" },
-  animate: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.35, ease } },
-  exit: { opacity: 0, x: -20, filter: "blur(4px)", transition: { duration: 0.2, ease } },
+  animate: {
+    opacity: 1,
+    x: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.35, ease },
+  },
+  exit: {
+    opacity: 0,
+    x: -20,
+    filter: "blur(4px)",
+    transition: { duration: 0.2, ease },
+  },
 };
 
 function AnimatedPage({ children }: { children: React.ReactNode }) {
@@ -99,7 +110,8 @@ const Dashboard = () => {
   const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
 
-  const profile = profiles.find(p => p.id === activeProfileId) || profiles[0] || null;
+  const profile =
+    profiles.find((p) => p.id === activeProfileId) || profiles[0] || null;
   const { t } = useLanguage();
   const currentTitle = getPageTitles(t)[location.pathname] || "Dashboard";
 
@@ -125,7 +137,7 @@ const Dashboard = () => {
       setProfiles(list);
       // Restore last active or pick first
       const stored = localStorage.getItem("avylink_active_profile");
-      const found = list.find(p => p.id === stored);
+      const found = list.find((p) => p.id === stored);
       setActiveProfileId(found?.id || list[0]?.id || null);
       setProfileLoading(false);
     };
@@ -138,13 +150,13 @@ const Dashboard = () => {
   };
 
   const handleProfileCreated = (newProfile: Profile) => {
-    setProfiles(prev => [...prev, newProfile]);
+    setProfiles((prev) => [...prev, newProfile]);
     switchProfile(newProfile);
   };
 
   const handleProfileDeleted = (profileId: string) => {
-    setProfiles(prev => {
-      const next = prev.filter(p => p.id !== profileId);
+    setProfiles((prev) => {
+      const next = prev.filter((p) => p.id !== profileId);
       if (activeProfileId === profileId && next.length > 0) {
         switchProfile(next[0]);
       }
@@ -161,27 +173,35 @@ const Dashboard = () => {
       .select()
       .single();
     if (data) {
-      setProfiles(prev => prev.map(p => p.id === data.id ? data : p));
+      setProfiles((prev) => prev.map((p) => (p.id === data.id ? data : p)));
     }
   };
 
   if (loading || profileLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--gradient-hero)" }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "var(--gradient-hero)" }}
+      >
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="flex flex-col items-center gap-3"
         >
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground font-medium">Chargement...</p>
+          <p className="text-sm text-muted-foreground font-medium">
+            Chargement...
+          </p>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex w-full" style={{ background: "hsl(210, 20%, 98%)" }}>
+    <div
+      className="min-h-screen flex w-full"
+      style={{ background: "hsl(210, 20%, 98%)" }}
+    >
       <DashboardSidebar
         profile={profile}
         profiles={profiles}
@@ -191,72 +211,211 @@ const Dashboard = () => {
       />
 
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
-        <DashboardTopbar
-          profile={profile}
-          title={currentTitle}
-        />
+        <DashboardTopbar profile={profile} title={currentTitle} />
         <NotificationBanner />
 
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
-            <Route path="/" element={
-              <AnimatedPage><DashboardOverview profile={profile} /></AnimatedPage>
-            } />
-            <Route path="/page" element={
-              <AnimatedPage><DashboardPage profile={profile} onUpdate={updateProfile} /></AnimatedPage>
-            } />
-            <Route path="/liens" element={
-              <AnimatedPage><DashboardLinks profile={profile} /></AnimatedPage>
-            } />
-            <Route path="/apparence" element={
-              <AnimatedPage><DashboardAppearance profile={profile} onUpdate={updateProfile} /></AnimatedPage>
-            } />
-            <Route path="/analytics" element={
-              <AnimatedPage><DashboardAnalytics profile={profile} /></AnimatedPage>
-            } />
-            <Route path="/parametres" element={
-              <AnimatedPage><DashboardSettings profile={profile} onUpdate={updateProfile} /></AnimatedPage>
-            } />
-            <Route path="/modeles" element={
-              <AnimatedPage><DashboardTemplates profile={profile} onUpdate={updateProfile} /></AnimatedPage>
-            } />
-            <Route path="/integrations" element={
-              <AnimatedPage><DashboardIntegrations profile={profile} onUpdate={updateProfile} /></AnimatedPage>
-            } />
-            <Route path="/support" element={
-              <AnimatedPage><DashboardSupport /></AnimatedPage>
-            } />
-            <Route path="/aide" element={
-              <AnimatedPage><DashboardHelp /></AnimatedPage>
-            } />
-            <Route path="/equipe" element={
-              <AnimatedPage><DashboardTeam profile={profile} /></AnimatedPage>
-            } />
-            <Route path="/api" element={
-              <AnimatedPage><DashboardAPI /></AnimatedPage>
-            } />
-            <Route path="/heatmap" element={
-              <AnimatedPage><DashboardHeatmap profile={profile} /></AnimatedPage>
-            } />
-            <Route path="/portefeuille" element={
-              <AnimatedPage><DashboardWallet /></AnimatedPage>
-            } />
-            <Route path="/boutique" element={
-              <AnimatedPage><DashboardStore profile={profile} /></AnimatedPage>
-            } />
-            <Route path="/abonnement" element={
-              <AnimatedPage><DashboardSubscription profile={profile} /></AnimatedPage>
-            } />
+            <Route
+              path="/"
+              element={
+                <AnimatedPage>
+                  <DashboardOverview profile={profile} />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/page"
+              element={
+                <AnimatedPage>
+                  <DashboardPage profile={profile} onUpdate={updateProfile} />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/liens"
+              element={
+                <AnimatedPage>
+                  <DashboardLinks profile={profile} />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/apparence"
+              element={
+                <AnimatedPage>
+                  <DashboardAppearance
+                    profile={profile}
+                    onUpdate={updateProfile}
+                  />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/analytics"
+              element={
+                <AnimatedPage>
+                  <DashboardAnalytics profile={profile} />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/parametres"
+              element={
+                <AnimatedPage>
+                  <DashboardSettings
+                    profile={profile}
+                    onUpdate={updateProfile}
+                  />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/modeles"
+              element={
+                <AnimatedPage>
+                  <DashboardTemplates
+                    profile={profile}
+                    onUpdate={updateProfile}
+                  />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/integrations"
+              element={
+                <AnimatedPage>
+                  <DashboardIntegrations
+                    profile={profile}
+                    onUpdate={updateProfile}
+                  />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/support"
+              element={
+                <AnimatedPage>
+                  <DashboardSupport />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/aide"
+              element={
+                <AnimatedPage>
+                  <DashboardHelp />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/equipe"
+              element={
+                <AnimatedPage>
+                  <DashboardTeam profile={profile} />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/api"
+              element={
+                <AnimatedPage>
+                  <DashboardAPI />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/heatmap"
+              element={
+                <AnimatedPage>
+                  <DashboardHeatmap profile={profile} />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/portefeuille"
+              element={
+                <AnimatedPage>
+                  <DashboardWallet />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/boutique"
+              element={
+                <AnimatedPage>
+                  <DashboardStore profile={profile} />
+                </AnimatedPage>
+              }
+            />
+            <Route
+              path="/abonnement"
+              element={
+                <AnimatedPage>
+                  <DashboardSubscription profile={profile} />
+                </AnimatedPage>
+              }
+            />
+
             {/* Admin routes */}
             {isAdmin && (
               <>
-                <Route path="/admin" element={<AnimatedPage><AdminOverview /></AnimatedPage>} />
-                <Route path="/admin/users" element={<AnimatedPage><AdminUsers /></AnimatedPage>} />
-                <Route path="/admin/analytics" element={<AnimatedPage><AdminAnalytics /></AnimatedPage>} />
-                <Route path="/admin/notifications" element={<AnimatedPage><AdminNotifications /></AnimatedPage>} />
-                <Route path="/admin/maintenance" element={<AnimatedPage><AdminMaintenance /></AnimatedPage>} />
-                <Route path="/admin/tickets" element={<AnimatedPage><AdminTickets /></AnimatedPage>} />
-                <Route path="/admin/source-code" element={<AnimatedPage><AdminSourceCode /></AnimatedPage>} />
+                <Route
+                  path="/admin"
+                  element={
+                    <AnimatedPage>
+                      <AdminOverview />
+                    </AnimatedPage>
+                  }
+                />
+                <Route
+                  path="/admin/users"
+                  element={
+                    <AnimatedPage>
+                      <AdminUsers />
+                    </AnimatedPage>
+                  }
+                />
+                <Route
+                  path="/admin/analytics"
+                  element={
+                    <AnimatedPage>
+                      <AdminAnalytics />
+                    </AnimatedPage>
+                  }
+                />
+                <Route
+                  path="/admin/notifications"
+                  element={
+                    <AnimatedPage>
+                      <AdminNotifications />
+                    </AnimatedPage>
+                  }
+                />
+                <Route
+                  path="/admin/maintenance"
+                  element={
+                    <AnimatedPage>
+                      <AdminMaintenance />
+                    </AnimatedPage>
+                  }
+                />
+                <Route
+                  path="/admin/tickets"
+                  element={
+                    <AnimatedPage>
+                      <AdminTickets />
+                    </AnimatedPage>
+                  }
+                />
+                <Route
+                  path="/admin/source-code"
+                  element={
+                    <AnimatedPage>
+                      <AdminSourceCode />
+                    </AnimatedPage>
+                  }
+                />
               </>
             )}
           </Routes>

@@ -4,9 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import AuthModal from "@/components/AuthModal";
 import { useAuth } from "@/hooks/useAuth";
-import { signOut } from "@/lib/supabase-auth";
+import { signOut } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import avylinkLogo from "@/assets/avylink-logo.jpg";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -37,16 +36,18 @@ const Navbar = () => {
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled 
-          ? "bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-sm" 
-          : "bg-transparent"
-      }`}>
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-sm"
+            : "bg-transparent"
+        }`}
+      >
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2.5">
             <img
-              src={avylinkLogo}
+              src="/icon-192.jpg"
               alt="AvyLink Logo"
               className="w-9 h-9 rounded-xl object-cover shadow-sm"
             />
@@ -70,7 +71,7 @@ const Navbar = () => {
 
           {/* CTA */}
           <div className="hidden md:flex items-center gap-3">
-          {user ? (
+            {user ? (
               <>
                 <Button
                   variant="ghost"
@@ -80,14 +81,24 @@ const Navbar = () => {
                 >
                   Mon Dashboard
                 </Button>
-                <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-muted-foreground hover:text-destructive gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="text-muted-foreground hover:text-destructive gap-2"
+                >
                   <LogOut className="w-4 h-4" />
                   Déconnexion
                 </Button>
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground font-medium" onClick={() => setAuthModal("login")}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-foreground font-medium"
+                  onClick={() => setAuthModal("login")}
+                >
                   Connexion
                 </Button>
                 <Button
@@ -102,7 +113,10 @@ const Navbar = () => {
           </div>
 
           {/* Mobile menu */}
-          <button className="md:hidden p-2 rounded-xl hover:bg-muted transition-colors" onClick={() => setOpen(!open)}>
+          <button
+            className="md:hidden p-2 rounded-xl hover:bg-muted transition-colors"
+            onClick={() => setOpen(!open)}
+          >
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
@@ -122,13 +136,37 @@ const Navbar = () => {
             ))}
             <div className="pt-3 flex flex-col gap-2 border-t border-border/50">
               {user ? (
-                <Button variant="outline" size="sm" onClick={handleSignOut} className="gap-2 rounded-xl">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="gap-2 rounded-xl"
+                >
                   <LogOut className="w-4 h-4" /> Déconnexion
                 </Button>
               ) : (
                 <>
-                  <Button variant="outline" size="sm" className="rounded-xl" onClick={() => { setAuthModal("login"); setOpen(false); }}>Connexion</Button>
-                  <Button size="sm" className="gradient-cta text-primary-foreground rounded-xl" onClick={() => { setAuthModal("signup"); setOpen(false); }}>Commencer Gratuitement</Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-xl"
+                    onClick={() => {
+                      setAuthModal("login");
+                      setOpen(false);
+                    }}
+                  >
+                    Connexion
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="gradient-cta text-primary-foreground rounded-xl"
+                    onClick={() => {
+                      setAuthModal("signup");
+                      setOpen(false);
+                    }}
+                  >
+                    Commencer Gratuitement
+                  </Button>
                 </>
               )}
             </div>

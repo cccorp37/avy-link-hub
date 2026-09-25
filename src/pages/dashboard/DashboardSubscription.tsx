@@ -3,7 +3,7 @@ import { Crown, Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PaymentModal } from "@/components/PaymentModal";
 import { motion } from "framer-motion";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Tables } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 
 type Profile = Tables<"profiles">;
@@ -48,25 +48,33 @@ const PLANS = [
 export default function DashboardSubscription({ profile }: Props) {
   const { toast } = useToast();
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
-  const [paymentPlan, setPaymentPlan] = useState<typeof PLANS[0] | null>(null);
+  const [paymentPlan, setPaymentPlan] = useState<(typeof PLANS)[0] | null>(
+    null,
+  );
   const [paymentOpen, setPaymentOpen] = useState(false);
 
   const currentPlan = profile?.plan || "free";
 
-  const handleUpgrade = (plan: typeof PLANS[0]) => {
+  const handleUpgrade = (plan: (typeof PLANS)[0]) => {
     setPaymentPlan(plan);
     setPaymentOpen(true);
   };
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-6">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
         <h2 className="font-dm font-bold text-2xl text-foreground flex items-center gap-2">
           <Crown className="w-6 h-6 text-primary" />
           Abonnement
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Plan actuel : <span className="font-bold text-primary capitalize">{currentPlan}</span>
+          Plan actuel :{" "}
+          <span className="font-bold text-primary capitalize">
+            {currentPlan}
+          </span>
         </p>
       </motion.div>
 
@@ -75,7 +83,9 @@ export default function DashboardSubscription({ profile }: Props) {
         <button
           onClick={() => setBilling("monthly")}
           className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-            billing === "monthly" ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+            billing === "monthly"
+              ? "bg-primary text-primary-foreground"
+              : "bg-secondary text-muted-foreground"
           }`}
         >
           Mensuel
@@ -83,7 +93,9 @@ export default function DashboardSubscription({ profile }: Props) {
         <button
           onClick={() => setBilling("yearly")}
           className={`px-4 py-2 rounded-xl text-sm font-medium transition-all relative ${
-            billing === "yearly" ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+            billing === "yearly"
+              ? "bg-primary text-primary-foreground"
+              : "bg-secondary text-muted-foreground"
           }`}
         >
           Annuel
@@ -121,7 +133,9 @@ export default function DashboardSubscription({ profile }: Props) {
               >
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-dm font-bold text-xl text-foreground">{plan.name}</h3>
+              <h3 className="font-dm font-bold text-xl text-foreground">
+                {plan.name}
+              </h3>
               <div className="mt-2 mb-4">
                 <span className="text-3xl font-dm font-bold text-foreground">
                   {price.toLocaleString("fr-FR")}
@@ -131,8 +145,11 @@ export default function DashboardSubscription({ profile }: Props) {
                 </span>
               </div>
               <div className="space-y-2 mb-6">
-                {plan.features.map(f => (
-                  <div key={f} className="flex items-center gap-2 text-sm text-foreground">
+                {plan.features.map((f) => (
+                  <div
+                    key={f}
+                    className="flex items-center gap-2 text-sm text-foreground"
+                  >
                     <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
                     {f}
                   </div>

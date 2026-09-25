@@ -19,7 +19,9 @@ import { MaintenanceGuard } from "@/components/MaintenanceGuard";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [splashDone, setSplashDone] = useState(() => sessionStorage.getItem("splashShown") === "true");
+  const [splashDone, setSplashDone] = useState(
+    () => sessionStorage.getItem("splashShown") === "true",
+  );
   const handleSplashComplete = useCallback(() => {
     sessionStorage.setItem("splashShown", "true");
     setSplashDone(true);
@@ -27,24 +29,33 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="light"
+        enableSystem={false}
+      >
         <TooltipProvider>
           <AuthProvider>
             <LanguageProvider>
               <Toaster />
               <Sonner />
-              {!splashDone && <SplashScreen onComplete={handleSplashComplete} />}
+              {!splashDone && (
+                <SplashScreen onComplete={handleSplashComplete} />
+              )}
               <MaintenanceGuard>
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/dashboard/*" element={<Dashboard />} />
-                  <Route path="/admin/*" element={<Navigate to="/dashboard/admin" replace />} />
-                  <Route path="/u/:username" element={<PublicProfile />} />
-                  <Route path="/install" element={<InstallApp />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/dashboard/*" element={<Dashboard />} />
+                    <Route
+                      path="/admin/*"
+                      element={<Navigate to="/dashboard/admin" replace />}
+                    />
+                    <Route path="/u/:username" element={<PublicProfile />} />
+                    <Route path="/install" element={<InstallApp />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
               </MaintenanceGuard>
             </LanguageProvider>
           </AuthProvider>
@@ -55,4 +66,3 @@ const App = () => {
 };
 
 export default App;
-

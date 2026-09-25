@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { firestoreDB as supabase } from "@/lib/db";
 
 export interface LinkMetadata {
   success: boolean;

@@ -22,7 +22,7 @@ const modules = import.meta.glob(
     "/eslint.config.js",
     "/vitest.config.ts",
     "/src/**/*.{tsx,ts,jsx,js,css,html,md,json}",
-    "/supabase/**/*.{ts,tsx,js,sql,json,toml,md}",
+    "/supabase-legacy-reference/**/*.{ts,tsx,js,sql,json,toml,md}",
     "/public/robots.txt",
     "!**/node_modules/**",
     "!**/dist/**",
@@ -30,7 +30,7 @@ const modules = import.meta.glob(
     "!**/*.test.ts",
     "!**/*.test.tsx",
   ],
-  { query: "?raw", import: "default", eager: true }
+  { query: "?raw", import: "default", eager: true },
 ) as Record<string, string>;
 
 const APP_VERSION = "2.0.0";
@@ -39,16 +39,18 @@ function categoryOf(path: string): string {
   if (path.startsWith("/src/pages/admin/")) return "Admin — Pages";
   if (path.startsWith("/src/pages/dashboard/")) return "Dashboard — Pages";
   if (path.startsWith("/src/pages/")) return "Pages publiques";
-  if (path.startsWith("/src/components/dashboard/")) return "Composants — Dashboard";
+  if (path.startsWith("/src/components/dashboard/"))
+    return "Composants — Dashboard";
   if (path.startsWith("/src/components/ui/")) return "Composants — UI (shadcn)";
   if (path.startsWith("/src/components/")) return "Composants";
   if (path.startsWith("/src/hooks/")) return "Hooks React";
   if (path.startsWith("/src/lib/")) return "Utilitaires";
   if (path.startsWith("/src/integrations/")) return "Intégrations";
   if (path.startsWith("/src/")) return "Source (racine)";
-  if (path.startsWith("/supabase/functions/")) return "Edge Functions (backend)";
-  if (path.startsWith("/supabase/migrations/")) return "Migrations SQL";
-  if (path.startsWith("/supabase/")) return "Configuration Supabase";
+  if (path.startsWith("/supabase-legacy-reference/functions/"))
+    return "Edge Functions (backend historique)";
+  if (path.startsWith("/supabase-legacy-reference/migrations/")) return "Migrations SQL (historique)";
+  if (path.startsWith("/supabase-legacy-reference/")) return "Configuration Supabase (historique)";
   if (path.startsWith("/public/")) return "Public";
   return "Configuration projet";
 }
@@ -111,7 +113,7 @@ export default function AdminSourceCode() {
   const filtered = useMemo(() => {
     if (!search.trim()) return files;
     const q = search.toLowerCase();
-    return files.filter(f => f.path.toLowerCase().includes(q));
+    return files.filter((f) => f.path.toLowerCase().includes(q));
   }, [files, search]);
 
   const humanBytes = (n: number) => {
@@ -132,12 +134,18 @@ export default function AdminSourceCode() {
     lines.push("  AVYLINK — CODE SOURCE COMPLET DE L'APPLICATION");
     lines.push(bar);
     lines.push(`  Version         : ${APP_VERSION}`);
-    lines.push(`  Généré le       : ${now.toLocaleDateString("fr-FR")} à ${now.toLocaleTimeString("fr-FR")}`);
+    lines.push(
+      `  Généré le       : ${now.toLocaleDateString("fr-FR")} à ${now.toLocaleTimeString("fr-FR")}`,
+    );
     lines.push(`  Fichiers        : ${totalFiles}`);
     lines.push(`  Lignes de code  : ${totalLines.toLocaleString("fr-FR")}`);
     lines.push(`  Taille totale   : ${humanBytes(totalBytes)}`);
-    lines.push(`  Stack technique : React 18 · Vite · TypeScript · Tailwind · shadcn/ui · Supabase`);
-    lines.push(`  Backend         : Supabase (Auth, DB, RLS, Storage, Edge Functions)`);
+    lines.push(
+      `  Stack technique : React 18 · Vite · TypeScript · Tailwind · shadcn/ui · Supabase`,
+    );
+    lines.push(
+      `  Backend         : Supabase (Auth, DB, RLS, Storage, Edge Functions)`,
+    );
     lines.push(`  Paiements       : MeSomb (Mobile Money — Orange, MTN)`);
     lines.push(bar);
     lines.push("");
@@ -149,7 +157,9 @@ export default function AdminSourceCode() {
       const list = byCategory.get(cat);
       if (!list?.length) continue;
       const catLines = list.reduce((n, f) => n + f.lines, 0);
-      lines.push(`  • ${cat.padEnd(38, " ")} ${String(list.length).padStart(4)} fichier(s)  ${String(catLines).padStart(7)} lignes`);
+      lines.push(
+        `  • ${cat.padEnd(38, " ")} ${String(list.length).padStart(4)} fichier(s)  ${String(catLines).padStart(7)} lignes`,
+      );
     }
     lines.push("");
 
@@ -158,7 +168,9 @@ export default function AdminSourceCode() {
     lines.push(thin);
     files.forEach((f, i) => {
       const idx = String(i + 1).padStart(3, " ");
-      lines.push(`  ${idx}. ${f.path.replace(/^\//, "").padEnd(60, " ")} ${String(f.lines).padStart(5)} l.  ${humanBytes(f.bytes).padStart(9)}`);
+      lines.push(
+        `  ${idx}. ${f.path.replace(/^\//, "").padEnd(60, " ")} ${String(f.lines).padStart(5)} l.  ${humanBytes(f.bytes).padStart(9)}`,
+      );
     });
     lines.push("");
     lines.push(bar);
@@ -170,13 +182,17 @@ export default function AdminSourceCode() {
       if (!list?.length) continue;
       lines.push("");
       lines.push(bar);
-      lines.push(`  SECTION : ${cat.toUpperCase()}  (${list.length} fichier(s))`);
+      lines.push(
+        `  SECTION : ${cat.toUpperCase()}  (${list.length} fichier(s))`,
+      );
       lines.push(bar);
       for (const f of list) {
         lines.push("");
         lines.push(thin);
         lines.push(`  FICHIER  : ${f.path.replace(/^\//, "")}`);
-        lines.push(`  LIGNES   : ${f.lines}   TAILLE : ${humanBytes(f.bytes)}   CATÉGORIE : ${f.category}`);
+        lines.push(
+          `  LIGNES   : ${f.lines}   TAILLE : ${humanBytes(f.bytes)}   CATÉGORIE : ${f.category}`,
+        );
         lines.push(thin);
         lines.push("");
         lines.push(f.content);
@@ -186,10 +202,14 @@ export default function AdminSourceCode() {
 
     lines.push("");
     lines.push(bar);
-    lines.push(`  FIN DU DOCUMENT — © ${now.getFullYear()} AvyLink. Tous droits réservés.`);
+    lines.push(
+      `  FIN DU DOCUMENT — © ${now.getFullYear()} AvyLink. Tous droits réservés.`,
+    );
     lines.push(bar);
 
-    const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+    const blob = new Blob([lines.join("\n")], {
+      type: "text/plain;charset=utf-8",
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -212,20 +232,30 @@ export default function AdminSourceCode() {
           Code Source Complet
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Export complet, à jour et détaillé de tout le code de l'application AvyLink — frontend, backend, configuration.
+          Export complet, à jour et détaillé de tout le code de l'application
+          AvyLink — frontend, backend, configuration.
         </p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: "Fichiers", value: totalFiles.toString(), emoji: "📄" },
-          { label: "Lignes de code", value: totalLines.toLocaleString("fr-FR"), emoji: "📝" },
+          {
+            label: "Lignes de code",
+            value: totalLines.toLocaleString("fr-FR"),
+            emoji: "📝",
+          },
           { label: "Taille", value: humanBytes(totalBytes), emoji: "💾" },
           { label: "Version", value: `v${APP_VERSION}`, emoji: "🏷️" },
-        ].map(s => (
-          <div key={s.label} className="bg-card rounded-2xl border border-border/50 shadow-card p-4 text-center">
+        ].map((s) => (
+          <div
+            key={s.label}
+            className="bg-card rounded-2xl border border-border/50 shadow-card p-4 text-center"
+          >
             <div className="text-2xl mb-1">{s.emoji}</div>
-            <div className="font-dm font-bold text-xl text-foreground">{s.value}</div>
+            <div className="font-dm font-bold text-xl text-foreground">
+              {s.value}
+            </div>
             <div className="text-xs text-muted-foreground">{s.label}</div>
           </div>
         ))}
@@ -237,8 +267,9 @@ export default function AdminSourceCode() {
           Télécharger tout le code source
         </h3>
         <p className="text-muted-foreground text-sm max-w-md mx-auto">
-          Un seul fichier .txt structuré par sections (frontend, dashboard, admin, backend, migrations SQL, edge functions…),
-          avec sommaire, index et contenu complet de chaque fichier.
+          Un seul fichier .txt structuré par sections (frontend, dashboard,
+          admin, backend, migrations SQL, edge functions…), avec sommaire, index
+          et contenu complet de chaque fichier.
         </p>
         <Button
           onClick={handleDownload}
@@ -246,12 +277,21 @@ export default function AdminSourceCode() {
           size="lg"
           className="gradient-cta text-primary-foreground rounded-2xl font-bold text-base px-10 py-6 shadow-blue hover:shadow-blue-lg transition-all"
         >
-          {downloading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Download className="w-5 h-5 mr-2" />}
+          {downloading ? (
+            <Loader2 className="w-5 h-5 animate-spin mr-2" />
+          ) : (
+            <Download className="w-5 h-5 mr-2" />
+          )}
           Télécharger le document complet
         </Button>
       </div>
 
-      <FileList files={filtered} totalFiles={totalFiles} search={search} setSearch={setSearch} />
+      <FileList
+        files={filtered}
+        totalFiles={totalFiles}
+        search={search}
+        setSearch={setSearch}
+      />
     </div>
   );
 }
@@ -271,17 +311,22 @@ function FileList({
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   // Reset pagination when the filter changes.
-  useEffect(() => { setVisible(PAGE_SIZE); }, [search]);
+  useEffect(() => {
+    setVisible(PAGE_SIZE);
+  }, [search]);
 
   // Progressive rendering — auto-load next page when sentinel is in view.
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
-    const io = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        setVisible((v) => Math.min(v + PAGE_SIZE, files.length));
-      }
-    }, { rootMargin: "200px" });
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisible((v) => Math.min(v + PAGE_SIZE, files.length));
+        }
+      },
+      { rootMargin: "200px" },
+    );
     io.observe(el);
     return () => io.disconnect();
   }, [files.length]);
@@ -293,41 +338,60 @@ function FileList({
     <div className="bg-card rounded-2xl border border-border/50 shadow-card overflow-hidden">
       <div className="px-5 py-3 border-b border-border bg-muted/30 flex items-center gap-3">
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex-1">
-          Contenu inclus ({shown.length} affichés / {files.length} filtrés · {totalFiles} au total)
+          Contenu inclus ({shown.length} affichés / {files.length} filtrés ·{" "}
+          {totalFiles} au total)
         </p>
         <div className="relative w-56">
           <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher un fichier…"
             className="h-8 pl-8 text-xs"
           />
         </div>
       </div>
       <div className="max-h-[55vh] overflow-y-auto divide-y divide-border/20">
-        {shown.map(f => {
+        {shown.map((f) => {
           const ext = f.path.split(".").pop();
           const extColor =
-            ext === "tsx" ? "text-primary"
-            : ext === "ts" ? "text-emerald-500"
-            : ext === "sql" ? "text-orange-500"
-            : ext === "css" ? "text-violet-500"
-            : ext === "json" ? "text-yellow-600"
-            : ext === "toml" ? "text-pink-500"
-            : ext === "html" ? "text-orange-500"
-            : "text-muted-foreground";
+            ext === "tsx"
+              ? "text-primary"
+              : ext === "ts"
+                ? "text-emerald-500"
+                : ext === "sql"
+                  ? "text-orange-500"
+                  : ext === "css"
+                    ? "text-violet-500"
+                    : ext === "json"
+                      ? "text-yellow-600"
+                      : ext === "toml"
+                        ? "text-pink-500"
+                        : ext === "html"
+                          ? "text-orange-500"
+                          : "text-muted-foreground";
           return (
-            <div key={f.path} className="flex items-center gap-3 px-5 py-2 hover:bg-secondary/20 transition-colors">
+            <div
+              key={f.path}
+              className="flex items-center gap-3 px-5 py-2 hover:bg-secondary/20 transition-colors"
+            >
               <FileCode className={"w-4 h-4 flex-shrink-0 " + extColor} />
-              <span className="text-sm font-mono text-foreground flex-1 truncate">{f.path.replace(/^\//, "")}</span>
-              <span className="hidden md:inline text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground flex-shrink-0">{f.category}</span>
-              <span className="text-xs text-muted-foreground flex-shrink-0 tabular-nums w-14 text-right">{f.lines} l.</span>
+              <span className="text-sm font-mono text-foreground flex-1 truncate">
+                {f.path.replace(/^\//, "")}
+              </span>
+              <span className="hidden md:inline text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground flex-shrink-0">
+                {f.category}
+              </span>
+              <span className="text-xs text-muted-foreground flex-shrink-0 tabular-nums w-14 text-right">
+                {f.lines} l.
+              </span>
             </div>
           );
         })}
         {!files.length && (
-          <div className="p-8 text-center text-sm text-muted-foreground">Aucun fichier ne correspond à votre recherche.</div>
+          <div className="p-8 text-center text-sm text-muted-foreground">
+            Aucun fichier ne correspond à votre recherche.
+          </div>
         )}
         {hasMore && (
           <>
@@ -336,7 +400,9 @@ function FileList({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setVisible(v => Math.min(v + PAGE_SIZE, files.length))}
+                onClick={() =>
+                  setVisible((v) => Math.min(v + PAGE_SIZE, files.length))
+                }
                 className="text-xs gap-1"
               >
                 <ChevronDown className="w-3.5 h-3.5" />

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { firestoreDB as supabase } from "@/lib/db";
 import { useAuth } from "@/hooks/useAuth";
 
 export function useAdmin() {
@@ -9,7 +9,11 @@ export function useAdmin() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) { setIsAdmin(false); setLoading(false); return; }
+    if (!user) {
+      setIsAdmin(false);
+      setLoading(false);
+      return;
+    }
 
     supabase
       .from("user_roles")

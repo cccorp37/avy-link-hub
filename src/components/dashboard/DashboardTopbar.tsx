@@ -1,8 +1,18 @@
-import { ArrowLeft, Bell, Eye, Search, Command, X, Sun, Moon, Languages } from "lucide-react";
+import {
+  ArrowLeft,
+  Bell,
+  Eye,
+  Search,
+  Command,
+  X,
+  Sun,
+  Moon,
+  Languages,
+} from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "next-themes";
-import avylinkLogo from "@/assets/avylink-logo.jpg";
-import type { Tables } from "@/integrations/supabase/types";
+
+import type { Tables } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useNavigate } from "react-router-dom";
@@ -21,7 +31,9 @@ export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
   const { theme, setTheme } = useTheme();
   const { lang, setLang, t } = useLanguage();
   const navigate = useNavigate();
-  const profileUrl = profile?.username ? `${window.location.origin}/u/${profile.username}` : null;
+  const profileUrl = profile?.username
+    ? `${window.location.origin}/u/${profile.username}`
+    : null;
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
 
@@ -31,11 +43,17 @@ export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
     { id: 3, text: t("notif_tip_social"), time: "5min", unread: false },
   ];
 
-  const unreadCount = notifications.filter(n => n.unread).length;
+  const unreadCount = notifications.filter((n) => n.unread).length;
 
   return (
-    <header className="h-16 px-4 md:px-6 flex items-center justify-between border-b border-border/40 flex-shrink-0 z-30"
-      style={{ background: "linear-gradient(90deg, hsl(var(--card) / 0.9), hsl(var(--card) / 0.95))", backdropFilter: "blur(12px)" }}>
+    <header
+      className="h-16 px-4 md:px-6 flex items-center justify-between border-b border-border/40 flex-shrink-0 z-30"
+      style={{
+        background:
+          "linear-gradient(90deg, hsl(var(--card) / 0.9), hsl(var(--card) / 0.95))",
+        backdropFilter: "blur(12px)",
+      }}
+    >
       {/* Left */}
       <div className="flex items-center gap-3">
         {/* Back button */}
@@ -50,8 +68,14 @@ export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
         </motion.button>
         {/* Mobile logo */}
         <div className="flex md:hidden items-center gap-2">
-          <img src={avylinkLogo} alt="AvyLink" className="w-8 h-8 rounded-xl object-cover shadow-sm" />
-          <span className="font-dm font-bold text-base text-foreground">Avy<span className="text-gradient">Link</span></span>
+          <img
+            src="/icon-192.jpg"
+            alt="AvyLink"
+            className="w-8 h-8 rounded-xl object-cover shadow-sm"
+          />
+          <span className="font-dm font-bold text-base text-foreground">
+            Avy<span className="text-gradient">Link</span>
+          </span>
         </div>
         <div className="hidden md:block">
           <h1 className="font-dm font-bold text-lg text-foreground">{title}</h1>
@@ -89,7 +113,11 @@ export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
               exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4" />
+              ) : (
+                <Moon className="w-4 h-4" />
+              )}
             </motion.div>
           </AnimatePresence>
         </motion.button>
@@ -103,7 +131,9 @@ export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
         >
           <Search className="w-3.5 h-3.5" />
           <span>{t("search")}</span>
-          <kbd className="ml-2 px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono border border-border/40">⌘K</kbd>
+          <kbd className="ml-2 px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono border border-border/40">
+            ⌘K
+          </kbd>
         </motion.button>
 
         {/* Profile link */}
@@ -140,7 +170,10 @@ export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
           <AnimatePresence>
             {notifOpen && (
               <>
-                <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setNotifOpen(false)}
+                />
                 <motion.div
                   initial={{ opacity: 0, y: 8, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -149,26 +182,40 @@ export function DashboardTopbar({ profile, title, onMobileMenuOpen }: Props) {
                   className="absolute right-0 top-full mt-2 w-80 bg-card rounded-2xl border border-border/60 shadow-lg z-50 overflow-hidden"
                 >
                   <div className="p-4 border-b border-border/40 flex items-center justify-between">
-                    <h3 className="font-dm font-bold text-sm text-foreground">{t("notifications")}</h3>
-                    <button onClick={() => setNotifOpen(false)} className="p-1 rounded-lg hover:bg-secondary">
+                    <h3 className="font-dm font-bold text-sm text-foreground">
+                      {t("notifications")}
+                    </h3>
+                    <button
+                      onClick={() => setNotifOpen(false)}
+                      className="p-1 rounded-lg hover:bg-secondary"
+                    >
                       <X className="w-3.5 h-3.5 text-muted-foreground" />
                     </button>
                   </div>
                   <div className="max-h-64 overflow-y-auto">
                     {notifications.map((n) => (
-                      <div key={n.id} className={`px-4 py-3 border-b border-border/30 last:border-0 hover:bg-secondary/50 transition-colors ${n.unread ? "" : "opacity-60"}`}>
+                      <div
+                        key={n.id}
+                        className={`px-4 py-3 border-b border-border/30 last:border-0 hover:bg-secondary/50 transition-colors ${n.unread ? "" : "opacity-60"}`}
+                      >
                         <div className="flex items-start gap-2">
-                          {n.unread && <div className="w-2 h-2 rounded-full gradient-cta mt-1.5 flex-shrink-0" />}
+                          {n.unread && (
+                            <div className="w-2 h-2 rounded-full gradient-cta mt-1.5 flex-shrink-0" />
+                          )}
                           <div className={!n.unread ? "ml-4" : ""}>
                             <p className="text-xs text-foreground">{n.text}</p>
-                            <p className="text-[10px] text-muted-foreground mt-0.5">{n.time}</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">
+                              {n.time}
+                            </p>
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
                   <div className="p-3 border-t border-border/40">
-                    <button className="w-full text-xs text-primary font-medium hover:underline">{t("mark_all_read")}</button>
+                    <button className="w-full text-xs text-primary font-medium hover:underline">
+                      {t("mark_all_read")}
+                    </button>
                   </div>
                 </motion.div>
               </>

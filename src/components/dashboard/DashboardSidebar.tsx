@@ -1,18 +1,37 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, User, Link2, Palette, BarChart3, Settings, LogOut, Eye,
-  ChevronLeft, ChevronRight, Shield, LayoutTemplate, Plug, Sparkles,
-  MessageSquare, Users, Zap, Activity, FileCode, Wallet, ShoppingBag, Crown,
+  LayoutDashboard,
+  User,
+  Link2,
+  Palette,
+  BarChart3,
+  Settings,
+  LogOut,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  Shield,
+  LayoutTemplate,
+  Plug,
+  Sparkles,
+  MessageSquare,
+  Users,
+  Zap,
+  Activity,
+  FileCode,
+  Wallet,
+  ShoppingBag,
+  Crown,
   BookOpen,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
-import { signOut } from "@/lib/supabase-auth";
+import { signOut } from "@/lib/auth";
 import { useNavigate } from "react-router-dom";
-import avylinkLogo from "@/assets/avylink-logo.jpg";
+
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Tables } from "@/lib/types";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { PageSwitcher } from "./PageSwitcher";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -46,14 +65,20 @@ interface Props {
   onProfileDeleted: (id: string) => void;
 }
 
-export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfileCreated, onProfileDeleted }: Props) {
+export function DashboardSidebar({
+  profile,
+  profiles,
+  onSwitchProfile,
+  onProfileCreated,
+  onProfileDeleted,
+}: Props) {
   const { user } = useAuth();
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const { t } = useLanguage();
-  const navItems = navItemsRaw.map(n => ({ ...n, label: t(n.key) }));
+  const navItems = navItemsRaw.map((n) => ({ ...n, label: t(n.key) }));
 
   const profileUrl = profile?.username
     ? `${window.location.origin}/u/${profile.username}`
@@ -67,7 +92,8 @@ export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfile
         collapsed ? "w-[72px]" : "w-[260px]"
       }`}
       style={{
-        background: "linear-gradient(180deg, hsl(var(--card)) 0%, hsl(210, 20%, 98%) 100%)",
+        background:
+          "linear-gradient(180deg, hsl(var(--card)) 0%, hsl(210, 20%, 98%) 100%)",
       }}
     >
       {/* Toggle button */}
@@ -85,9 +111,15 @@ export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfile
       </motion.button>
 
       {/* Logo */}
-      <div className={`flex items-center gap-2.5 px-5 h-16 border-b border-border/40 flex-shrink-0 ${collapsed ? "justify-center px-3" : ""}`}>
+      <div
+        className={`flex items-center gap-2.5 px-5 h-16 border-b border-border/40 flex-shrink-0 ${collapsed ? "justify-center px-3" : ""}`}
+      >
         <div className="relative">
-          <img src={avylinkLogo} alt="AvyLink" className="w-9 h-9 rounded-xl object-cover flex-shrink-0 shadow-sm" />
+          <img
+            src="/icon-192.jpg"
+            alt="AvyLink"
+            className="w-9 h-9 rounded-xl object-cover flex-shrink-0 shadow-sm"
+          />
           <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2 border-card" />
         </div>
         <AnimatePresence>
@@ -144,7 +176,8 @@ export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfile
                     layoutId="sidebar-active"
                     className="absolute inset-0 rounded-xl"
                     style={{
-                      background: "linear-gradient(135deg, hsl(204 94% 52% / 0.1), hsl(204 94% 52% / 0.05))",
+                      background:
+                        "linear-gradient(135deg, hsl(204 94% 52% / 0.1), hsl(204 94% 52% / 0.05))",
                       border: "1px solid hsl(204 94% 52% / 0.15)",
                     }}
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
@@ -157,7 +190,9 @@ export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfile
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
-                <item.icon className={`w-[18px] h-[18px] flex-shrink-0 relative z-10 ${isActive ? "text-primary" : ""}`} />
+                <item.icon
+                  className={`w-[18px] h-[18px] flex-shrink-0 relative z-10 ${isActive ? "text-primary" : ""}`}
+                />
                 <AnimatePresence>
                   {!collapsed && (
                     <motion.span
@@ -181,21 +216,53 @@ export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfile
             <div className="my-3 mx-3 h-px bg-border/50" />
             {!collapsed && (
               <div className="px-4 mb-1">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-destructive/70">Administration</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-destructive/70">
+                  Administration
+                </span>
               </div>
             )}
             {[
-              { to: "/dashboard/admin", label: "Vue d'ensemble", icon: Shield, end: true },
-              { to: "/dashboard/admin/users", label: "Utilisateurs", icon: Users },
-              { to: "/dashboard/admin/analytics", label: "Analytics", icon: BarChart3 },
-              { to: "/dashboard/admin/notifications", label: "Notifications", icon: MessageSquare },
-              { to: "/dashboard/admin/maintenance", label: "Maintenance", icon: Settings },
-              { to: "/dashboard/admin/tickets", label: "Tickets", icon: MessageSquare },
-              { to: "/dashboard/admin/source-code", label: "Code Source", icon: FileCode },
+              {
+                to: "/dashboard/admin",
+                label: "Vue d'ensemble",
+                icon: Shield,
+                end: true,
+              },
+              {
+                to: "/dashboard/admin/users",
+                label: "Utilisateurs",
+                icon: Users,
+              },
+              {
+                to: "/dashboard/admin/analytics",
+                label: "Analytics",
+                icon: BarChart3,
+              },
+              {
+                to: "/dashboard/admin/notifications",
+                label: "Notifications",
+                icon: MessageSquare,
+              },
+              {
+                to: "/dashboard/admin/maintenance",
+                label: "Maintenance",
+                icon: Settings,
+              },
+              {
+                to: "/dashboard/admin/tickets",
+                label: "Tickets",
+                icon: MessageSquare,
+              },
+              {
+                to: "/dashboard/admin/source-code",
+                label: "Code Source",
+                icon: FileCode,
+              },
             ].map((item) => {
               const isActive = item.end
                 ? location.pathname === item.to
-                : location.pathname.startsWith(item.to) && item.to !== "/dashboard/admin";
+                : location.pathname.startsWith(item.to) &&
+                  item.to !== "/dashboard/admin";
               return (
                 <NavLink
                   key={item.to}
@@ -216,14 +283,22 @@ export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfile
                       <motion.div
                         layoutId="sidebar-admin-active"
                         className="absolute inset-0 rounded-xl bg-destructive/10 border border-destructive/15"
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        transition={{
+                          type: "spring",
+                          bounce: 0.2,
+                          duration: 0.6,
+                        }}
                       />
                     )}
                     {isActive && (
                       <motion.div
                         layoutId="sidebar-admin-indicator"
                         className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-destructive"
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        transition={{
+                          type: "spring",
+                          bounce: 0.2,
+                          duration: 0.6,
+                        }}
                       />
                     )}
                     <item.icon className="w-[18px] h-[18px] flex-shrink-0 relative z-10" />
@@ -270,14 +345,17 @@ export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfile
           animate={{ opacity: 1, y: 0 }}
           className="mx-3 mb-3 p-4 rounded-2xl relative overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, hsl(204 94% 52% / 0.08), hsl(338 85% 65% / 0.06))",
+            background:
+              "linear-gradient(135deg, hsl(204 94% 52% / 0.08), hsl(338 85% 65% / 0.06))",
             border: "1px solid hsl(204 94% 52% / 0.12)",
           }}
         >
           <div className="absolute top-0 right-0 w-20 h-20 rounded-full bg-primary/5 -translate-y-1/2 translate-x-1/2" />
           <div className="flex items-center gap-2 mb-2 relative">
             <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-xs font-bold text-primary">Passer à Premium</span>
+            <span className="text-xs font-bold text-primary">
+              Passer à Premium
+            </span>
           </div>
           <p className="text-xs text-muted-foreground mb-3 leading-relaxed relative">
             Débloque analytics avancés, thèmes premium et domaine custom.
@@ -298,14 +376,20 @@ export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfile
         <div className="mx-3 mb-3 p-3 rounded-2xl bg-destructive/5 border border-destructive/15">
           <div className="flex items-center gap-2">
             <Shield className="w-3.5 h-3.5 text-destructive" />
-            <span className="text-xs font-bold text-destructive">Accès Admin</span>
+            <span className="text-xs font-bold text-destructive">
+              Accès Admin
+            </span>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">Toutes les fonctionnalités débloquées.</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Toutes les fonctionnalités débloquées.
+          </p>
         </div>
       )}
 
       {/* User footer */}
-      <div className={`border-t border-border/40 px-3 py-3 flex items-center gap-2.5 ${collapsed ? "justify-center" : ""}`}>
+      <div
+        className={`border-t border-border/40 px-3 py-3 flex items-center gap-2.5 ${collapsed ? "justify-center" : ""}`}
+      >
         <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold flex-shrink-0 shadow-sm">
           {(profile?.display_name || user?.email || "U")[0].toUpperCase()}
         </div>
@@ -323,17 +407,27 @@ export function DashboardSidebar({ profile, profiles, onSwitchProfile, onProfile
                     {profile?.display_name || user?.email?.split("@")[0]}
                   </p>
                   {profile?.is_verified && (
-                    <VerifiedBadge style={(profile as any).verified_badge_style} size="sm" />
+                    <VerifiedBadge
+                      style={(profile as any).verified_badge_style}
+                      size="sm"
+                    />
                   )}
                 </div>
                 <p className="text-[11px] text-muted-foreground truncate">
-                  {isAdmin ? "Administrateur" : profile?.plan === "free" ? "Plan gratuit" : profile?.plan || "free"}
+                  {isAdmin
+                    ? "Administrateur"
+                    : profile?.plan === "free"
+                      ? "Plan gratuit"
+                      : profile?.plan || "free"}
                 </p>
               </div>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={async () => { await signOut(); navigate("/"); }}
+                onClick={async () => {
+                  await signOut();
+                  navigate("/");
+                }}
                 className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"
                 title="Déconnexion"
               >
